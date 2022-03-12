@@ -6,8 +6,9 @@ from random import randint
 
 
 class Player:  # Snake
-    def __init__(self, grid):
+    def __init__(self, grid, border):
         self.grid = grid
+        self.border = border
         self.velocity = grid
         self.left = False
         self.right = False
@@ -19,7 +20,7 @@ class Player:  # Snake
         self.down_current = False
         self.x = int((width - self.grid) / 2)
         self.y = int((height - self.grid) / 2)
-        self.xyList = [(int((width - self.grid) / 2), int((height - self.grid) / 2), self.grid, self.grid)]
+        self.xyList = [(int((width - self.grid) / 2) + self.border, int((height - self.grid) / 2) + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)]
         self.fps_counter = 0
 
     def move(self):
@@ -36,7 +37,7 @@ class Player:  # Snake
             self.y -= self.velocity
         elif self.down_current:
             self.y += self.velocity
-        self.location = (self.x, self.y, self.grid, self.grid)
+        self.location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
 
         if self.x == -self.grid or self.x == width or self.y == -self.grid or self.y == height:
             game_over = True
@@ -60,14 +61,15 @@ class Player:  # Snake
 
 
 class Target:  # Apple
-    def __init__(self, grid):
+    def __init__(self, grid, border):
         self.grid = grid
+        self.border = border
         self.move()
 
     def move(self):
         self.x = randint(0, width / self.grid - 1) * self.grid
         self.y = randint(0, height / self.grid - 1) * self.grid
-        self.location = (self.x, self.y, self.grid, self.grid)
+        self.location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
         for pair in Snake.xyList:
             if pair == self.location:
                 self.move()
@@ -85,6 +87,7 @@ def redrawGameWindow():
 
 
 grid = 20
+border = 1
 width = 41 * grid  # odd multiples of grid
 height = 31 * grid
 fps = 40
@@ -92,10 +95,10 @@ fps = 40
 pygame.display.init()
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Snake by Michał v0.1")
+pygame.display.set_caption("Snake by Michał v0.2")
 
-Snake = Player(grid)
-Apple = Target(grid)
+Snake = Player(grid, border)
+Apple = Target(grid, border)
 
 
 game_over = False
