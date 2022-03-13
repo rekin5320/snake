@@ -16,14 +16,6 @@ import webbrowser
 
 ######## Classes and definitions ########
 
-def two_digits(a):
-    a = str(int(a))
-    if len(a) == 1:
-        return f"0{a}"
-    else:
-        return a
-
-
 def decimals(a):
     a = str(a)
     b = ""
@@ -73,7 +65,7 @@ class Button:
 
     def click(self):
         if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
-            exec(self.command, globals())
+            self.command()
 
     def draw(self):
         if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
@@ -81,6 +73,83 @@ class Button:
         else:
             pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
         window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
+
+
+class ButtonSpeed:
+    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_value):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.button_color1 = color1
+        self.button_color2 = color2
+        self.color_text = color_text
+        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
+        self.text_width, self.text_height = self.font.size(str(desired_value))
+        self.text = self.font.render(str(desired_value), True, color_text)
+        self.desired_value = desired_value
+
+    def click(self):
+        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+            settings.speed = self.desired_value
+            settings.move_delay = settings.fps / settings.speed
+            logger.info(f"Changed speed to {self.desired_value}")
+            Data.write()
+
+    def draw(self):
+        if settings.speed == self.desired_value or (self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height):
+            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
+        else:
+            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
+        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
+
+
+class ButtonSpeedGroup:
+    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_values_list, spacing):
+        self.width = (len(settings.speed_list) - 1) * (width + spacing) + width
+        self.height = height
+
+        self.ButtonsList = []
+        for index, value in enumerate(desired_values_list):
+            self.ButtonsList.append(ButtonSpeed(x + index * (spacing + width), y, width, height, color1, color2, color_text, font_size, value))
+
+    def click(self):
+        for button in self.ButtonsList:
+            button.click()
+
+    def draw(self):
+        for button in self.ButtonsList:
+            button.draw()
+
+
+class ButtonCmds:
+    @staticmethod
+    def gameTrue():
+        global game
+        game = True
+
+    @staticmethod
+    def menuFalse():
+        global menu
+        menu = False
+
+    @staticmethod
+    def exit1():
+        exit(1)
+
+    @staticmethod
+    def website():
+        webbrowser.open(settings.url_website, new=0, autoraise=True)
+
+    @staticmethod
+    def creditssTrue():
+        global creditss
+        creditss = True
+
+    @staticmethod
+    def creditssFalse():
+        global creditss
+        creditss = False
 
 
 class Text:
@@ -100,21 +169,23 @@ class LongText:
 
         # splitting text into lines
         words = text.split(" ")
-        words_len = []
-        for word in words:
-            words_len.append(len(word))
 
         i = 0
         textList = []
         curr_line = ""
         while i < len(words):
-            if line_lenght - len(curr_line) - 1 >= words_len[i]:
+            if words[i] == "\n":
+                textList.append(curr_line)
+                curr_line = ""
+                i += 1
+
+            elif line_lenght - len(curr_line) - 1 >= len(words[i]):
                 if len(curr_line):
                     curr_line += " "
                 curr_line += words[i]
                 i += 1
 
-            elif words_len[i] >= line_lenght:
+            elif len(words[i]) >= line_lenght:
                 textList.append(curr_line)
                 textList.append(words[i])
                 curr_line = ""
@@ -160,10 +231,14 @@ class File:  # Data
                 data = base64_decode(file.readline())
 
             self.datadict = json.loads(data)
-            if not self.datadict.get("highscore"):
-                self.highscore = 0
-            else:
+            if self.datadict.get("highscore"):
                 self.highscore = self.datadict.get("highscore")
+            else:
+                self.highscore = 0
+
+            if self.datadict.get("speed"):
+                settings.speed = self.datadict.get("speed")
+                settings.move_delay = settings.fps / settings.speed
 
         except:
             logger.exception("Error while reading game data:")
@@ -175,6 +250,7 @@ class File:  # Data
     def write(self):
         try:
             self.datadict["highscore"] = self.highscore
+            self.datadict["speed"] = settings.speed
             with open(self.path_data, "w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
@@ -267,8 +343,8 @@ def error_screen(text):
     global error
     global mouse
     error = True
-    ErrorText = LongText(text, settings.color_font, settings.font_size_error, settings.line_lenght_error, settings.line_spacing)
-    ButtonExit2 = Button(int((settings.window_width - settings.button_width) / 2), 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, "exit(1)")
+    ErrorText = LongText(text, settings.color_font, settings.font_size_error, settings.line_lenght, settings.line_spacing)
+    ButtonExit2 = Button(int((settings.window_width - settings.button_width) / 2), 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.exit1)
 
     while error:
         clock.tick(settings.fps)
@@ -378,7 +454,7 @@ class Bar:  # TopBar
         self.height = height
 
     def draw(self):
-        Time = Text(f"time: {two_digits(Snake.fpsCounter / settings.fps // 60)}:{two_digits(Snake.fpsCounter / settings.fps % 60)}", settings.color_font, settings.label_font_size)
+        Time = Text(f"time: {int(Snake.fpsCounter / settings.fps // 60):02}:{int(Snake.fpsCounter / settings.fps % 60):02}", settings.color_font, settings.label_font_size)
         Time.draw(1.4 * settings.grid, int((self.height - Time.text_height)/2))
 
         Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, settings.label_font_size)
@@ -391,11 +467,17 @@ class Bar:  # TopBar
 ########### Scenes managing ###########
 
 def menu_main():
-    global menu
     global mouse
+    global menu
     global game
+    global creditss
+    global HighscoreInMenu
+
     menu = True
     game = False
+    creditss = False
+
+    HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
     while menu:
         clock.tick(settings.fps)
 
@@ -409,6 +491,8 @@ def menu_main():
                 ButtonPlay.click()  # Game
                 ButtonExit.click()  # Exit
                 WebsiteButton.click()  # Website
+                CreditsButton.click()  # Credits
+                SpeedButtons.click()  # Speed buttons
 
         if keys[pygame.K_q]:
             game = True
@@ -416,18 +500,24 @@ def menu_main():
         if game:
             game_main()
 
+        if creditss:
+            creditss_main()
+
         menu_redraw()
 
 
 def menu_redraw():
     window.fill(settings.color_window_background)
     SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) / 2, int(settings.grid * 3.8))
-    HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
     HighscoreInMenu.draw(int((settings.window_width - HighscoreInMenu.text_width) / 2), 195)
     ButtonPlay.draw()
     ButtonExit.draw()
     Author.draw(settings.window_width - Author.text_width - int(0.4 * settings.grid), settings.window_height - Author.text_height - int(0.4 * settings.grid))
     WebsiteButton.draw()
+    CreditsButton.draw()
+    SpeedText.draw(settings.window_width - SpeedButtons.width - 0.5 * settings.grid - SpeedText.text_width - settings.SpeedButton_spacing, 0.5 * settings.grid + (settings.SpeedButton_height - SpeedText.text_height) / 2)
+    SpeedButtons.draw()
+
     pygame.display.update()
 
 
@@ -481,14 +571,17 @@ def game_main():
     pygame.mixer.music.load(settings.path_music_GameOver)
     pygame.mixer.music.play()
 
-    if Snake.score > Data.highscore:
+    if Snake.score > Data.highscore:  # new record
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score}")
         Data.highscore = Snake.score
         Data.write()
         NewHighscoreText = Text(f"new highscore: {Snake.score}", settings.color_newhighscore, settings.font_size_newhighscore)
         NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) / 2, (settings.window_height - GameOver.text_height) / 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
+        global HighscoreInMenu
+        HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
 
     GameOver.draw((settings.window_width - GameOver.text_width) / 2, (settings.window_height - GameOver.text_height) / 2)
+
     while pygame.mixer.music.get_busy():
         clock.tick(settings.fps)
         pygame.display.update()
@@ -505,10 +598,45 @@ def game_redraw():
     pygame.display.update()
 
 
+def creditss_main():
+    global mouse
+    global creditss
+    global CreditsText
+    global CreditsBackButton
+
+    # I do not prerender it, as it is unlikely to be used often
+    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", settings.color_font, settings.font_size_creditss, settings.line_lenght_creditss, settings.line_spacing)
+    CreditsBackButton = Button(int((settings.window_width - settings.button_width) / 2), 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Back", settings.button_text_size, ButtonCmds.creditssFalse)
+
+    while creditss:
+        clock.tick(settings.fps)
+
+        keys = pygame.key.get_pressed()
+        mouse = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+                creditss = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                CreditsBackButton.click()  # Back to menu
+
+        creditss_redraw()
+
+
+def creditss_redraw():
+    global CreditsText
+    global CreditsBackButton
+    window.fill(settings.color_window_background)
+    CreditsText.draw((settings.window_width - CreditsText.text_width) / 2, 90)
+    CreditsBackButton.draw()
+    pygame.display.update()
+
+
 ############## Settings ##############
 
 class settings:
-    version = "1.0"
+    version = "1.1"
     grid = 25
     grid_border = 2
     window_width = grid * 33
@@ -535,7 +663,7 @@ class settings:
     color_gameover = (255, 0, 0)
     color_newhighscore = (0, 0, 255)
     color_snakeLogo = (255, 255, 255)
-    color_author = (200, 200, 200)
+    color_author = (215, 215, 215)
 
     font_name = "Verdana"
     font_size_loading = 35
@@ -546,9 +674,12 @@ class settings:
     font_size_highscoreinmenu = 30
     font_size_author = 21
     font_size_website = 20
+    font_size_creditss = 25
+    font_size_speed = 22
 
     line_spacing = 6
-    line_lenght_error = 40
+    line_lenght = 40
+    line_lenght_creditss = 52
 
     button_width = grid * 10
     button_height = grid * 4
@@ -556,36 +687,49 @@ class settings:
     button_text_color = (255, 255, 255)
 
     ButtonPlay_y = 275
-    ButtonExit_y = 435
+    ButtonExit_y = 420
+    SpeedButton_width = 40
+    SpeedButton_height = 35
+    SpeedButton_spacing = 15
 
     if os.name == "nt":
-        path_gameDirectory = os.path.join(os.path.join(os.path.expanduser("~"), "AppData", "Roaming", ".snake"))  # ~\AppData\Roaming\.snake
+        path_gameDirectory = os.path.join(os.path.join(os.path.expanduser("~"), "AppData", "Roaming", ".snake"))  # ~\AppData\Roaming\.snake\
     else:
-        path_gameDirectory = os.path.join(os.path.expanduser("~"), ".snake")  # ~/.snake
+        path_gameDirectory = os.path.join(os.path.expanduser("~"), ".snake")  # ~/.snake/
     path_data = os.path.join(path_gameDirectory, "data")  # ~/.snake/data
     path_version = os.path.join(path_gameDirectory, "version")  # ~/.snake/version
-    path_musicDirectory = os.path.join(path_gameDirectory, "music")  # ~/.snake/music
+    path_musicDirectory = os.path.join(path_gameDirectory, "music")  # ~/.snake/music/
     path_music_Game = os.path.join(path_musicDirectory, "Tristan Lohengrin - Happy 8bit Loop 01.ogg")
     path_music_GameOver = os.path.join(path_musicDirectory, "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg")
-    path_logDirectory = os.path.join(path_gameDirectory, "logs")  # ~/.snake/logs
+    path_logDirectory = os.path.join(path_gameDirectory, "logs")  # ~/.snake/logs/
+    path_icon = os.path.join(path_gameDirectory, "icon.png")
 
     url_music_Game = "https://drive.google.com/u/0/uc?id=1ksgD-ftTtFs5GKyA2mNZW6XIJKvk53dw&export=download"
     url_music_GameOver = "https://drive.google.com/u/0/uc?id=1dF_wNbBxyNsKmRf83f4UgZcT8Xgsux46&export=download"
     url_website = "http://tiny.cc/snake_website"
 
+    icon_content = "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAABR1BMVEUAAABeswAAgABrygBnuwBrygBowQBnvAAAbwFnvgDlNBdrywBpwADuORRtvQBrzgAAgABnvQABcAFovgBsygBrygBrygBowQAAcwBqwwBqxQAAfgBpxwBxzgALdwFfwQALhwBcvwAAbQFnvgAxogBrygBnvgAFgwBovwBsywAnkABpxgAAcgAAcQBsygAAcgBrygA7nQBryABowQAAgAB6rAMAbQEAbAEokABrygAXjwBovQBmxwBrygADgQA0pQBwtwFnxgAAgAAAbwFBrQBovwBrygBovwBrygBqwAAAcQAAgABqygAAcQBovwA8pAAPgABrywAAdQBqzAAAgABrywAvoQAAgQBGsQAAcgAdlgAAdQAnlgBXrwBpwwBnugBrygAAgAAAaQExogDeLBsWgAE8qQBdtQA5qABnuwBSrAB7qARZsgAJeIArAAAAX3RSTlMABOLg/fpo+uLi28yjWRsU+Pbr3dXBh35dVU8+OQz8/Pz39PDv59nUwLSlkpKIZ2dINCwhFPn59/Lw7ezq6enm5d3c09HQxMS6tbSrqKWMiXh1dHNsYlxXRUM9MCcjEayMVDsAAAHASURBVEjH1dVnUwIxEAbgnByCYgERFMHeBREBe++993rhxAL4/z/LJbckJ8lMZnSc8f3Ezu5zQzbcgFRSn883wud/CZobtqZKpdWRWsX5iG7YCWoq850eo5I9FdBmsHhUwIjBJaMAhngQUQALPGhTAB4eNHzvPqdvr++ziE+BBzuOVsfhHMZvuVzOf3BT2XiTwSeIWGI+jLEFSIaj8BQH6GfzV24MgMR/ya5BdBERjAFAjkgj7gA6zKfd1cBstzq1DhAAsIsFoM/qaAHRWmNYBMxzcmqdzQ/B8sJisEEX2199bT4Yd29vzg/7AUzTbh0A9gYNAkhZVRSAKQWwoyVargPIysCLnQFarnxYKRaLj6ScfbVzUgFwzh5a9mIr5UdOkrLLtDP2c7BMyzUAT6RsAXBaBWpo2QqgiZReABO/BnwAYs6v1C4DowDqMghpCRPyIANxAEah8GmyaDKQooDknc17kQxog0IwLgUoKQJ9SA60EA/YjkQ/PppmVxVIIC7YTjeqiBAAdgAxgGgXOge8USQEi46/tuNgQC/fw0zL/h1CYuBCkvw9cNkgpArCNkiqgk76BoxqSFmEXe7WM7X5L+xVXXt8wCY7AAAAAElFTkSuQmCC"
+
     fps = 60
-    movesPerSecond = 3  # or 4 (fps divisor)
-    move_delay = fps / movesPerSecond
+    speed = 4  # default speed (aka movesPerSecond) (fps divisor)
+    speed_list = [3, 4, 6, 10]
+    move_delay = fps / speed
 
 
 ############# Main code #############
 
-#### Logging configuration ####
-if not os.path.exists(settings.path_gameDirectory):  # moved from checkFiles() to make sure there is a game directory and the log file can be put there
+#### Initilizing game data ####
+# moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
+if not os.path.exists(settings.path_gameDirectory):
     os.mkdir(settings.path_gameDirectory)
 if not os.path.exists(settings.path_logDirectory):
     os.mkdir(settings.path_logDirectory)
 
+if not os.path.exists(settings.path_icon):
+    with open(settings.path_icon, "wb") as file:
+        file.write(base64.b64decode(settings.icon_content))
+
+#### Logging configuration ####
 if os.path.exists(os.path.join(settings.path_logDirectory, "4.log")):
     os.remove(os.path.join(settings.path_logDirectory, "4.log"))
 if os.path.exists(os.path.join(settings.path_logDirectory, "3.log")):
@@ -607,7 +751,6 @@ file_handler = logging.FileHandler(filename=os.path.join(settings.path_logDirect
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 stdout_handler = logging.StreamHandler(sys.stdout)
-# stdout_handler.setFormatter(formatter)  # logs on stdout are clearer without date and time
 logger.addHandler(stdout_handler)
 
 #### Main game code ####
@@ -618,19 +761,26 @@ pygame.mixer.init()
 pygame.font.init()
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((settings.window_width, settings.window_height))
-pygame.display.set_caption("Snake v1.0")
+pygame.display.set_caption(f"Snake v{settings.version}")
+Icon = pygame.image.load(settings.path_icon)
+pygame.display.set_icon(Icon)
 
-loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again later.")
+loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.")
 Data = File()
 Data.read()
 
+# Prerendered objects
 GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameover)
 SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
 Author = Text("Michał Machnikowski 2021", settings.color_author, settings.font_size_author)
-WebsiteButton = Button(settings.grid, settings.window_height - 3 * settings.grid, int(4.85 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "website", settings.font_size_website, "webbrowser.open(settings.url_website, new=0, autoraise=True)")
 
-ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, "game = True")
-ButtonExit = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, "menu = False")
+ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, ButtonCmds.gameTrue)
+ButtonExit = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.menuFalse)
+WebsiteButton = Button(0.5 * settings.grid, settings.window_height - 2.5 * settings.grid, int(4.85 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "website", settings.font_size_website, ButtonCmds.website)
+CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * settings.grid, int(4.65 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "credits", settings.font_size_website, ButtonCmds.creditssTrue)
+
+SpeedText = Text("Speed:", settings.color_font, settings.font_size_speed)
+SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_list) - 1) * (settings.SpeedButton_width + settings.SpeedButton_spacing) + settings.SpeedButton_width + 0.5 * settings.grid), 0.5 * settings.grid, settings.SpeedButton_width, settings.SpeedButton_height, settings.color_button, settings.color_button_focused, settings.color_font, settings.font_size_speed, settings.speed_list, settings.SpeedButton_spacing)
 
 Snake = Player(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
 Apple = Target(settings.grid, settings.grid_border, settings.color_apple)

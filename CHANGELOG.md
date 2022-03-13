@@ -1,5 +1,15 @@
 # Changelog
 
+## Release 1.1 (2021-04-09)
+* Added an icon (it is Base64 encoded in the code, instead of downloading it)
+* Changed the way the button commands are executed
+* Got rid of the `two_digits()` function (use f-strings formatting ":02")
+* Added support for forcing a new line by `\n` in LongText
+* Credits scene
+* Buttons in the menu changing snake speed
+* Save the set speed to the game data
+* Changed default speed from 3 to 4
+
 ## Release 1.0 (2021-03-21)
 * Changed from processes to threads (processes do not want to work on Windows, and threads are enough here)
 * Play music via pygame
