@@ -4,6 +4,7 @@ import base64
 import json
 import logging.handlers
 import os
+from pathlib import Path
 import platform
 from random import randint
 import sys
@@ -225,10 +226,10 @@ class File:  # Data
 
     def read(self):
         try:
-            with open(settings.path_version, "r") as file:
+            with settings.path_version.open("r") as file:
                 self.version = base64_decode(file.readline())
 
-            with open(self.path_data, "r") as file:
+            with self.path_data.open("r") as file:
                 data = base64_decode(file.readline())
 
             self.datadict = json.loads(data)
@@ -252,7 +253,7 @@ class File:  # Data
         try:
             self.datadict["highscore"] = self.highscore
             self.datadict["speed"] = settings.speed
-            with open(self.path_data, "w") as file:
+            with self.path_data.open("w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         except Exception as err:
@@ -262,9 +263,9 @@ class File:  # Data
 
 
 def checkFiles():
-    if not os.path.exists(settings.path_data) or os.path.getsize(settings.path_data) == 0:
+    if not settings.path_data.exists() or settings.path_data.stat().st_size == 0:
         logger.warning("Data file did not exist, trying to create")
-        with open(settings.path_data, "w") as file:
+        with settings.path_data.open("w") as file:
             empty_dict = {
                 "highscore": None
             }
@@ -272,22 +273,21 @@ def checkFiles():
             file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         logger.warning("Data file successfully created")
 
-    if not os.path.exists(settings.path_version) or os.path.getsize(settings.path_version) == 0:
+    if not settings.path_version.exists() or settings.path_version.stat().st_size == 0:
         logger.warning("Version file did not exist, trying to create")
-        with open(settings.path_version, "w") as file:
-            file.write(base64_encode(settings.version))
+        settings.path_version.write_text(base64_encode(settings.version))
         logger.warning("Version file successfully created")
 
-    if not os.path.exists(settings.path_musicDirectory):
+    if not settings.path_musicDirectory.exists():
         logger.warning("Music directory did not exist, trying to create")
-        os.mkdir(settings.path_musicDirectory)
+        settings.path_musicDirectory.mkdir()
         logger.warning("Music directory successfully created")
 
-    if not os.path.exists(settings.path_music_Game):
+    if not settings.path_music_Game.exists():
         logger.warning("Game music did not exist, trying to download")
         try:
             download = requests.get(settings.url_music_Game, allow_redirects=True)
-            open(settings.path_music_Game, "wb").write(download.content)
+            settings.path_music_Game.write_bytes(download.content)
         except Exception as err:
             logger.error(err)
             logger.error(traceback.format_exc())
@@ -295,11 +295,11 @@ def checkFiles():
         else:
             logger.warning("Game music successfully downloaded")
 
-    if not os.path.exists(settings.path_music_GameOver):
+    if not settings.path_music_GameOver.exists():
         logger.warning("GameOver music did not exist, trying to download")
         try:
             download = requests.get(settings.url_music_GameOver, allow_redirects=True)
-            open(settings.path_music_GameOver, "wb").write(download.content)
+            settings.path_music_GameOver.write_bytes(download.content)
         except Exception as err:
             logger.error(err)
             logger.error(traceback.format_exc())
@@ -694,16 +694,20 @@ class settings:
     SpeedButton_spacing = 15
 
     if os.name == "nt":
-        path_gameDirectory = os.path.join(os.path.join(os.path.expanduser("~"), "AppData", "Roaming", ".snake"))  # ~\AppData\Roaming\.snake\
+        path_gameDirectory = Path.home() / "AppData" / "Roaming" / ".snake"  # ~\AppData\Roaming\.snake\
     else:
-        path_gameDirectory = os.path.join(os.path.expanduser("~"), ".snake")  # ~/.snake/
-    path_data = os.path.join(path_gameDirectory, "data")  # ~/.snake/data
-    path_version = os.path.join(path_gameDirectory, "version")  # ~/.snake/version
-    path_musicDirectory = os.path.join(path_gameDirectory, "music")  # ~/.snake/music/
-    path_music_Game = os.path.join(path_musicDirectory, "Tristan Lohengrin - Happy 8bit Loop 01.ogg")
-    path_music_GameOver = os.path.join(path_musicDirectory, "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg")
-    path_logDirectory = os.path.join(path_gameDirectory, "logs")  # ~/.snake/logs/
-    path_icon = os.path.join(path_gameDirectory, "icon.png")
+        path_gameDirectory = Path.home() / ".snake"  # ~/.snake/
+    path_data = path_gameDirectory / "data"  # ~/.snake/data
+    path_version = path_gameDirectory / "version"  # ~/.snake/version
+    path_musicDirectory = path_gameDirectory / "music"  # ~/.snake/music/
+    path_music_Game = path_musicDirectory / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
+    path_music_GameOver = path_musicDirectory / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
+    path_logDirectory = path_gameDirectory / "logs"  # ~/.snake/logs/
+    path_log1 = path_logDirectory / "1.log"
+    path_log2 = path_logDirectory / "2.log"
+    path_log3 = path_logDirectory / "3.log"
+    path_log4 = path_logDirectory / "4.log"
+    path_icon = path_gameDirectory / "icon.png"
 
     url_music_Game = "https://drive.google.com/uc?id=1ksgD-ftTtFs5GKyA2mNZW6XIJKvk53dw&export=download"
     url_music_GameOver = "https://drive.google.com/uc?id=1dF_wNbBxyNsKmRf83f4UgZcT8Xgsux46&export=download"
@@ -721,26 +725,25 @@ class settings:
 
 #### Initilizing game data ####
 # moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
-if not os.path.exists(settings.path_gameDirectory):
-    os.mkdir(settings.path_gameDirectory)
-if not os.path.exists(settings.path_logDirectory):
-    os.mkdir(settings.path_logDirectory)
+if not settings.path_gameDirectory.exists():
+    settings.path_gameDirectory.mkdir()
+if not settings.path_logDirectory.exists():
+    settings.path_logDirectory.mkdir()
 
-if not os.path.exists(settings.path_icon):
-    with open(settings.path_icon, "wb") as file:
-        file.write(base64.b64decode(settings.icon_content))
+if not settings.path_icon.exists():
+    settings.path_icon.write_bytes(base64.b64decode(settings.icon_content))
 
 #### Logging configuration ####
-if os.path.exists(os.path.join(settings.path_logDirectory, "4.log")):
-    os.remove(os.path.join(settings.path_logDirectory, "4.log"))
-if os.path.exists(os.path.join(settings.path_logDirectory, "3.log")):
-    os.replace(os.path.join(settings.path_logDirectory, "3.log"), os.path.join(settings.path_logDirectory, "4.log"))
-if os.path.exists(os.path.join(settings.path_logDirectory, "2.log")):
-    os.replace(os.path.join(settings.path_logDirectory, "2.log"), os.path.join(settings.path_logDirectory, "3.log"))
-if os.path.exists(os.path.join(settings.path_logDirectory, "1.log")):
-    os.replace(os.path.join(settings.path_logDirectory, "1.log"), os.path.join(settings.path_logDirectory, "2.log"))
+if settings.path_log4.exists():
+    settings.path_log4.unlink()
+if settings.path_log3.exists():
+    settings.path_log3.replace(settings.path_log4)
+if settings.path_log2.exists():
+    settings.path_log2.replace(settings.path_log3)
+if settings.path_log1.exists():
+    settings.path_log1.replace(settings.path_log2)
 
-sys.stderr = open(os.path.join(settings.path_logDirectory, "1.log"), "a")
+sys.stderr = open(settings.path_log1, "a")
 
 for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
     logging.root.removeHandler(handler)
@@ -748,7 +751,7 @@ for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s')
-file_handler = logging.FileHandler(filename=os.path.join(settings.path_logDirectory, "1.log"), mode="a")
+file_handler = logging.FileHandler(filename=settings.path_log1, mode="a")
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 stdout_handler = logging.StreamHandler(sys.stdout)
