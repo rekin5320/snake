@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
-import pygame
-from random import randint
-import os
-import threading
-import requests
-import logging.handlers
-import sys
-import json
 import base64
+import json
+import logging.handlers
+import os
 import platform
+from random import randint
+import sys
+import threading
 import traceback
 import webbrowser
+
+import pygame
+import requests
 
 
 ######## Classes and definitions ########
