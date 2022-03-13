@@ -1,5 +1,10 @@
 # Changelog
 
+## Release 0.5 (2021-01-15)
+* Added in-game music (running in a separate process) and sound at loss
+* Expanded the game directory and creating it if it doesn't exist
+* Loading screen and downloading music from Google Drive in a separate process if not yet downloaded
+
 ## Release 0.4 (2021-01-13)
 * Added menu
 * Added Game Over text and a message if the record was beaten

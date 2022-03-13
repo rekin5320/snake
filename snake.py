@@ -3,6 +3,10 @@
 import pygame
 from random import randint
 import os
+import signal
+import multiprocessing
+from playsound import playsound
+import requests
 
 
 ######## Classes and definitions ########
@@ -23,6 +27,13 @@ def decimals(a):
         if (-(i + 1)) % 3 == 0 and i + 1 != len(a):
             b = " " + b
     return b
+
+
+def Pkill(process_name):
+    if os.name == "posix":  # for Linux and Mac it prints "posix", for Windows "nt"
+        os.kill(process_name.pid, signal.SIGKILL)
+    else:
+        process_name.terminate()
 
 
 class Button:
@@ -63,12 +74,9 @@ class Text:
 
 class File:  # Data
     def __init__(self):
-        self.path = os.path.expanduser("~/.snake_data")
+        self.path = settings.path_highscore
 
     def read(self):
-        file = open(self.path, "a")  # create an empty file, if it does not exist
-        file.close()
-
         file = open(self.path, "r")
         line = file.readline()
         if line == "":
@@ -82,6 +90,52 @@ class File:  # Data
         self.highscore = Snake.score
         file = open(self.path, "w")
         file.write(str(Snake.score))
+
+
+def checkFiles():
+    if not os.path.exists(settings.path_gameDirectory):
+        os.mkdir(settings.path_gameDirectory)
+
+    if not os.path.exists(settings.path_highscore):
+        file = open(settings.path_highscore, "a")
+        file.close()
+
+    if not os.path.exists(settings.path_musicDirectory):
+        os.mkdir(settings.path_musicDirectory)
+
+    if not os.path.exists(settings.path_music_Game):
+        download = requests.get(settings.url_music_Game, allow_redirects=True)
+        open(settings.path_music_Game, "wb").write(download.content)
+
+    if not os.path.exists(settings.path_music_GameOver):
+        download = requests.get(settings.url_music_GameOver, allow_redirects=True)
+        open(settings.path_music_GameOver, "wb").write(download.content)
+    print("Checking files done")
+
+
+def loading_screen(function, text):
+    process = multiprocessing.Process(target=function)
+    process.daemon = True
+    process.start()
+    time = 0
+    Loading0 = Text(text, settings.color_font, settings.font_size_loading)
+    Loading1 = Text(text + ".", settings.color_font, settings.font_size_loading)
+    Loading2 = Text(text + "..", settings.color_font, settings.font_size_loading)
+    Loading3 = Text(text + "...", settings.color_font, settings.font_size_loading)
+
+    while process.is_alive():
+        clock.tick(settings.fps)
+        window.fill(settings.color_window_background)
+        if time // settings.fps % 4 == 0:
+            Loading0.draw((settings.window_width - Loading0.text_width) / 2, (settings.window_height - Loading0.text_height) / 2)
+        elif time // settings.fps % 4 == 1:
+            Loading1.draw((settings.window_width - Loading1.text_width) / 2, (settings.window_height - Loading1.text_height) / 2)
+        elif time // settings.fps % 4 == 2:
+            Loading2.draw((settings.window_width - Loading2.text_width) / 2, (settings.window_height - Loading2.text_height) / 2)
+        elif time // settings.fps % 4 == 3:
+            Loading3.draw((settings.window_width - Loading3.text_width) / 2, (settings.window_height - Loading3.text_height) / 2)
+        pygame.display.update()
+        time += 1
 
 
 class Player:  # Snake
@@ -194,6 +248,11 @@ def gameOverText():
     pygame.display.update()
 
 
+def music_Game():
+    while True:
+        playsound(settings.path_music_Game)
+
+
 ########### Scenes managing ###########
 
 def menu_main():
@@ -230,6 +289,9 @@ def menu_redraw():
 def game_main():
     global game_notOver
     Data.read()
+    musicGame = multiprocessing.Process(target=music_Game)
+    musicGame.daemon = True
+    musicGame.start()
     Snake.reinit()
     Apple.move()
     game_notOver = True
@@ -270,8 +332,10 @@ def game_main():
         if Snake.fpsCounter % settings.move_delay == 0:
             Snake.move()
 
+    Pkill(musicGame)
     gameOverText()
-    pygame.time.wait(4000)
+    playsound(settings.path_music_GameOver)
+    # pygame.time.wait(3650)  # unnecessary, because playing sound stops code execution
 
 
 def game_redraw():
@@ -313,10 +377,11 @@ class settings:
     color_snakeLogo = (255, 255, 255)
     color_author = (200, 200, 200)
 
+    font_size_loading = 35
     font_size_gameover = 70
     font_size_newhighscore = 33
     font_size_snakeLogo = 60
-    font_size_author = 20
+    font_size_author = 21
 
     button_width = grid * 10
     button_height = grid * 4
@@ -326,6 +391,15 @@ class settings:
     ButtonPlay_y = 245
     ButtonExit_y = 415
 
+    path_gameDirectory = os.path.expanduser("~/.snake")
+    path_highscore = path_gameDirectory + "/.snake_data"  # os.path.expanduser("~/.snake/.snake_data")
+    path_musicDirectory = path_gameDirectory + "/music"  # os.path.expanduser("~/.snake/music")
+    path_music_Game = path_musicDirectory + "/Tristan Lohengrin - Happy 8bit Loop 01.mp3"  # os.path.expanduser("~/.snake/music/Tristan Lohengrin - Happy 8bit Loop 01.mp3")
+    path_music_GameOver = path_musicDirectory + "/Sad Trombone Wah Wah Wah Fail Sound Effect.mp3"  # os.path.expanduser("~/.snake/music/Sad Trombone Wah Wah Wah Fail Sound Effect.mp3")
+
+    url_music_Game = "https://drive.google.com/u/0/uc?id=12iQh-5UzBuTLsWbTAeHemYWlmwHm0USr&export=download"
+    url_music_GameOver = "https://drive.google.com/u/0/uc?id=12SbYvszlHOUjhjiWk4bEo1pjqkjTaI1y&export=download"
+
     fps = 60
     movesPerSecond = 3  # or 4 (fps divisor)
     move_delay = fps / movesPerSecond
@@ -334,13 +408,15 @@ class settings:
 ############# Main code #############
 
 pygame.display.init()
+pygame.font.init()
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((settings.window_width, settings.window_height))
-pygame.display.set_caption("Snake by Michał v0.4")
+pygame.display.set_caption("Snake by Michał v0.5")
+
+loading_screen(checkFiles, "Loading")
 
 Data = File()
 
-pygame.font.init()
 GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameover)
 SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
 Author = Text("Michał Machnikowski 2021", settings.color_author, settings.font_size_author)
