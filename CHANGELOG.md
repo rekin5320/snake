@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+* Slightly corrected Google Drive links
+
 ## Release 1.1 (2021-04-09)
 * Added an icon (it is Base64 encoded in the code, instead of downloading it)
 * Changed the way the button commands are executed
