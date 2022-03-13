@@ -1,5 +1,15 @@
 # Changelog
 
+## Release 1.0 (2021-03-21)
+* Changed from processes to threads (processes do not want to work on Windows, and threads are enough here)
+* Play music via pygame
+* Changed music files from mp3 to ogg (because pygame does not work with mp3)
+* Improved rendering of the game over text
+* Use f-strings
+* Changed `logger.exception()` to a probably better way of logging an error
+* Corrected drawing text on the button - if the button size was different than the default, the text was not centered
+* Added a button to the website ;)
+
 ## Release 0.7 (2021-03-20)
 * Better traceback logging (by redirecting stderr to a file)
 * Added a file storing the game version (may be helpful if I change the game file structure in the future)

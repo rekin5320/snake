@@ -3,15 +3,15 @@
 import pygame
 from random import randint
 import os
-import signal
-import multiprocessing
-from playsound import playsound
+import threading
 import requests
 import logging.handlers
 import sys
 import json
 import base64
 import platform
+import traceback
+import webbrowser
 
 
 ######## Classes and definitions ########
@@ -19,7 +19,7 @@ import platform
 def two_digits(a):
     a = str(int(a))
     if len(a) == 1:
-        return "0" + a
+        return f"0{a}"
     else:
         return a
 
@@ -30,15 +30,19 @@ def decimals(a):
     for i in range(len(a)):
         b = a[-(i + 1)] + b
         if (-(i + 1)) % 3 == 0 and i + 1 != len(a):
-            b = " " + b
+            b = f" {b}"
     return b
 
 
-def Pkill(process_name):
-    if os.name == "posix":  # for Linux and Mac it prints "posix", for Windows "nt"
-        os.kill(process_name.pid, signal.SIGKILL)
-    else:
-        process_name.terminate()
+class MyThread(threading.Thread):
+    def run(self):
+        try:
+            threading.Thread.run(self)
+        except Exception as err:
+            self.error = err
+            self.traceback = traceback.format_exc()
+        else:
+            self.error = False
 
 
 def base64_encode(text):
@@ -76,7 +80,7 @@ class Button:
             pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
         else:
             pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
-        window.blit(self.text, (int((settings.window_width - self.text_width) / 2), self.y + (settings.button_height - self.text_height) / 2))
+        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
 
 
 class Text:
@@ -174,9 +178,9 @@ class File:  # Data
             with open(self.path_data, "w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
-        except Exception as e:
-            logger.error("Error while writing game data - type: " + str(type(e)))
-            logger.error("Error while writing game data: " + str(e))
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
             error_screen("Error while writing game data")
 
 
@@ -207,9 +211,10 @@ def checkFiles():
         try:
             download = requests.get(settings.url_music_Game, allow_redirects=True)
             open(settings.path_music_Game, "wb").write(download.content)
-        except:
-            logger.exception("Downloading error:")
-            exit(1)
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            raise err
         else:
             logger.warning("Game music successfully downloaded")
 
@@ -218,26 +223,26 @@ def checkFiles():
         try:
             download = requests.get(settings.url_music_GameOver, allow_redirects=True)
             open(settings.path_music_GameOver, "wb").write(download.content)
-        except:
-            logger.exception("Downloading error:")
-            exit(1)
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            raise err
         else:
             logger.warning("GameOver music successfully downloaded")
 
     logger.info("Checking files done")
 
 
-def loading_screen(function, text):
-    process = multiprocessing.Process(target=function)
-    process.daemon = True
-    process.start()
+def loading_screen(function, loading_text, error_text):
+    thread = MyThread(target=function, daemon=True)
+    thread.start()
     time = 0
-    Loading0 = Text(text, settings.color_font, settings.font_size_loading)
-    Loading1 = Text(text + ".", settings.color_font, settings.font_size_loading)
-    Loading2 = Text(text + "..", settings.color_font, settings.font_size_loading)
-    Loading3 = Text(text + "...", settings.color_font, settings.font_size_loading)
+    Loading0 = Text(loading_text, settings.color_font, settings.font_size_loading)
+    Loading1 = Text(f"{loading_text}.", settings.color_font, settings.font_size_loading)
+    Loading2 = Text(f"{loading_text}..", settings.color_font, settings.font_size_loading)
+    Loading3 = Text(f"{loading_text}...", settings.color_font, settings.font_size_loading)
 
-    while process.is_alive():
+    while thread.is_alive():
         clock.tick(settings.fps)
         window.fill(settings.color_window_background)
         if time // settings.fps % 4 == 0:
@@ -251,12 +256,14 @@ def loading_screen(function, text):
         pygame.display.update()
         time += 1
 
-    if process.exitcode:
-        error_screen("Program encountered a problem while creating local files. Check Your Internet connection and try again later.")
+    if thread.error:
+        logger.error(thread.error)
+        logger.error(thread.traceback)
+        error_screen(error_text)
 
 
 def error_screen(text):
-    logger.critical("Error screen: " + text)
+    logger.critical(f"Error screen: {text}")
     global error
     global mouse
     error = True
@@ -371,32 +378,14 @@ class Bar:  # TopBar
         self.height = height
 
     def draw(self):
-        Time = Text("time: " + two_digits(Snake.fpsCounter / settings.fps // 60) + ":" + two_digits(Snake.fpsCounter / settings.fps % 60), settings.color_font, settings.label_font_size)
+        Time = Text(f"time: {two_digits(Snake.fpsCounter / settings.fps // 60)}:{two_digits(Snake.fpsCounter / settings.fps % 60)}", settings.color_font, settings.label_font_size)
         Time.draw(1.4 * settings.grid, int((self.height - Time.text_height)/2))
 
-        Score = Text("score: " + decimals(Snake.score), settings.color_font, settings.label_font_size)
+        Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, settings.label_font_size)
         Score.draw(int((self.width - Score.text_width) / 2), int((self.height - Score.text_height)/2))
 
-        HighscoreOnBar = Text("highscore: " + decimals(Data.highscore), settings.color_font, settings.label_font_size)
+        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.label_font_size)
         HighscoreOnBar.draw(self.width - settings.grid - HighscoreOnBar.text_width - 0.4 * settings.grid, int((self.height - HighscoreOnBar.text_height)/2))
-
-
-def gameOverText():
-    GameOver.draw((settings.window_width - GameOver.text_width) / 2, (settings.window_height - GameOver.text_height) / 2)
-    if Snake.score > Data.highscore:
-        logger.info("Highscore beaten, old: {}, new: {}".format(Data.highscore, Snake.score))
-        Data.highscore = Snake.score
-        Data.write()
-        NewHighscoreText = Text("new highscore: " + str(Snake.score), settings.color_newhighscore, settings.font_size_newhighscore)
-        NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) / 2, (settings.window_height - GameOver.text_height) / 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
-    pygame.display.update()
-
-
-def music_Game():
-    logger.debug("Starting game music")
-    while True:
-        playsound(settings.path_music_Game)
-        logger.debug("Game music ended, playing again")
 
 
 ########### Scenes managing ###########
@@ -419,6 +408,7 @@ def menu_main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 ButtonPlay.click()  # Game
                 ButtonExit.click()  # Exit
+                WebsiteButton.click()  # Website
 
         if keys[pygame.K_q]:
             game = True
@@ -432,20 +422,20 @@ def menu_main():
 def menu_redraw():
     window.fill(settings.color_window_background)
     SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) / 2, int(settings.grid * 3.8))
-    HighscoreInMenu = Text("highscore: " + str(Data.highscore), settings.color_font, settings.font_size_highscoreinmenu)
+    HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
     HighscoreInMenu.draw(int((settings.window_width - HighscoreInMenu.text_width) / 2), 195)
     ButtonPlay.draw()
     ButtonExit.draw()
     Author.draw(settings.window_width - Author.text_width - int(0.4 * settings.grid), settings.window_height - Author.text_height - int(0.4 * settings.grid))
+    WebsiteButton.draw()
     pygame.display.update()
 
 
 def game_main():
     global game_notOver
     global game
-    musicGame = multiprocessing.Process(target=music_Game)
-    musicGame.daemon = True
-    musicGame.start()
+    pygame.mixer.music.load(settings.path_music_Game)
+    pygame.mixer.music.play(loops=-1)
     Snake.reinit()
     Apple.move()
     game_notOver = True
@@ -486,10 +476,22 @@ def game_main():
         if Snake.fpsCounter % settings.move_delay == 0:
             Snake.move()
 
-    logger.info("Game over, score: " + str(Snake.score))
-    Pkill(musicGame)
-    gameOverText()
-    playsound(settings.path_music_GameOver)
+    logger.info(f"Game over, score: {Snake.score}")
+    pygame.mixer.music.pause()
+    pygame.mixer.music.load(settings.path_music_GameOver)
+    pygame.mixer.music.play()
+
+    if Snake.score > Data.highscore:
+        logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score}")
+        Data.highscore = Snake.score
+        Data.write()
+        NewHighscoreText = Text(f"new highscore: {Snake.score}", settings.color_newhighscore, settings.font_size_newhighscore)
+        NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) / 2, (settings.window_height - GameOver.text_height) / 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
+
+    GameOver.draw((settings.window_width - GameOver.text_width) / 2, (settings.window_height - GameOver.text_height) / 2)
+    while pygame.mixer.music.get_busy():
+        clock.tick(settings.fps)
+        pygame.display.update()
 
     game = False
 
@@ -506,7 +508,7 @@ def game_redraw():
 ############## Settings ##############
 
 class settings:
-    version = "0.7"
+    version = "1.0"
     grid = 25
     grid_border = 2
     window_width = grid * 33
@@ -541,8 +543,9 @@ class settings:
     font_size_gameover = 70
     font_size_newhighscore = 33
     font_size_snakeLogo = 60
-    font_size_highscoreinmenu = 28
+    font_size_highscoreinmenu = 30
     font_size_author = 21
+    font_size_website = 20
 
     line_spacing = 6
     line_lenght_error = 40
@@ -562,12 +565,13 @@ class settings:
     path_data = os.path.join(path_gameDirectory, "data")  # ~/.snake/data
     path_version = os.path.join(path_gameDirectory, "version")  # ~/.snake/version
     path_musicDirectory = os.path.join(path_gameDirectory, "music")  # ~/.snake/music
-    path_music_Game = os.path.join(path_musicDirectory, "Tristan Lohengrin - Happy 8bit Loop 01.mp3")
-    path_music_GameOver = os.path.join(path_musicDirectory, "Sad Trombone Wah Wah Wah Fail Sound Effect.mp3")
+    path_music_Game = os.path.join(path_musicDirectory, "Tristan Lohengrin - Happy 8bit Loop 01.ogg")
+    path_music_GameOver = os.path.join(path_musicDirectory, "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg")
     path_logDirectory = os.path.join(path_gameDirectory, "logs")  # ~/.snake/logs
 
-    url_music_Game = "https://drive.google.com/u/0/uc?id=12iQh-5UzBuTLsWbTAeHemYWlmwHm0USr&export=download"
-    url_music_GameOver = "https://drive.google.com/u/0/uc?id=12SbYvszlHOUjhjiWk4bEo1pjqkjTaI1y&export=download"
+    url_music_Game = "https://drive.google.com/u/0/uc?id=1ksgD-ftTtFs5GKyA2mNZW6XIJKvk53dw&export=download"
+    url_music_GameOver = "https://drive.google.com/u/0/uc?id=1dF_wNbBxyNsKmRf83f4UgZcT8Xgsux46&export=download"
+    url_website = "http://tiny.cc/snake_website"
 
     fps = 60
     movesPerSecond = 3  # or 4 (fps divisor)
@@ -608,20 +612,22 @@ logger.addHandler(stdout_handler)
 
 #### Main game code ####
 logger.info("Starting")
-logger.info("System: {}, version: {}".format(platform.system(), platform.release()))
+logger.info(f"System: {platform.system()}, version: {platform.release()}")
 pygame.display.init()
+pygame.mixer.init()
 pygame.font.init()
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((settings.window_width, settings.window_height))
-pygame.display.set_caption("Snake v0.7")
+pygame.display.set_caption("Snake v1.0")
 
-loading_screen(checkFiles, "Loading")
+loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again later.")
 Data = File()
 Data.read()
 
 GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameover)
 SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
 Author = Text("Michał Machnikowski 2021", settings.color_author, settings.font_size_author)
+WebsiteButton = Button(settings.grid, settings.window_height - 3 * settings.grid, int(4.85 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "website", settings.font_size_website, "webbrowser.open(settings.url_website, new=0, autoraise=True)")
 
 ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, "game = True")
 ButtonExit = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, "menu = False")
