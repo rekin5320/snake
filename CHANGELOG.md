@@ -1,5 +1,13 @@
 # Changelog
 
+## Release 0.7 (2021-03-20)
+* Better traceback logging (by redirecting stderr to a file)
+* Added a file storing the game version (may be helpful if I change the game file structure in the future)
+* Show best score in menu
+* Added operating system info to logs
+* The game directory on Windows is now in AppData
+* Changed from `os.rename()` to `os.replace()`, as the first one does not work on Windows
+
 ## Release 0.6 (2021-02-25)
 * Added program logging
 * Put download into try/except block

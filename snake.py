@@ -7,11 +7,11 @@ import signal
 import multiprocessing
 from playsound import playsound
 import requests
-import logging
-# import logging.handlers
+import logging.handlers
 import sys
 import json
 import base64
+import platform
 
 
 ######## Classes and definitions ########
@@ -149,6 +149,9 @@ class File:  # Data
 
     def read(self):
         try:
+            with open(settings.path_version, "r") as file:
+                self.version = base64_decode(file.readline())
+
             with open(self.path_data, "r") as file:
                 data = base64_decode(file.readline())
 
@@ -158,9 +161,8 @@ class File:  # Data
             else:
                 self.highscore = self.datadict.get("highscore")
 
-        except Exception as e:
-            logger.error("Error while reading game data - type: " + str(type(e)))
-            logger.error("Error while reading game data: " + str(e))
+        except:
+            logger.exception("Error while reading game data:")
             error_screen("Error while reading game data")
 
         else:
@@ -171,6 +173,7 @@ class File:  # Data
             self.datadict["highscore"] = self.highscore
             with open(self.path_data, "w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
+                file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         except Exception as e:
             logger.error("Error while writing game data - type: " + str(type(e)))
             logger.error("Error while writing game data: " + str(e))
@@ -182,11 +185,17 @@ def checkFiles():
         logger.warning("Data file did not exist, trying to create")
         with open(settings.path_data, "w") as file:
             empty_dict = {
-                "highscore": None,
-                "just found an Easter Egg?": True
+                "highscore": None
             }
             file.write(base64_encode(json.dumps(empty_dict)))
+            file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         logger.warning("Data file successfully created")
+
+    if not os.path.exists(settings.path_version) or os.path.getsize(settings.path_version) == 0:
+        logger.warning("Version file did not exist, trying to create")
+        with open(settings.path_version, "w") as file:
+            file.write(base64_encode(settings.version))
+        logger.warning("Version file successfully created")
 
     if not os.path.exists(settings.path_musicDirectory):
         logger.warning("Music directory did not exist, trying to create")
@@ -198,9 +207,8 @@ def checkFiles():
         try:
             download = requests.get(settings.url_music_Game, allow_redirects=True)
             open(settings.path_music_Game, "wb").write(download.content)
-        except Exception as e:
-            logger.error("Downloading error type: " + str(type(e)))
-            logger.error("Downloading error: " + str(e))
+        except:
+            logger.exception("Downloading error:")
             exit(1)
         else:
             logger.warning("Game music successfully downloaded")
@@ -210,9 +218,8 @@ def checkFiles():
         try:
             download = requests.get(settings.url_music_GameOver, allow_redirects=True)
             open(settings.path_music_GameOver, "wb").write(download.content)
-        except Exception as e:
-            logger.error("Downloading error type: " + str(type(e)))
-            logger.error("Downloading error: " + str(e))
+        except:
+            logger.exception("Downloading error:")
             exit(1)
         else:
             logger.warning("GameOver music successfully downloaded")
@@ -370,8 +377,8 @@ class Bar:  # TopBar
         Score = Text("score: " + decimals(Snake.score), settings.color_font, settings.label_font_size)
         Score.draw(int((self.width - Score.text_width) / 2), int((self.height - Score.text_height)/2))
 
-        Highscore = Text("highscore: " + decimals(Data.highscore), settings.color_font, settings.label_font_size)
-        Highscore.draw(self.width - settings.grid - Highscore.text_width - 0.4 * settings.grid, int((self.height - Highscore.text_height)/2))
+        HighscoreOnBar = Text("highscore: " + decimals(Data.highscore), settings.color_font, settings.label_font_size)
+        HighscoreOnBar.draw(self.width - settings.grid - HighscoreOnBar.text_width - 0.4 * settings.grid, int((self.height - HighscoreOnBar.text_height)/2))
 
 
 def gameOverText():
@@ -389,6 +396,7 @@ def music_Game():
     logger.debug("Starting game music")
     while True:
         playsound(settings.path_music_Game)
+        logger.debug("Game music ended, playing again")
 
 
 ########### Scenes managing ###########
@@ -396,12 +404,15 @@ def music_Game():
 def menu_main():
     global menu
     global mouse
+    global game
     menu = True
+    game = False
     while menu:
         clock.tick(settings.fps)
 
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pos()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
                 menu = False
@@ -410,6 +421,9 @@ def menu_main():
                 ButtonExit.click()  # Exit
 
         if keys[pygame.K_q]:
+            game = True
+
+        if game:
             game_main()
 
         menu_redraw()
@@ -418,6 +432,8 @@ def menu_main():
 def menu_redraw():
     window.fill(settings.color_window_background)
     SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) / 2, int(settings.grid * 3.8))
+    HighscoreInMenu = Text("highscore: " + str(Data.highscore), settings.color_font, settings.font_size_highscoreinmenu)
+    HighscoreInMenu.draw(int((settings.window_width - HighscoreInMenu.text_width) / 2), 195)
     ButtonPlay.draw()
     ButtonExit.draw()
     Author.draw(settings.window_width - Author.text_width - int(0.4 * settings.grid), settings.window_height - Author.text_height - int(0.4 * settings.grid))
@@ -426,7 +442,7 @@ def menu_redraw():
 
 def game_main():
     global game_notOver
-    Data.read()
+    global game
     musicGame = multiprocessing.Process(target=music_Game)
     musicGame.daemon = True
     musicGame.start()
@@ -475,6 +491,8 @@ def game_main():
     gameOverText()
     playsound(settings.path_music_GameOver)
 
+    game = False
+
 
 def game_redraw():
     window.fill(settings.color_window_background)
@@ -488,6 +506,7 @@ def game_redraw():
 ############## Settings ##############
 
 class settings:
+    version = "0.7"
     grid = 25
     grid_border = 2
     window_width = grid * 33
@@ -522,6 +541,7 @@ class settings:
     font_size_gameover = 70
     font_size_newhighscore = 33
     font_size_snakeLogo = 60
+    font_size_highscoreinmenu = 28
     font_size_author = 21
 
     line_spacing = 6
@@ -532,11 +552,15 @@ class settings:
     button_text_size = 34
     button_text_color = (255, 255, 255)
 
-    ButtonPlay_y = 245
-    ButtonExit_y = 415
+    ButtonPlay_y = 275
+    ButtonExit_y = 435
 
-    path_gameDirectory = os.path.join(os.path.expanduser("~"), ".snake")  # ~/.snake
+    if os.name == "nt":
+        path_gameDirectory = os.path.join(os.path.join(os.path.expanduser("~"), "AppData", "Roaming", ".snake"))  # ~\AppData\Roaming\.snake
+    else:
+        path_gameDirectory = os.path.join(os.path.expanduser("~"), ".snake")  # ~/.snake
     path_data = os.path.join(path_gameDirectory, "data")  # ~/.snake/data
+    path_version = os.path.join(path_gameDirectory, "version")  # ~/.snake/version
     path_musicDirectory = os.path.join(path_gameDirectory, "music")  # ~/.snake/music
     path_music_Game = os.path.join(path_musicDirectory, "Tristan Lohengrin - Happy 8bit Loop 01.mp3")
     path_music_GameOver = os.path.join(path_musicDirectory, "Sad Trombone Wah Wah Wah Fail Sound Effect.mp3")
@@ -561,11 +585,13 @@ if not os.path.exists(settings.path_logDirectory):
 if os.path.exists(os.path.join(settings.path_logDirectory, "4.log")):
     os.remove(os.path.join(settings.path_logDirectory, "4.log"))
 if os.path.exists(os.path.join(settings.path_logDirectory, "3.log")):
-    os.rename(os.path.join(settings.path_logDirectory, "3.log"), os.path.join(settings.path_logDirectory, "4.log"))
+    os.replace(os.path.join(settings.path_logDirectory, "3.log"), os.path.join(settings.path_logDirectory, "4.log"))
 if os.path.exists(os.path.join(settings.path_logDirectory, "2.log")):
-    os.rename(os.path.join(settings.path_logDirectory, "2.log"), os.path.join(settings.path_logDirectory, "3.log"))
+    os.replace(os.path.join(settings.path_logDirectory, "2.log"), os.path.join(settings.path_logDirectory, "3.log"))
 if os.path.exists(os.path.join(settings.path_logDirectory, "1.log")):
-    os.rename(os.path.join(settings.path_logDirectory, "1.log"), os.path.join(settings.path_logDirectory, "2.log"))
+    os.replace(os.path.join(settings.path_logDirectory, "1.log"), os.path.join(settings.path_logDirectory, "2.log"))
+
+sys.stderr = open(os.path.join(settings.path_logDirectory, "1.log"), "a")
 
 for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
     logging.root.removeHandler(handler)
@@ -573,32 +599,31 @@ for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s')
-file_handler = logging.FileHandler(filename=os.path.join(settings.path_logDirectory, "1.log"))
+file_handler = logging.FileHandler(filename=os.path.join(settings.path_logDirectory, "1.log"), mode="a")
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-# file_rot_handler = logging.handlers.RotatingFileHandler(filename=settings.path_log, maxBytes=60000, backupCount=1)
-# file_rot_handler.setFormatter(formatter)
-# logger.addHandler(file_rot_handler)
 stdout_handler = logging.StreamHandler(sys.stdout)
+# stdout_handler.setFormatter(formatter)  # logs on stdout are clearer without date and time
 logger.addHandler(stdout_handler)
 
 #### Main game code ####
 logger.info("Starting")
+logger.info("System: {}, version: {}".format(platform.system(), platform.release()))
 pygame.display.init()
 pygame.font.init()
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((settings.window_width, settings.window_height))
-pygame.display.set_caption("Snake v0.6")
+pygame.display.set_caption("Snake v0.7")
 
 loading_screen(checkFiles, "Loading")
-
 Data = File()
+Data.read()
 
 GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameover)
 SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
 Author = Text("Michał Machnikowski 2021", settings.color_author, settings.font_size_author)
 
-ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, "game_main()")
+ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, "game = True")
 ButtonExit = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, "menu = False")
 
 Snake = Player(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
