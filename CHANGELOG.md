@@ -1,5 +1,14 @@
 # Changelog
 
+## Release 0.6 (2021-02-25)
+* Added program logging
+* Put download into try/except block
+* Added an error screen in case of an error (e.g. during downloading)
+* Renamed game data file (from `.snake_data` to `data`)
+* Use `os.path.join()` to create paths instead of string concatenation
+* Re-written reading and writing of game data - now data is saved as JSON encoded in Base64
+* Added easy rendering of long, multi-line text
+
 ## Release 0.5 (2021-01-15)
 * Added in-game music (running in a separate process) and sound at loss
 * Expanded the game directory and creating it if it doesn't exist
