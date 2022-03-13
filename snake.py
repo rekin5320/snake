@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import pygame
-import time
 from random import randint
+import os
 
+
+######## Classes and definitions ########
 
 def two_digits(a):
     a = str(int(a))
@@ -19,8 +21,67 @@ def decimals(a):
     for i in range(len(a)):
         b = a[-(i + 1)] + b
         if (-(i + 1)) % 3 == 0 and i + 1 != len(a):
-            b = "." + b
+            b = " " + b
     return b
+
+
+class Button:
+    def __init__(self, x, y, width, height, color1, color2, color_text, text, font_size, command):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.button_color1 = color1
+        self.button_color2 = color2
+        self.color_text = color_text
+        self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
+        self.text_width, self.text_height = self.font.size(text)
+        self.text = self.font.render(text, True, color_text)
+        self.command = command
+
+    def click(self):
+        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+            exec(self.command, globals())
+
+    def draw(self):
+        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
+        else:
+            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
+        window.blit(self.text, (int((settings.window_width - self.text_width) / 2), self.y + (settings.button_height - self.text_height) / 2))
+
+
+class Text:
+    def __init__(self, text, color, font_size):
+        self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
+        self.text_width, self.text_height = self.font.size(text)
+        self.text = self.font.render(text, True, color)
+
+    def draw(self, x, y):
+        window.blit(self.text, (x, y))
+
+
+class File:  # Data
+    def __init__(self):
+        self.path = os.path.expanduser("~/.snake_data")
+
+    def read(self):
+        file = open(self.path, "a")  # create an empty file, if it does not exist
+        file.close()
+
+        file = open(self.path, "r")
+        line = file.readline()
+        if line == "":
+            self.highscore = 0
+        else:
+            self.highscore = int(line)
+
+        file.close()
+
+    def write(self):
+        self.highscore = Snake.score
+        file = open(self.path, "w")
+        file.write(str(Snake.score))
 
 
 class Player:  # Snake
@@ -30,6 +91,9 @@ class Player:  # Snake
         self.velocity = grid
         self.color_head = color_head
         self.color_tail = color_tail
+        self.reinit()
+
+    def reinit(self):
         self.left = False
         self.right = False
         self.up = False
@@ -42,14 +106,15 @@ class Player:  # Snake
         self.y = int((settings.game_height - self.grid) / 2 + settings.game_y)
         self.xyList = [(self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)]
         self.fpsCounter = 0
-        self.highscore_read()
+        self.score = 1
 
     def move(self):
+        global game_notOver
         self.left_current = self.left
         self.right_current = self.right
         self.up_current = self.up
         self.down_current = self.down
-        global game_over
+
         if self.left_current:
             self.x -= self.velocity
         elif self.right_current:
@@ -61,15 +126,16 @@ class Player:  # Snake
         self.location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
 
         if self.x == settings.game_x - self.grid or self.x == settings.game_width + self.grid or self.y == settings.game_y - self.grid or self.y == settings.game_height + settings.label_height:
-            game_over = True
+            game_notOver = False
 
         for pair in self.xyList:  # collision with itself
             if self.location == pair and len(self.xyList) != 1:
-                game_over = True
+                game_notOver = False
 
         self.xyList.append(self.location)
 
-        if self.x == Apple.x and self.y == Apple.y:
+        if self.x == Apple.x and self.y == Apple.y:  # ate the apple
+            self.score += 1
             Apple.move()
         else:
             self.xyList.pop(0)
@@ -79,23 +145,6 @@ class Player:  # Snake
             if self.xyList.index(pair) != len(self.xyList) - 1:
                 pygame.draw.rect(window, self.color_tail, pair)
         pygame.draw.rect(window, self.color_head, self.xyList[len(self.xyList) - 1])
-
-    def highscore_read(self):  # I know, it shouldn't be here
-        highscore_file = open("snake_highscore.txt", "a")  # create an empty file, if it does not exist
-        highscore_file.close()
-
-        highscore_file = open("snake_highscore.txt", "r")
-        line = highscore_file.readline()
-        if line == "":
-            self.highscore = 0
-        else:
-            self.highscore = int(line)
-
-        highscore_file.close()
-
-    def highscore_write(self):
-        highscore_file = open("snake_highscore.txt", "w")
-        highscore_file.write(str(len(Snake.xyList)))
 
 
 class Target:  # Apple
@@ -118,7 +167,7 @@ class Target:  # Apple
         pygame.draw.rect(window, self.color, self.location)
 
 
-class TextBox:  # TopBar
+class Bar:  # TopBar
     def __init__(self, x, y, width, height):
         self.x = x
         self.y = y
@@ -126,19 +175,106 @@ class TextBox:  # TopBar
         self.height = height
 
     def draw(self):
-        time = myfont.render("time: " + two_digits(Snake.fpsCounter / settings.fps // 60) + ":" + two_digits(Snake.fpsCounter / settings.fps % 60), True, settings.color_font)
-        window.blit(time, (settings.grid, int((settings.label_height - text_height)/2)))
+        Time = Text("time: " + two_digits(Snake.fpsCounter / settings.fps // 60) + ":" + two_digits(Snake.fpsCounter / settings.fps % 60), settings.color_font, settings.label_font_size)
+        Time.draw(1.4 * settings.grid, int((self.height - Time.text_height)/2))
 
-        score_width, score_height = myfont.size("score: " + decimals(len(Snake.xyList)))
-        score = myfont.render("score: " + decimals(len(Snake.xyList)), True, settings.color_font)
-        window.blit(score, ((settings.label_width - score_width) / 2, int((settings.label_height - text_height)/2)))
+        Score = Text("score: " + decimals(Snake.score), settings.color_font, settings.label_font_size)
+        Score.draw(int((self.width - Score.text_width) / 2), int((self.height - Score.text_height)/2))
 
-        highscore_width, highscore_height = myfont.size("highscore: " + decimals(Snake.highscore))
-        highscore = myfont.render("highscore: " + decimals(Snake.highscore), True, settings.color_font)
-        window.blit(highscore, (settings.label_width - settings.grid - highscore_width, int((settings.label_height - text_height)/2)))
+        Highscore = Text("highscore: " + decimals(Data.highscore), settings.color_font, settings.label_font_size)
+        Highscore.draw(self.width - settings.grid - Highscore.text_width - 0.4 * settings.grid, int((self.height - Highscore.text_height)/2))
 
 
-def redrawGameWindow():
+def gameOverText():
+    GameOver.draw((settings.window_width - GameOver.text_width) / 2, (settings.window_height - GameOver.text_height) / 2)
+    if Snake.score > Data.highscore:
+        Data.write()
+        NewHigscoreText = Text("new highscore: " + str(Snake.score), settings.color_newhighscore, settings.font_size_newhighscore)
+        NewHigscoreText.draw((settings.window_width - NewHigscoreText.text_width) / 2, (settings.window_height - GameOver.text_height) / 2 - GameOver.text_height + NewHigscoreText.text_height - 10)
+    pygame.display.update()
+
+
+########### Scenes managing ###########
+
+def menu_main():
+    global menu
+    global mouse
+    menu = True
+    while menu:
+        clock.tick(settings.fps)
+
+        keys = pygame.key.get_pressed()
+        mouse = pygame.mouse.get_pos()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+                menu = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                ButtonPlay.click()  # Game
+                ButtonExit.click()  # Exit
+
+        if keys[pygame.K_q]:
+            game_main()
+
+        menu_redraw()
+
+
+def menu_redraw():
+    window.fill(settings.color_window_background)
+    SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) / 2, int(settings.grid * 3.8))
+    ButtonPlay.draw()
+    ButtonExit.draw()
+    Author.draw(settings.window_width - Author.text_width - int(0.4 * settings.grid), settings.window_height - Author.text_height - int(0.4 * settings.grid))
+    pygame.display.update()
+
+
+def game_main():
+    global game_notOver
+    Data.read()
+    Snake.reinit()
+    Apple.move()
+    game_notOver = True
+
+    while game_notOver:
+        clock.tick(settings.fps)
+
+        if Snake.fpsCounter % settings.move_delay == 0:
+            game_redraw()
+        Snake.fpsCounter += 1
+
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+                game_notOver = False
+
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not Snake.right_current:
+            Snake.left = True
+            Snake.right = False
+            Snake.up = False
+            Snake.down = False
+        if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not Snake.left_current:
+            Snake.left = False
+            Snake.right = True
+            Snake.up = False
+            Snake.down = False
+        if (keys[pygame.K_UP] or keys[pygame.K_w]) and not Snake.down_current:
+            Snake.left = False
+            Snake.right = False
+            Snake.up = True
+            Snake.down = False
+        if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and not Snake.up_current:
+            Snake.left = False
+            Snake.right = False
+            Snake.up = False
+            Snake.down = True
+
+        if Snake.fpsCounter % settings.move_delay == 0:
+            Snake.move()
+
+    gameOverText()
+    pygame.time.wait(4000)
+
+
+def game_redraw():
     window.fill(settings.color_window_background)
     pygame.draw.rect(window, settings.color_game_background, (settings.game_x, settings.game_y, settings.game_width, settings.game_height))
     Snake.draw()
@@ -147,15 +283,18 @@ def redrawGameWindow():
     pygame.display.update()
 
 
+############## Settings ##############
+
 class settings:
-    grid = 25  # 20
+    grid = 25
     grid_border = 2
-    window_width = grid * 29
-    window_height = grid * 24
+    window_width = grid * 33
+    window_height = grid * 26
     label_x = 0
     label_y = 0
     label_width = window_width
     label_height = 2 * grid
+    label_font_size = int(grid * 1.04)
     game_x = grid
     game_y = label_height
     game_width = window_width - 2 * grid  # odd multiples of grid
@@ -166,66 +305,53 @@ class settings:
     color_snake_head = (255, 255, 255)
     color_snake_tail = (0, 255, 0)
     color_apple = (255, 0, 0)
+    color_button = (254, 151, 12)
+    color_button_pointed = (183, 111, 15)
     color_font = (255, 255, 255)
+    color_gameover = (255, 0, 0)
+    color_newhighscore = (0, 0, 255)
+    color_snakeLogo = (255, 255, 255)
+    color_author = (200, 200, 200)
+
+    font_size_gameover = 70
+    font_size_newhighscore = 33
+    font_size_snakeLogo = 60
+    font_size_author = 20
+
+    button_width = grid * 10
+    button_height = grid * 4
+    button_text_size = 34
+    button_text_color = (255, 255, 255)
+
+    ButtonPlay_y = 245
+    ButtonExit_y = 415
 
     fps = 60
-    move_delay = fps / 3  # or 4
+    movesPerSecond = 3  # or 4 (fps divisor)
+    move_delay = fps / movesPerSecond
 
+
+############# Main code #############
 
 pygame.display.init()
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((settings.window_width, settings.window_height))
-pygame.display.set_caption("Snake by Michał v0.3")
+pygame.display.set_caption("Snake by Michał v0.4")
+
+Data = File()
 
 pygame.font.init()
-myfont = pygame.font.SysFont("Verdana", settings.grid, bold=True)
-text_width, text_height = myfont.size("A")
+GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameover)
+SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
+Author = Text("Michał Machnikowski 2021", settings.color_author, settings.font_size_author)
 
-TopBar = TextBox(settings.label_x, settings.label_y, settings.label_width, settings.label_height)
+ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_pointed, settings.button_text_color, "Play", settings.button_text_size, "game_main()")
+ButtonExit = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_pointed, settings.button_text_color, "Exit", settings.button_text_size, "menu = False")
 
 Snake = Player(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
 Apple = Target(settings.grid, settings.grid_border, settings.color_apple)
+TopBar = Bar(settings.label_x, settings.label_y, settings.label_width, settings.label_height)
 
-game_over = False
-while not game_over:
-    clock.tick(settings.fps)
+menu_main()
 
-    if Snake.fpsCounter % settings.move_delay == 0:
-        redrawGameWindow()
-    Snake.fpsCounter += 1
-
-    keys = pygame.key.get_pressed()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
-            game_over = True
-
-    if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not Snake.right_current:
-        Snake.left = True
-        Snake.right = False
-        Snake.up = False
-        Snake.down = False
-    if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not Snake.left_current:
-        Snake.left = False
-        Snake.right = True
-        Snake.up = False
-        Snake.down = False
-    if (keys[pygame.K_UP] or keys[pygame.K_w]) and not Snake.down_current:
-        Snake.left = False
-        Snake.right = False
-        Snake.up = True
-        Snake.down = False
-    if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and not Snake.up_current:
-        Snake.left = False
-        Snake.right = False
-        Snake.up = False
-        Snake.down = True
-
-    if Snake.fpsCounter % settings.move_delay == 0:
-        Snake.move()
-
-
-if len(Snake.xyList) > Snake.highscore:
-    Snake.highscore_write()
-
-time.sleep(4)
 pygame.quit()

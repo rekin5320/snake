@@ -1,5 +1,11 @@
 # Changelog
 
+## Release 0.4 (2021-01-13)
+* Added menu
+* Added Game Over text and a message if the record was beaten
+* Changed data storage path to `~/.snake_data` (this is cross-platform)
+* Minor code improvements
+
 ## Release 0.3 (????-??-??)
 * Added game window border and top bar displaying game time, current score and high score
 * Score calculated as snake length
