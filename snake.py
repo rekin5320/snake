@@ -18,14 +18,12 @@ import requests
 
 ######## Classes and definitions ########
 
-def decimals(a):
-    a = str(a)
-    b = ""
-    for i in range(len(a)):
-        b = a[-(i + 1)] + b
-        if (-(i + 1)) % 3 == 0 and i + 1 != len(a):
-            b = f" {b}"
-    return b
+def decimals(n):
+    """
+    Inserts spaces between every three digits.
+    See https://stackoverflow.com/a/17484665
+    """
+    return format(n, ',').replace(',', ' ')
 
 
 class MyThread(threading.Thread):
