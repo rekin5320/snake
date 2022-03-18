@@ -477,12 +477,14 @@ def menu_main():
     global game
     global creditss
     global HighscoreInMenu
+    global LastScore
 
     menu = True
     game = False
     creditss = False
 
     HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
+    LastScore = None
     while menu:
         clock.tick(settings.fps)
 
@@ -512,9 +514,12 @@ def menu_main():
 
 
 def menu_redraw():
+    global LastScore
     window.fill(settings.color_window_background)
-    SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) // 2, 3.8 * settings.grid)
-    HighscoreInMenu.draw((settings.window_width - HighscoreInMenu.text_width) // 2, 195)
+    SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) // 2, 4.5 * settings.grid)
+    HighscoreInMenu.draw(0.4 * settings.grid, 0.35 * settings.grid)
+    if LastScore:
+        LastScore.draw((settings.window_width - LastScore.text_width) // 2, 205)
     ButtonPlay.draw()
     ButtonExit.draw()
     Author.draw(settings.window_width - Author.text_width - 0.4 * settings.grid, settings.window_height - Author.text_height - 0.4 * settings.grid)
@@ -584,6 +589,9 @@ def game_main():
         NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
         global HighscoreInMenu
         HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
+
+    global LastScore
+    LastScore = Text(f"last score: {Snake.score}", settings.color_font, settings.font_size_lastscore)
 
     GameOver.draw((settings.window_width - GameOver.text_width) // 2, (settings.window_height - GameOver.text_height) // 2)
 
@@ -677,7 +685,8 @@ class settings:
     font_size_gameover = 70
     font_size_newhighscore = 33
     font_size_snakeLogo = 60
-    font_size_highscoreinmenu = 30
+    font_size_highscoreinmenu = 27
+    font_size_lastscore = 30
     font_size_author = 21
     font_size_website = 20
     font_size_creditss = 25
@@ -784,8 +793,8 @@ GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameov
 SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
 Author = Text("Michał Machnikowski 2022", settings.color_author, settings.font_size_author)
 
-ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, ButtonCmds.gameTrue)
-ButtonExit = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.menuFalse)
+ButtonPlay = Button((settings.window_width - settings.button_width) // 2, settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, ButtonCmds.gameTrue)
+ButtonExit = Button((settings.window_width - settings.button_width) // 2, settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.menuFalse)
 WebsiteButton = Button(0.5 * settings.grid, settings.window_height - 2.5 * settings.grid, int(4.85 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "website", settings.font_size_website, ButtonCmds.website)
 CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * settings.grid, int(4.65 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "credits", settings.font_size_website, ButtonCmds.creditssTrue)
 
