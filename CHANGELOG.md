@@ -5,6 +5,7 @@
 * Use `pathlib` to work with paths
 * Show current speed during game
 * Updated preset speeds
+* Code improvements
 
 ## Release 1.1 (2021-04-09)
 * Added an icon (it is Base64 encoded in the code, instead of downloading it)
