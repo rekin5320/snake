@@ -776,7 +776,7 @@ Data.read()
 # Prerendered objects
 GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameover)
 SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
-Author = Text("Michał Machnikowski 2021", settings.color_author, settings.font_size_author)
+Author = Text("Michał Machnikowski 2022", settings.color_author, settings.font_size_author)
 
 ButtonPlay = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, ButtonCmds.gameTrue)
 ButtonExit = Button(int((settings.window_width - settings.button_width) / 2), settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.menuFalse)
