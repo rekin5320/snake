@@ -97,6 +97,7 @@ class ButtonSpeed:
             settings.move_delay = settings.fps / settings.speed
             logger.info(f"Changed speed to {self.desired_value}")
             Data.write()
+            CurrentSpeed.update()
 
     def draw(self):
         if settings.speed == self.desired_value or (self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height):
@@ -465,6 +466,19 @@ class Bar:  # TopBar
         HighscoreOnBar.draw(self.width - settings.grid - HighscoreOnBar.text_width - 0.4 * settings.grid, int((self.height - HighscoreOnBar.text_height)/2))
 
 
+class CurrentSpeedClass:
+    def __init__(self):
+        self.update()
+        self.x = 1.4 * settings.grid
+        self.y = settings.grid * 25 + (settings.grid - self.text.text_height) // 2
+
+    def update(self):
+        self.text = Text(f"speed: {settings.speed}", settings.color_font, settings.font_size_currentspeed)
+
+    def draw(self):
+        self.text.draw(self.x, self.y)
+
+
 ########### Scenes managing ###########
 
 def menu_main():
@@ -596,6 +610,7 @@ def game_redraw():
     Snake.draw()
     Apple.draw()
     TopBar.draw()
+    CurrentSpeed.draw()
     pygame.display.update()
 
 
@@ -677,6 +692,7 @@ class settings:
     font_size_website = 20
     font_size_creditss = 25
     font_size_speed = 22
+    font_size_currentspeed = 17
 
     line_spacing = 6
     line_lenght = 40
@@ -789,6 +805,7 @@ SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_lis
 Snake = Player(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
 Apple = Target(settings.grid, settings.grid_border, settings.color_apple)
 TopBar = Bar(settings.label_x, settings.label_y, settings.label_width, settings.label_height)
+CurrentSpeed = CurrentSpeedClass()
 
 menu_main()
 
