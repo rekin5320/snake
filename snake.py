@@ -531,7 +531,7 @@ def game_main():
         if Snake.fpsCounter % settings.move_delay == 0:
             Snake.move()
 
-    logger.info(f"Game over, score: {Snake.score}")
+    logger.info(f"Game over, score: {Snake.score} (speed: {settings.speed})")
     pygame.mixer.music.pause()
     pygame.mixer.music.load(settings.path_music_GameOver)
     pygame.mixer.music.play()
