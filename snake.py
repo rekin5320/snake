@@ -266,6 +266,20 @@ class File:  # Data
             error_screen("Error while writing game data")
 
 
+def download_if_needed(path: Path, url, name):
+    if not path.exists() or path.stat().st_size == 0:
+        logger.warning(f"{name} did not exist, trying to download")
+        try:
+            download = requests.get(url, allow_redirects=True)
+            path.write_bytes(download.content)
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            raise err
+        else:
+            logger.warning(f"{name} successfully downloaded")
+
+
 def checkFiles():
     if not settings.path_data.exists() or settings.path_data.stat().st_size == 0:
         logger.warning("Data file did not exist, trying to create")
@@ -282,41 +296,9 @@ def checkFiles():
         settings.path_version.write_text(base64_encode(settings.version))
         logger.warning("Version file successfully created")
 
-    if not settings.path_font.exists() or settings.path_font.stat().st_size == 0:
-        logger.warning("Font did not exist, trying to download")
-        try:
-            download = requests.get(settings.url_font, allow_redirects=True)
-            settings.path_font.write_bytes(download.content)
-        except Exception as err:
-            logger.error(err)
-            logger.error(traceback.format_exc())
-            raise err
-        else:
-            logger.warning("Font successfully downloaded")
-
-    if not settings.path_music_Game.exists() or settings.path_music_Game.stat().st_size == 0:
-        logger.warning("Game music did not exist, trying to download")
-        try:
-            download = requests.get(settings.url_music_Game, allow_redirects=True)
-            settings.path_music_Game.write_bytes(download.content)
-        except Exception as err:
-            logger.error(err)
-            logger.error(traceback.format_exc())
-            raise err
-        else:
-            logger.warning("Game music successfully downloaded")
-
-    if not settings.path_music_GameOver.exists() or settings.path_music_GameOver.stat().st_size == 0:
-        logger.warning("GameOver music did not exist, trying to download")
-        try:
-            download = requests.get(settings.url_music_GameOver, allow_redirects=True)
-            settings.path_music_GameOver.write_bytes(download.content)
-        except Exception as err:
-            logger.error(err)
-            logger.error(traceback.format_exc())
-            raise err
-        else:
-            logger.warning("GameOver music successfully downloaded")
+    download_if_needed(settings.path_font, settings.url_font, "Font")
+    download_if_needed(settings.path_music_Game, settings.url_music_Game, "Game music")
+    download_if_needed(settings.path_music_GameOver, settings.url_music_GameOver, "GameOver music")
 
     logger.info("Checking files done")
 
