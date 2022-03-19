@@ -9,6 +9,7 @@
 * Show last score in menu
 * Buttons have rounded corners
 * Renamed the "music" directory to "assets"
+* Use Open Sans font
 
 ## Release 1.1 (2021-04-09)
 * Added an icon (it is Base64 encoded in the code, instead of downloading it)

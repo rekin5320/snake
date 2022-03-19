@@ -51,7 +51,10 @@ def base64_decode(text):
 
 class Text:
     def __init__(self, text, color, font_size):
-        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
+        if settings.path_font.exists() and settings.path_font.stat().st_size > 0:
+            self.font = pygame.font.Font(settings.path_font, font_size)
+        else:
+            self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
         self.text_width, self.text_height = self.font.size(text)
         self.text = self.font.render(text, True, color)
 
@@ -62,7 +65,6 @@ class Text:
 class LongText:
     def __init__(self, text, color, font_size, line_lenght=40, line_spacing=6):
         self.line_spacing = line_spacing
-        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
 
         # splitting text into lines
         words = text.split(" ")
@@ -279,6 +281,18 @@ def checkFiles():
         logger.warning("Version file did not exist, trying to create")
         settings.path_version.write_text(base64_encode(settings.version))
         logger.warning("Version file successfully created")
+
+    if not settings.path_font.exists() or settings.path_font.stat().st_size == 0:
+        logger.warning("Font did not exist, trying to download")
+        try:
+            download = requests.get(settings.url_font, allow_redirects=True)
+            settings.path_font.write_bytes(download.content)
+        except Exception as err:
+            logger.error(err)
+            logger.error(traceback.format_exc())
+            raise err
+        else:
+            logger.warning("Font successfully downloaded")
 
     if not settings.path_music_Game.exists() or settings.path_music_Game.stat().st_size == 0:
         logger.warning("Game music did not exist, trying to download")
@@ -680,7 +694,6 @@ class settings:
     color_snakeLogo = (255, 255, 255)
     color_author = (215, 215, 215)
 
-    font_name = "Verdana"
     font_size_loading = 35
     font_size_error = 30
     font_size_gameover = 70
@@ -712,6 +725,7 @@ class settings:
     path_data = path_gameDirectory / "data"  # ~/.snake/data
     path_version = path_gameDirectory / "version"  # ~/.snake/version
     path_assetsDirectory = path_gameDirectory / "assets"  # ~/.snake/assets/
+    path_font = path_assetsDirectory / "OpenSans-Bold.ttf"
     path_music_Game = path_assetsDirectory / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
     path_music_GameOver = path_assetsDirectory / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
     path_icon = path_assetsDirectory / "icon.png"
@@ -721,6 +735,7 @@ class settings:
     path_log3 = path_logDirectory / "3.log"
     path_log4 = path_logDirectory / "4.log"
 
+    url_font = "https://drive.google.com/uc?id=1sudSgrckaZPxSxtAxv8zXCSIEdcfTqRi&export=download"
     url_music_Game = "https://drive.google.com/uc?id=1ksgD-ftTtFs5GKyA2mNZW6XIJKvk53dw&export=download"
     url_music_GameOver = "https://drive.google.com/uc?id=1dF_wNbBxyNsKmRf83f4UgZcT8Xgsux46&export=download"
     url_website = "http://tiny.cc/snake_website"
