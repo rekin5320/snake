@@ -574,7 +574,7 @@ def creditss_main():
     global CreditsBackButton
 
     # I do not prerender it, as it is unlikely to be used often
-    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", settings.color_font, settings.font_size_creditss, line_lenght=52)
+    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", settings.color_font, settings.font_size_creditsscene, line_lenght=52)
     CreditsBackButton = Button((settings.window_width - settings.button_width) // 2, 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Back", settings.button_text_size, ButtonCmds.creditssFalse)
 
     while creditss:
@@ -686,20 +686,20 @@ class settings:
 
     font_size_loading = 35
     font_size_error = 30
-    font_size_gameover = 70
+    font_size_gameover = 77
     font_size_newhighscore = 33
-    font_size_snakeLogo = 60
-    font_size_highscoreinmenu = 27
-    font_size_lastscore = 30
+    font_size_snakeLogo = 62
+    font_size_highscoreinmenu = 25
+    font_size_lastscore = 27
     font_size_author = 21
-    font_size_website = 20
-    font_size_creditss = 25
+    font_size_website = 21
+    font_size_creditsscene = 25
     font_size_speed = 22
     font_size_currentspeed = 17
 
     button_width = grid * 10
     button_height = grid * 4
-    button_text_size = 34
+    button_text_size = 35
     button_text_color = (255, 255, 255)
 
     ButtonPlay_y = 275
