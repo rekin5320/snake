@@ -144,15 +144,18 @@ class Button:
         self.text = self.font.render(text, True, color_text)
         self.command = command
 
-    def is_focused(self):
+    def is_pointed(self):
         return self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height
 
+    def is_highlighted(self):
+        return self.is_pointed()
+
     def click(self):
-        if self.is_focused():
+        if self.is_pointed():
             self.command()
 
     def draw(self):
-        if self.is_focused():
+        if self.is_highlighted():
             self.background2.draw(self.x, self.y)
         else:
             self.background1.draw(self.x, self.y)
@@ -165,15 +168,15 @@ class ButtonSpeed(Button):
         self.desired_value = desired_value
 
     def click(self):
-        if self.is_focused():
+        if self.is_pointed():
             settings.speed = self.desired_value
             settings.move_delay = settings.fps / settings.speed
             logger.info(f"Changed speed to {self.desired_value}")
             Data.write()
             CurrentSpeedText.update()
 
-    def is_focused(self):
-        return super().is_focused() or settings.speed == self.desired_value
+    def is_highlighted(self):
+        return super().is_pointed() or settings.speed == self.desired_value
 
 
 class ButtonSpeedGroup:
