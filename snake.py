@@ -115,60 +115,65 @@ class LongText:
             i += self.line_height + self.line_spacing
 
 
+class RoundedRectangle:
+    def __init__(self, width, height, radius, color):
+        self.width = width
+        self.height = height
+        self.radius = radius
+        self.color = color
+
+    def draw(self, x, y):
+        pygame.draw.rect(window, self.color, (x + self.radius, y, self.width - 2 * self.radius, self.height))
+        pygame.draw.rect(window, self.color, (x, y + self.radius, self.width, self.height - 2 * self.radius))
+        pygame.draw.circle(window, self.color, (x + self.radius, y + self.radius), self.radius)
+        pygame.draw.circle(window, self.color, (x + self.width - self.radius, y + self.radius), self.radius)
+        pygame.draw.circle(window, self.color, (x + self.width - self.radius, y + self.height - self.radius), self.radius)
+        pygame.draw.circle(window, self.color, (x + self.radius, y + self.height - self.radius), self.radius)
+
+
 class Button:
-    def __init__(self, x, y, width, height, color1, color2, color_text, text, font_size, command):
+    def __init__(self, x, y, width, height, color1, color2, color_text, text, font_size, command=None, radius=9):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.button_color1 = color1
-        self.button_color2 = color2
-        self.color_text = color_text
+        self.background1 = RoundedRectangle(width, height, radius, color1)
+        self.background2 = RoundedRectangle(width, height, radius, color2)
         self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
         self.text_width, self.text_height = self.font.size(text)
         self.text = self.font.render(text, True, color_text)
         self.command = command
 
+    def is_focused(self):
+        return self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height
+
     def click(self):
-        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+        if self.is_focused():
             self.command()
 
     def draw(self):
-        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
-            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
+        if self.is_focused():
+            self.background2.draw(self.x, self.y)
         else:
-            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
-        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
+            self.background1.draw(self.x, self.y)
+        window.blit(self.text, (self.x + (self.width - self.text_width) // 2, self.y + (self.height - self.text_height) // 2))
 
 
-class ButtonSpeed:
+class ButtonSpeed(Button):
     def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_value):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.button_color1 = color1
-        self.button_color2 = color2
-        self.color_text = color_text
-        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
-        self.text_width, self.text_height = self.font.size(str(desired_value))
-        self.text = self.font.render(str(desired_value), True, color_text)
+        super().__init__(x, y, width, height, color1, color2, color_text, str(desired_value), font_size, radius=4)
         self.desired_value = desired_value
 
     def click(self):
-        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+        if self.is_focused():
             settings.speed = self.desired_value
             settings.move_delay = settings.fps / settings.speed
             logger.info(f"Changed speed to {self.desired_value}")
             Data.write()
             CurrentSpeedText.update()
 
-    def draw(self):
-        if settings.speed == self.desired_value or (self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height):
-            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
-        else:
-            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
-        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
+    def is_focused(self):
+        return super().is_focused() or settings.speed == self.desired_value
 
 
 class ButtonSpeedGroup:
@@ -672,7 +677,7 @@ class settings:
     color_snake_tail = (0, 255, 0)
     color_apple = (255, 0, 0)
     color_button = (254, 151, 12)
-    color_button_focused = (183, 111, 15)
+    color_button_focused = (195, 122, 20)
     color_font = (255, 255, 255)
     color_gameover = (255, 0, 0)
     color_newhighscore = (0, 0, 255)
@@ -791,8 +796,8 @@ Author = Text("Michał Machnikowski 2022", settings.color_author, settings.font_
 
 ButtonPlay = Button((settings.window_width - settings.button_width) // 2, settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, ButtonCmds.gameTrue)
 ButtonExit = Button((settings.window_width - settings.button_width) // 2, settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.menuFalse)
-WebsiteButton = Button(0.5 * settings.grid, settings.window_height - 2.5 * settings.grid, int(4.85 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "website", settings.font_size_website, ButtonCmds.website)
-CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * settings.grid, int(4.65 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "credits", settings.font_size_website, ButtonCmds.creditssTrue)
+WebsiteButton = Button(0.5 * settings.grid, settings.window_height - 2.5 * settings.grid, int(4.85 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "website", settings.font_size_website, ButtonCmds.website, radius=7)
+CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * settings.grid, int(4.65 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "credits", settings.font_size_website, ButtonCmds.creditssTrue, radius=7)
 
 SpeedText = Text("Speed:", settings.color_font, settings.font_size_speed)
 SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_list) - 1) * (settings.SpeedButton_width + settings.SpeedButton_spacing) + settings.SpeedButton_width + 0.5 * settings.grid), 0.5 * settings.grid, settings.SpeedButton_width, settings.SpeedButton_height, settings.color_button, settings.color_button_focused, settings.color_font, settings.font_size_speed, settings.speed_list, settings.SpeedButton_spacing)
