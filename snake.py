@@ -548,11 +548,7 @@ def game_main():
     global LastScore
     LastScore = Text(f"last score: {Snake.score}", settings.color_font, settings.font_size_lastscore)
 
-    GameOver.draw((settings.window_width - GameOver.text_width) // 2, (settings.window_height - GameOver.text_height) // 2)
-
-    while pygame.mixer.music.get_busy():
-        clock.tick(settings.fps)
-        pygame.display.update()
+    gameover_main()
 
     game = False
 
@@ -565,6 +561,35 @@ def game_redraw():
     TopBar.draw()
     CurrentSpeedText.draw()
     pygame.display.update()
+
+
+def gameover_main():
+    GameOver.draw((settings.window_width - GameOver.text_width) // 2, (settings.window_height - GameOver.text_height) // 2)
+    show_gameOver = True
+
+    while show_gameOver:
+        clock.tick(settings.fps)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                show_gameOver = False
+        keys = pygame.key.get_pressed()
+        if not pygame.mixer.music.get_busy() or keys[pygame.K_SPACE] or keys[pygame.K_ESCAPE]:
+            show_gameOver = False
+
+        pygame.display.update()
+
+    while True:  # wait for key to be released to avoid pressing it on menu
+        clock.tick(settings.fps)
+
+        pygame.event.get()
+        keys = pygame.key.get_pressed()
+        if not (keys[pygame.K_SPACE] or keys[pygame.K_ESCAPE]):
+            break
+
+        pygame.display.update()
+
+    pygame.mixer.music.pause()
 
 
 def creditss_main():

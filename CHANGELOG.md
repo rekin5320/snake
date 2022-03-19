@@ -11,6 +11,7 @@
 * Renamed the "music" directory to "assets"
 * Use Open Sans font
 * Press spacebar in menu to start game
+* Press spacebar or escape to skip game over
 
 ## Release 1.1 (2021-04-09)
 * Added an icon (it is Base64 encoded in the code, instead of downloading it)
