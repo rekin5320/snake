@@ -443,25 +443,25 @@ def menu_main():
     while menu:
         clock.tick(settings.fps)
 
-        keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pos()
-
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+            if event.type == pygame.QUIT:
                 menu = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 ButtonPlay.click()     # Game
                 ButtonExit.click()     # Exit
                 WebsiteButton.click()  # Website
                 CreditsButton.click()  # Credits
                 SpeedButtons.click()   # Speed buttons
 
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            menu = False
         if keys[pygame.K_SPACE]:
             game = True
 
         if game:
             game_main()
-
         if creditss:
             creditss_main()
 
@@ -502,11 +502,13 @@ def game_main():
             game_redraw()
         Snake.fpsCounter += 1
 
-        keys = pygame.key.get_pressed()
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+            if event.type == pygame.QUIT:
                 game_notOver = False
 
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            game_notOver = False
         if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not Snake.right_current:
             Snake.left = True
             Snake.right = False
@@ -605,15 +607,16 @@ def creditss_main():
     while creditss:
         clock.tick(settings.fps)
 
-        keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pos()
-
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+            if event.type == pygame.QUIT:
                 creditss = False
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 CreditsBackButton.click()  # Back to menu
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            creditss = False
 
         creditss_redraw()
 
@@ -663,13 +666,16 @@ def error_screen(text):
     while error:
         clock.tick(settings.fps)
 
-        keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+            if event.type == pygame.QUIT:
                 error = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 ButtonExit2.click()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            error = False
 
         window.fill(settings.color_error_backgorund)
         ErrorText.draw((settings.window_width - ErrorText.text_width) / 2, (settings.window_height - ErrorText.text_height) / 2 - 60)
