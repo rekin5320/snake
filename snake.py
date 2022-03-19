@@ -456,7 +456,7 @@ def menu_main():
                 CreditsButton.click()  # Credits
                 SpeedButtons.click()   # Speed buttons
 
-        if keys[pygame.K_q]:
+        if keys[pygame.K_SPACE]:
             game = True
 
         if game:
