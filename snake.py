@@ -284,7 +284,7 @@ def checkFiles():
         settings.path_musicDirectory.mkdir()
         logger.warning("Music directory successfully created")
 
-    if not settings.path_music_Game.exists():
+    if not settings.path_music_Game.exists() or settings.path_music_Game.stat().st_size == 0:
         logger.warning("Game music did not exist, trying to download")
         try:
             download = requests.get(settings.url_music_Game, allow_redirects=True)
@@ -296,7 +296,7 @@ def checkFiles():
         else:
             logger.warning("Game music successfully downloaded")
 
-    if not settings.path_music_GameOver.exists():
+    if not settings.path_music_GameOver.exists() or settings.path_music_GameOver.stat().st_size == 0:
         logger.warning("GameOver music did not exist, trying to download")
         try:
             download = requests.get(settings.url_music_GameOver, allow_redirects=True)
