@@ -37,6 +37,14 @@ class MyThread(threading.Thread):
             self.error = False
 
 
+class MyPath(type(Path())):
+    def size(self):
+        return self.stat().st_size
+
+    def is_good(self):
+        return self.exists() and self.size() > 0
+
+
 def base64_encode(text):
     encodedtext_bytes = base64.b64encode(text.encode("utf-8"))
     encodedtext = str(encodedtext_bytes, "utf-8")
@@ -51,7 +59,7 @@ def base64_decode(text):
 
 class Text:
     def __init__(self, text, color, font_size):
-        if settings.path_font.exists() and settings.path_font.stat().st_size > 0:
+        if settings.path_font.is_good():
             self.font = pygame.font.Font(settings.path_font, font_size)
         else:
             self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
@@ -266,8 +274,8 @@ class File:  # Data
             error_screen("Error while writing game data")
 
 
-def download_if_needed(path: Path, url, name):
-    if not path.exists() or path.stat().st_size == 0:
+def download_if_needed(path: MyPath, url, name):
+    if not path.is_good():
         logger.warning(f"{name} did not exist, trying to download")
         try:
             download = requests.get(url, allow_redirects=True)
@@ -281,7 +289,7 @@ def download_if_needed(path: Path, url, name):
 
 
 def checkFiles():
-    if not settings.path_data.exists() or settings.path_data.stat().st_size == 0:
+    if not settings.path_data.is_good():
         logger.warning("Data file did not exist, trying to create")
         with settings.path_data.open("w") as file:
             empty_dict = {
@@ -291,7 +299,7 @@ def checkFiles():
             file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         logger.warning("Data file successfully created")
 
-    if not settings.path_version.exists() or settings.path_version.stat().st_size == 0:
+    if not settings.path_version.is_good():
         logger.warning("Version file did not exist, trying to create")
         settings.path_version.write_text(base64_encode(settings.version))
         logger.warning("Version file successfully created")
@@ -701,9 +709,9 @@ class settings:
     SpeedButton_spacing = 15
 
     if os.name == "nt":
-        path_gameDirectory = Path.home() / "AppData" / "Roaming" / ".snake"  # ~\AppData\Roaming\.snake\
+        path_gameDirectory = MyPath.home() / "AppData" / "Roaming" / ".snake"  # ~\AppData\Roaming\.snake\
     else:
-        path_gameDirectory = Path.home() / ".snake"  # ~/.snake/
+        path_gameDirectory = MyPath.home() / ".snake"  # ~/.snake/
     path_data = path_gameDirectory / "data"  # ~/.snake/data
     path_version = path_gameDirectory / "version"  # ~/.snake/version
     path_assetsDirectory = path_gameDirectory / "assets"  # ~/.snake/assets/
