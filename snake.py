@@ -282,11 +282,6 @@ def checkFiles():
         settings.path_version.write_text(base64_encode(settings.version))
         logger.warning("Version file successfully created")
 
-    if not settings.path_musicDirectory.exists():
-        logger.warning("Music directory did not exist, trying to create")
-        settings.path_musicDirectory.mkdir()
-        logger.warning("Music directory successfully created")
-
     if not settings.path_music_Game.exists() or settings.path_music_Game.stat().st_size == 0:
         logger.warning("Game music did not exist, trying to download")
         try:
@@ -718,15 +713,15 @@ class settings:
         path_gameDirectory = Path.home() / ".snake"  # ~/.snake/
     path_data = path_gameDirectory / "data"  # ~/.snake/data
     path_version = path_gameDirectory / "version"  # ~/.snake/version
-    path_musicDirectory = path_gameDirectory / "music"  # ~/.snake/music/
-    path_music_Game = path_musicDirectory / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
-    path_music_GameOver = path_musicDirectory / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
+    path_assetsDirectory = path_gameDirectory / "assets"  # ~/.snake/assets/
+    path_music_Game = path_assetsDirectory / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
+    path_music_GameOver = path_assetsDirectory / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
+    path_icon = path_assetsDirectory / "icon.png"
     path_logDirectory = path_gameDirectory / "logs"  # ~/.snake/logs/
     path_log1 = path_logDirectory / "1.log"
     path_log2 = path_logDirectory / "2.log"
     path_log3 = path_logDirectory / "3.log"
     path_log4 = path_logDirectory / "4.log"
-    path_icon = path_gameDirectory / "icon.png"
 
     url_music_Game = "https://drive.google.com/uc?id=1ksgD-ftTtFs5GKyA2mNZW6XIJKvk53dw&export=download"
     url_music_GameOver = "https://drive.google.com/uc?id=1dF_wNbBxyNsKmRf83f4UgZcT8Xgsux46&export=download"
@@ -748,6 +743,8 @@ if not settings.path_gameDirectory.exists():
     settings.path_gameDirectory.mkdir()
 if not settings.path_logDirectory.exists():
     settings.path_logDirectory.mkdir()
+if not settings.path_assetsDirectory.exists():
+    settings.path_assetsDirectory.mkdir()
 
 if not settings.path_icon.exists():
     settings.path_icon.write_bytes(base64.b64decode(settings.icon_content))
