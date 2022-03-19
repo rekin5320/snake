@@ -139,9 +139,7 @@ class Button:
         self.height = height
         self.background1 = RoundedRectangle(width, height, radius, color1)
         self.background2 = RoundedRectangle(width, height, radius, color2)
-        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
-        self.text_width, self.text_height = self.font.size(text)
-        self.text = self.font.render(text, True, color_text)
+        self.text = Text(text, color_text, font_size)
         self.command = command
 
     def is_pointed(self):
@@ -159,7 +157,7 @@ class Button:
             self.background2.draw(self.x, self.y)
         else:
             self.background1.draw(self.x, self.y)
-        window.blit(self.text, (self.x + (self.width - self.text_width) // 2, self.y + (self.height - self.text_height) // 2))
+        self.text.draw(self.x + (self.width - self.text.text_width) // 2, self.y + (self.height - self.text.text_height) // 2)
 
 
 class ButtonSpeed(Button):
