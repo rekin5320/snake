@@ -293,7 +293,7 @@ def checkFiles():
         logger.warning("Data file did not exist, trying to create")
         with settings.path_data.open("w") as file:
             empty_dict = {
-                "highscore": None
+                "highscore": 0
             }
             file.write(base64_encode(json.dumps(empty_dict)))
             file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
