@@ -164,7 +164,7 @@ class Text:
 
 
 class LongText:
-    def __init__(self, text, color, font_size, line_lenght, line_spacing):
+    def __init__(self, text, color, font_size, line_lenght=40, line_spacing=6):
         self.line_spacing = line_spacing
         self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
 
@@ -336,7 +336,7 @@ def error_screen(text):
     global error
     global mouse
     error = True
-    ErrorText = LongText(text, settings.color_font, settings.font_size_error, settings.line_lenght, settings.line_spacing)
+    ErrorText = LongText(text, settings.color_font, settings.font_size_error)
     ButtonExit2 = Button((settings.window_width - settings.button_width) // 2, 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.exit1)
 
     while error:
@@ -619,7 +619,7 @@ def creditss_main():
     global CreditsBackButton
 
     # I do not prerender it, as it is unlikely to be used often
-    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", settings.color_font, settings.font_size_creditss, settings.line_lenght_creditss, settings.line_spacing)
+    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", settings.color_font, settings.font_size_creditss, line_lenght=52)
     CreditsBackButton = Button((settings.window_width - settings.button_width) // 2, 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Back", settings.button_text_size, ButtonCmds.creditssFalse)
 
     while creditss:
@@ -692,10 +692,6 @@ class settings:
     font_size_creditss = 25
     font_size_speed = 22
     font_size_currentspeed = 17
-
-    line_spacing = 6
-    line_lenght = 40
-    line_lenght_creditss = 52
 
     button_width = grid * 10
     button_height = grid * 4
