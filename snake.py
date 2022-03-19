@@ -49,110 +49,6 @@ def base64_decode(text):
     return decodedtext
 
 
-class Button:
-    def __init__(self, x, y, width, height, color1, color2, color_text, text, font_size, command):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.button_color1 = color1
-        self.button_color2 = color2
-        self.color_text = color_text
-        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
-        self.text_width, self.text_height = self.font.size(text)
-        self.text = self.font.render(text, True, color_text)
-        self.command = command
-
-    def click(self):
-        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
-            self.command()
-
-    def draw(self):
-        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
-            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
-        else:
-            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
-        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
-
-
-class ButtonSpeed:
-    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_value):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.button_color1 = color1
-        self.button_color2 = color2
-        self.color_text = color_text
-        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
-        self.text_width, self.text_height = self.font.size(str(desired_value))
-        self.text = self.font.render(str(desired_value), True, color_text)
-        self.desired_value = desired_value
-
-    def click(self):
-        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
-            settings.speed = self.desired_value
-            settings.move_delay = settings.fps / settings.speed
-            logger.info(f"Changed speed to {self.desired_value}")
-            Data.write()
-            CurrentSpeed.update()
-
-    def draw(self):
-        if settings.speed == self.desired_value or (self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height):
-            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
-        else:
-            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
-        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
-
-
-class ButtonSpeedGroup:
-    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_values_list, spacing):
-        self.width = (len(settings.speed_list) - 1) * (width + spacing) + width
-        self.height = height
-
-        self.ButtonsList = []
-        for index, value in enumerate(desired_values_list):
-            self.ButtonsList.append(ButtonSpeed(x + index * (spacing + width), y, width, height, color1, color2, color_text, font_size, value))
-
-    def click(self):
-        for button in self.ButtonsList:
-            button.click()
-
-    def draw(self):
-        for button in self.ButtonsList:
-            button.draw()
-
-
-class ButtonCmds:
-    @staticmethod
-    def gameTrue():
-        global game
-        game = True
-
-    @staticmethod
-    def menuFalse():
-        global menu
-        menu = False
-
-    @staticmethod
-    def exit1():
-        exit(1)
-
-    @staticmethod
-    def website():
-        webbrowser.open(settings.url_website, new=0, autoraise=True)
-
-    @staticmethod
-    def creditssTrue():
-        global creditss
-        creditss = True
-
-    @staticmethod
-    def creditssFalse():
-        global creditss
-        creditss = False
-
-
 class Text:
     def __init__(self, text, color, font_size):
         self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
@@ -217,6 +113,110 @@ class LongText:
         for line in self.rendredTextList:
             line.draw(x, y + i)
             i += self.line_height + self.line_spacing
+
+
+class Button:
+    def __init__(self, x, y, width, height, color1, color2, color_text, text, font_size, command):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.button_color1 = color1
+        self.button_color2 = color2
+        self.color_text = color_text
+        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
+        self.text_width, self.text_height = self.font.size(text)
+        self.text = self.font.render(text, True, color_text)
+        self.command = command
+
+    def click(self):
+        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+            self.command()
+
+    def draw(self):
+        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
+        else:
+            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
+        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
+
+
+class ButtonSpeed:
+    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_value):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.button_color1 = color1
+        self.button_color2 = color2
+        self.color_text = color_text
+        self.font = pygame.font.SysFont(settings.font_name, font_size, bold=True)
+        self.text_width, self.text_height = self.font.size(str(desired_value))
+        self.text = self.font.render(str(desired_value), True, color_text)
+        self.desired_value = desired_value
+
+    def click(self):
+        if self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height:
+            settings.speed = self.desired_value
+            settings.move_delay = settings.fps / settings.speed
+            logger.info(f"Changed speed to {self.desired_value}")
+            Data.write()
+            CurrentSpeedText.update()
+
+    def draw(self):
+        if settings.speed == self.desired_value or (self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height):
+            pygame.draw.rect(window, self.button_color2, (self.x, self.y, self.width, self.height))
+        else:
+            pygame.draw.rect(window, self.button_color1, (self.x, self.y, self.width, self.height))
+        window.blit(self.text, (self.x + (self.width - self.text_width) / 2, self.y + (self.height - self.text_height) / 2))
+
+
+class ButtonSpeedGroup:
+    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_values_list, spacing):
+        self.width = (len(settings.speed_list) - 1) * (width + spacing) + width
+        self.height = height
+
+        self.ButtonsList = []
+        for index, value in enumerate(desired_values_list):
+            self.ButtonsList.append(ButtonSpeed(x + index * (spacing + width), y, width, height, color1, color2, color_text, font_size, value))
+
+    def click(self):
+        for button in self.ButtonsList:
+            button.click()
+
+    def draw(self):
+        for button in self.ButtonsList:
+            button.draw()
+
+
+class ButtonCmds:
+    @staticmethod
+    def gameTrue():
+        global game
+        game = True
+
+    @staticmethod
+    def menuFalse():
+        global menu
+        menu = False
+
+    @staticmethod
+    def exit1():
+        exit(1)
+
+    @staticmethod
+    def website():
+        webbrowser.open(settings.url_website, new=0, autoraise=True)
+
+    @staticmethod
+    def creditssTrue():
+        global creditss
+        creditss = True
+
+    @staticmethod
+    def creditssFalse():
+        global creditss
+        creditss = False
 
 
 class File:  # Data
@@ -304,56 +304,6 @@ def checkFiles():
             logger.warning("GameOver music successfully downloaded")
 
     logger.info("Checking files done")
-
-
-def loading_screen(function, loading_text, error_text):
-    thread = MyThread(target=function, daemon=True)
-    thread.start()
-    time = 0
-    LoadingTexts = (
-        Text(loading_text, settings.color_font, settings.font_size_loading),
-        Text(f"{loading_text}.", settings.color_font, settings.font_size_loading),
-        Text(f"{loading_text}..", settings.color_font, settings.font_size_loading),
-        Text(f"{loading_text}...", settings.color_font, settings.font_size_loading)
-    )
-
-    while thread.is_alive():
-        clock.tick(settings.fps)
-        window.fill(settings.color_window_background)
-        Loading = LoadingTexts[time // settings.fps % 4]
-        Loading.draw((settings.window_width - Loading.text_width) / 2, (settings.window_height - Loading.text_height) / 2)
-        pygame.display.update()
-        time += 1
-
-    if thread.error:
-        logger.error(thread.error)
-        logger.error(thread.traceback)
-        error_screen(error_text)
-
-
-def error_screen(text):
-    logger.critical(f"Error screen: {text}")
-    global error
-    global mouse
-    error = True
-    ErrorText = LongText(text, settings.color_font, settings.font_size_error)
-    ButtonExit2 = Button((settings.window_width - settings.button_width) // 2, 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.exit1)
-
-    while error:
-        clock.tick(settings.fps)
-
-        keys = pygame.key.get_pressed()
-        mouse = pygame.mouse.get_pos()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
-                error = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                ButtonExit2.click()
-
-        window.fill(settings.color_error_backgorund)
-        ErrorText.draw((settings.window_width - ErrorText.text_width) / 2, (settings.window_height - ErrorText.text_height) / 2 - 60)
-        ButtonExit2.draw()
-        pygame.display.update()
 
 
 class SnakeClass:
@@ -456,7 +406,7 @@ class TopBarClass:
         HighscoreOnBar.draw(self.width - settings.grid - HighscoreOnBar.text_width - 0.4 * settings.grid, (self.height - HighscoreOnBar.text_height) // 2)
 
 
-class CurrentSpeedClass:
+class CurrentSpeedTextClass:
     def __init__(self):
         self.update()
         self.x = 1.4 * settings.grid
@@ -608,7 +558,7 @@ def game_redraw():
     Snake.draw()
     Apple.draw()
     TopBar.draw()
-    CurrentSpeed.draw()
+    CurrentSpeedText.draw()
     pygame.display.update()
 
 
@@ -645,6 +595,56 @@ def creditss_redraw():
     CreditsText.draw((settings.window_width - CreditsText.text_width) // 2, 90)
     CreditsBackButton.draw()
     pygame.display.update()
+
+
+def loading_screen(function, loading_text, error_text):
+    thread = MyThread(target=function, daemon=True)
+    thread.start()
+    time = 0
+    LoadingTexts = (
+        Text(loading_text, settings.color_font, settings.font_size_loading),
+        Text(f"{loading_text}.", settings.color_font, settings.font_size_loading),
+        Text(f"{loading_text}..", settings.color_font, settings.font_size_loading),
+        Text(f"{loading_text}...", settings.color_font, settings.font_size_loading)
+    )
+
+    while thread.is_alive():
+        clock.tick(settings.fps)
+        window.fill(settings.color_window_background)
+        Loading = LoadingTexts[time // settings.fps % 4]
+        Loading.draw((settings.window_width - Loading.text_width) / 2, (settings.window_height - Loading.text_height) / 2)
+        pygame.display.update()
+        time += 1
+
+    if thread.error:
+        logger.error(thread.error)
+        logger.error(thread.traceback)
+        error_screen(error_text)
+
+
+def error_screen(text):
+    logger.critical(f"Error screen: {text}")
+    global error
+    global mouse
+    error = True
+    ErrorText = LongText(text, settings.color_font, settings.font_size_error)
+    ButtonExit2 = Button((settings.window_width - settings.button_width) // 2, 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.exit1)
+
+    while error:
+        clock.tick(settings.fps)
+
+        keys = pygame.key.get_pressed()
+        mouse = pygame.mouse.get_pos()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+                error = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                ButtonExit2.click()
+
+        window.fill(settings.color_error_backgorund)
+        ErrorText.draw((settings.window_width - ErrorText.text_width) / 2, (settings.window_height - ErrorText.text_height) / 2 - 60)
+        ButtonExit2.draw()
+        pygame.display.update()
 
 
 ############## Settings ##############
@@ -800,7 +800,7 @@ SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_lis
 Snake = SnakeClass(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
 Apple = AppleClass(settings.grid, settings.grid_border, settings.color_apple)
 TopBar = TopBarClass(settings.label_x, settings.label_y, settings.label_width, settings.label_height)
-CurrentSpeed = CurrentSpeedClass()
+CurrentSpeedText = CurrentSpeedTextClass()
 
 menu_main()
 
