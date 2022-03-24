@@ -253,6 +253,8 @@ class File:  # Data
 
             self.datadict = json.loads(data)
             self.highscore = self.datadict.get("highscore", 0)
+            highscores_speed = self.datadict.get("highscores_speed", {})
+            self.highscores_speed = {i: highscores_speed.get(i, 0) for i in map(str, settings.speed_list)}
 
             if "speed" in self.datadict:
                 settings.speed = self.datadict["speed"]
@@ -267,8 +269,9 @@ class File:  # Data
 
     def write(self):
         try:
-            self.datadict["highscore"] = self.highscore
             self.datadict["speed"] = settings.speed
+            self.datadict["highscore"] = self.highscore
+            self.datadict["highscores_speed"] = self.highscores_speed
             with self.path_data.open("w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
@@ -293,20 +296,17 @@ def download_if_needed(path: MyPath, url, name):
 
 
 def checkFiles():
-    if not settings.path_data.is_good():
-        logger.warning("Data file did not exist, trying to create")
-        with settings.path_data.open("w") as file:
-            empty_dict = {
-                "highscore": 0
-            }
-            file.write(base64_encode(json.dumps(empty_dict)))
-            file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
-        logger.warning("Data file successfully created")
-
     if not settings.path_version.is_good():
         logger.warning("Version file did not exist, trying to create")
         settings.path_version.write_text(base64_encode(settings.version))
         logger.warning("Version file successfully created")
+
+    if not settings.path_data.is_good():
+        logger.warning("Data file did not exist, trying to create")
+        with settings.path_data.open("w") as file:
+            file.write(base64_encode(json.dumps({})))
+            file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
+        logger.warning("Data file successfully created")
 
     download_if_needed(settings.path_font, settings.url_font, "Font")
     download_if_needed(settings.path_music_Game, settings.url_music_Game, "Game music")
@@ -428,6 +428,26 @@ class CurrentSpeedTextClass:
         self.text.draw(self.x, self.y)
 
 
+class HighscoresInMenuClass:
+    def __init__(self):
+        self.x1 = 0.4 * settings.grid
+        self.x2 = settings.grid
+        self.y1 = 0.35 * settings.grid
+        self.color = settings.color_font
+        self.font_size1 = 24
+        self.font_size2 = 22
+        self.update()
+
+    def update(self):
+        self.text1 = Text("Higscores:", self.color, self.font_size1)
+        self.text2 = LongText(f"• overall: {Data.highscore} \n " + " \n ".join([f"• {k}: {v}" for k, v in Data.highscores_speed.items()]), self.color, self.font_size2, line_spacing=6)
+        self.y2 = self.text1.text_height + 10
+
+    def draw(self):
+        self.text1.draw(self.x1, self.y1)
+        self.text2.draw(self.x2, self.y2)
+
+
 ########### Scenes managing ###########
 
 def menu_main():
@@ -435,14 +455,12 @@ def menu_main():
     global menu
     global game
     global creditss
-    global HighscoreInMenu
     global LastScore
 
     menu = True
     game = False
     creditss = False
 
-    HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
     LastScore = None
     while menu:
         clock.tick(settings.fps)
@@ -476,7 +494,7 @@ def menu_redraw():
     global LastScore
     window.fill(settings.color_window_background)
     SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) // 2, 4.5 * settings.grid)
-    HighscoreInMenu.draw(0.4 * settings.grid, 0.35 * settings.grid)
+    HighscoreInMenu.draw()
     if LastScore:
         LastScore.draw((settings.window_width - LastScore.text_width) // 2, 205)
     ButtonPlay.draw()
@@ -542,14 +560,23 @@ def game_main():
     pygame.mixer.music.load(settings.path_music_GameOver)
     pygame.mixer.music.play()
 
-    if Snake.score > Data.highscore:  # new record
-        logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score}")
+    # new record
+    if Snake.score > Data.highscores_speed[speed_str := str(settings.speed)]:
+        logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
+        Data.highscores_speed[speed_str] = Snake.score
+        if Snake.score > Data.highscore:
+            Data.highscore = Snake.score
+        Data.write()
+        NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {settings.speed})", settings.color_newhighscore, settings.font_size_newhighscore)
+        NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
+        HighscoreInMenu.update()
+    elif Snake.score > Data.highscore:
+        logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
         Data.highscore = Snake.score
         Data.write()
         NewHighscoreText = Text(f"new highscore: {Snake.score}", settings.color_newhighscore, settings.font_size_newhighscore)
         NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
-        global HighscoreInMenu
-        HighscoreInMenu = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.font_size_highscoreinmenu)
+        HighscoreInMenu.update()
 
     global LastScore
     LastScore = Text(f"last score: {Snake.score}", settings.color_font, settings.font_size_lastscore)
@@ -724,7 +751,6 @@ class settings:
     font_size_gameover = 77
     font_size_newhighscore = 33
     font_size_snakeLogo = 62
-    font_size_highscoreinmenu = 25
     font_size_lastscore = 27
     font_size_author = 21
     font_size_website = 21
@@ -839,6 +865,7 @@ CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * se
 
 SpeedText = Text("Speed:", settings.color_font, settings.font_size_speed)
 SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_list) - 1) * (settings.SpeedButton_width + settings.SpeedButton_spacing) + settings.SpeedButton_width + 0.5 * settings.grid), 0.5 * settings.grid, settings.SpeedButton_width, settings.SpeedButton_height, settings.color_button, settings.color_button_focused, settings.color_font, settings.font_size_speed, settings.speed_list, settings.SpeedButton_spacing)
+HighscoreInMenu = HighscoresInMenuClass()
 
 Snake = SnakeClass(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
 Apple = AppleClass(settings.grid, settings.grid_border, settings.color_apple)
