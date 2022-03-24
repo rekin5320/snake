@@ -1,9 +1,9 @@
 # Changelog
 
 ## Unreleased
+* Separate highscores for different speeds
 
 ## Release 1.2 (2022-03-19)
-* Slightly corrected Google Drive links
 * Use `pathlib` to work with paths
 * Show current speed during game
 * Updated preset speeds
