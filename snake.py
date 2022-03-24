@@ -57,6 +57,10 @@ def base64_decode(text):
     return decodedtext
 
 
+def format_time():
+    return f"{Snake.fpsCounter // settings.fps // 60:02}:{Snake.fpsCounter // settings.fps % 60:02}"
+
+
 class Text:
     def __init__(self, text, color, font_size):
         if settings.path_font.is_good():
@@ -401,7 +405,7 @@ class TopBarClass:
         self.height = height
 
     def draw(self):
-        Time = Text(f"time: {Snake.fpsCounter // settings.fps // 60:02}:{Snake.fpsCounter // settings.fps % 60:02}", settings.color_font, settings.label_font_size)
+        Time = Text(f"time: {format_time()}", settings.color_font, settings.label_font_size)
         Time.draw(1.4 * settings.grid, (self.height - Time.text_height) // 2)
 
         Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, settings.label_font_size)
@@ -533,7 +537,7 @@ def game_main():
         if Snake.fpsCounter % settings.move_delay == 0:
             Snake.move()
 
-    logger.info(f"Game over, score: {Snake.score} (speed: {settings.speed})")
+    logger.info(f"Game over, score: {Snake.score} (speed: {settings.speed}, time: {format_time()})")
     pygame.mixer.music.pause()
     pygame.mixer.music.load(settings.path_music_GameOver)
     pygame.mixer.music.play()
@@ -808,7 +812,7 @@ stdout_handler = logging.StreamHandler(sys.stdout)
 logger.addHandler(stdout_handler)
 
 #### Main game code ####
-logger.info("Starting")
+logger.info(f"Starting Snake v{settings.version}")
 logger.info(f"System: {platform.system()}, version: {platform.release()}")
 pygame.display.init()
 pygame.mixer.init()
