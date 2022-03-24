@@ -269,12 +269,15 @@ class File:  # Data
 
     def write(self):
         try:
+            logger.debug("Writing data")
             self.datadict["speed"] = settings.speed
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
             with self.path_data.open("w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
+            settings.path_version.write_text(base64_encode(settings.version))
+
         except Exception as err:
             logger.error(err)
             logger.error(traceback.format_exc())
