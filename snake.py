@@ -254,7 +254,7 @@ class File:  # Data
             self.datadict = json.loads(data)
             self.highscore = self.datadict.get("highscore", 0)
             highscores_speed = self.datadict.get("highscores_speed", {})
-            self.highscores_speed = {i: highscores_speed.get(i, 0) for i in map(str, settings.speed_list)}
+            self.highscores_speed = {i: highscores_speed.get(i, 0) for i in map(str, sorted(settings.speed_list))}
 
             if "speed" in self.datadict:
                 settings.speed = self.datadict["speed"]
