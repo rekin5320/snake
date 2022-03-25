@@ -804,7 +804,7 @@ class settings:
 
     fps = 60
     speed = 5  # default speed (aka movesPerSecond) (fps divisor)
-    speed_list = [3, 5, 10, 15, 30, 60]
+    speed_list = [5, 10, 15, 30, 60]
     move_delay = fps / speed
 
 
