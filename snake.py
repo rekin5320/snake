@@ -255,6 +255,8 @@ class File:  # Data
             self.highscore = self.datadict.get("highscore", 0)
             highscores_speed = self.datadict.get("highscores_speed", {})
             self.highscores_speed = {i: highscores_speed.get(i, 0) for i in map(str, sorted(settings.speed_list))}
+            self.total_games = self.datadict.get("total_games", 0)
+            self.total_time = self.datadict.get("total_time", 0)
 
             if "speed" in self.datadict:
                 settings.speed = self.datadict["speed"]
@@ -273,6 +275,8 @@ class File:  # Data
             self.datadict["speed"] = settings.speed
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
+            self.datadict["total_games"] = self.total_games
+            self.datadict["total_time"] = self.total_time
             with self.path_data.open("w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
@@ -563,23 +567,24 @@ def game_main():
     pygame.mixer.music.load(settings.path_music_GameOver)
     pygame.mixer.music.play()
 
+    Data.total_games += 1
+    Data.total_time += Snake.fpsCounter // settings.fps
     # new record
     if Snake.score > Data.highscores_speed[speed_str := str(settings.speed)]:
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
         Data.highscores_speed[speed_str] = Snake.score
         if Snake.score > Data.highscore:
             Data.highscore = Snake.score
-        Data.write()
         NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {settings.speed})", settings.color_newhighscore, settings.font_size_newhighscore)
         NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
         HighscoreInMenu.update()
     elif Snake.score > Data.highscore:
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
         Data.highscore = Snake.score
-        Data.write()
         NewHighscoreText = Text(f"new highscore: {Snake.score}", settings.color_newhighscore, settings.font_size_newhighscore)
         NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
         HighscoreInMenu.update()
+    Data.write()
 
     global LastScore
     LastScore = Text(f"last score: {Snake.score}", settings.color_font, settings.font_size_lastscore)
