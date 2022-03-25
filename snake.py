@@ -447,7 +447,7 @@ class HighscoresInMenuClass:
         self.update()
 
     def update(self):
-        self.text1 = Text("Higscores:", self.color, self.font_size1)
+        self.text1 = Text("Highscores:", self.color, self.font_size1)
         self.text2 = LongText(f"• overall: {Data.highscore} \n " + " \n ".join([f"• {k}: {v}" for k, v in Data.highscores_speed.items()]), self.color, self.font_size2, line_spacing=6)
         self.y2 = self.text1.text_height + 10
 
