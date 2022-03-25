@@ -23,7 +23,7 @@ def decimals(n):
     Inserts spaces between every three digits.
     See https://stackoverflow.com/a/17484665
     """
-    return format(n, ',').replace(',', ' ')
+    return format(n, ",").replace(",", " ")
 
 
 class MyThread(threading.Thread):
@@ -68,8 +68,8 @@ class Text:
             self.font = pygame.font.Font(settings.path_font, font_size)
         else:
             self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
-        self.text_width, self.text_height = self.font.size(text)
         self.text = self.font.render(text, True, color)
+        self.text_width, self.text_height = self.text.get_size()
 
     def draw(self, x, y):
         window.blit(self.text, (x, y))
@@ -839,7 +839,7 @@ for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s')
+formatter = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
 file_handler = logging.FileHandler(filename=settings.path_log1, mode="a")
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
@@ -883,6 +883,6 @@ CurrentSpeedText = CurrentSpeedTextClass()
 
 menu_main()
 
-pygame.quit()
-
 logger.info("Quitting")
+
+pygame.quit()

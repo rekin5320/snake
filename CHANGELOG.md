@@ -18,7 +18,7 @@
 ## Release 1.1 (2021-04-09)
 * Added an icon (it is Base64 encoded in the code, instead of downloading it)
 * Changed the way the button commands are executed
-* Got rid of the `two_digits()` function (use f-strings formatting ":02")
+* Got rid of the `two_digits()` function (use f-strings formatting `:02`)
 * Added support for forcing a new line by `\n` in LongText
 * Credits scene
 * Buttons in the menu changing snake speed
