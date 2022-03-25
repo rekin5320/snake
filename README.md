@@ -1,1 +1,1 @@
-# Just my version of snake game
+# Just my version of snake game 🐍
