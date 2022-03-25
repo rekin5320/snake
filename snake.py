@@ -419,7 +419,7 @@ class TopBarClass:
         Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, settings.label_font_size)
         Score.draw((self.width - Score.text_width) // 2, (self.height - Score.text_height) // 2)
 
-        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscore)}", settings.color_font, settings.label_font_size)
+        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscores_speed[str(settings.speed)])}", settings.color_font, settings.label_font_size)
         HighscoreOnBar.draw(self.width - settings.grid - HighscoreOnBar.text_width - 0.4 * settings.grid, (self.height - HighscoreOnBar.text_height) // 2)
 
 
