@@ -58,7 +58,8 @@ def base64_decode(text):
 
 
 def format_time():
-    return f"{Snake.fpsCounter // settings.fps // 60:02}:{Snake.fpsCounter // settings.fps % 60:02}"
+    seconds = Snake.fpsCounter // settings.fps
+    return f"{seconds // 60:02}:{seconds % 60:02}"
 
 
 class Text:
