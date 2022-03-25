@@ -57,8 +57,7 @@ def base64_decode(text):
     return decodedtext
 
 
-def format_time():
-    seconds = Snake.fpsCounter // settings.fps
+def format_time(seconds):
     return f"{seconds // 60:02}:{seconds % 60:02}"
 
 
@@ -413,7 +412,7 @@ class TopBarClass:
         self.height = height
 
     def draw(self):
-        Time = Text(f"time: {format_time()}", settings.color_font, settings.label_font_size)
+        Time = Text(f"time: {format_time(Snake.fpsCounter // settings.fps)}", settings.color_font, settings.label_font_size)
         Time.draw(1.4 * settings.grid, (self.height - Time.text_height) // 2)
 
         Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, settings.label_font_size)
@@ -442,9 +441,10 @@ class HighscoresInMenuClass:
         self.x2 = settings.grid
         self.y1 = 0.35 * settings.grid
         self.color = settings.color_font
-        self.font_size1 = 24
-        self.font_size2 = 22
+        self.font_size1 = 23
+        self.font_size2 = 21
         self.update()
+        self.height = self.y2 + self.text2.text_height
 
     def update(self):
         self.text1 = Text("Highscores:", self.color, self.font_size1)
@@ -454,6 +454,24 @@ class HighscoresInMenuClass:
     def draw(self):
         self.text1.draw(self.x1, self.y1)
         self.text2.draw(self.x2, self.y2)
+
+
+class TotalStatsInMenuClass:
+    def __init__(self):
+        self.x = 0.4 * settings.grid
+        self.y1 = HighscoresInMenu.height + 7
+        self.color = settings.color_font
+        self.font_size = 20
+        self.update()
+        self.y2 = self.y1 + self.text_games.text_height + 5
+
+    def update(self):
+        self.text_games = Text(f"total games: {Data.total_games}", self.color, self.font_size)
+        self.text_time = Text(f"total time: {format_time(Data.total_time)}", self.color, self.font_size)
+
+    def draw(self):
+        self.text_games.draw(self.x, self.y1)
+        self.text_time.draw(self.x, self.y2)
 
 
 ########### Scenes managing ###########
@@ -503,6 +521,7 @@ def menu_redraw():
     window.fill(settings.color_window_background)
     SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) // 2, 4.5 * settings.grid)
     HighscoresInMenu.draw()
+    TotalStatsInMenu.draw()
     if LastScore:
         LastScore.draw((settings.window_width - LastScore.text_width) // 2, 205)
     ButtonPlay.draw()
@@ -563,13 +582,14 @@ def game_main():
         if Snake.fpsCounter % settings.move_delay == 0:
             Snake.move()
 
-    logger.info(f"Game over, score: {Snake.score} (speed: {settings.speed}, time: {format_time()})")
+    logger.info(f"Game over, score: {Snake.score} (speed: {settings.speed}, time: {format_time(Snake.fpsCounter // settings.fps)})")
     pygame.mixer.music.pause()
     pygame.mixer.music.load(settings.path_music_GameOver)
     pygame.mixer.music.play()
 
     Data.total_games += 1
     Data.total_time += Snake.fpsCounter // settings.fps
+    TotalStatsInMenu.update()
     # new record
     if Snake.score > Data.highscores_speed[speed_str := str(settings.speed)]:
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
@@ -875,6 +895,7 @@ CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * se
 SpeedText = Text("Speed:", settings.color_font, settings.font_size_speed)
 SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_list) - 1) * (settings.SpeedButton_width + settings.SpeedButton_spacing) + settings.SpeedButton_width + 0.5 * settings.grid), 0.5 * settings.grid, settings.SpeedButton_width, settings.SpeedButton_height, settings.color_button, settings.color_button_focused, settings.color_font, settings.font_size_speed, settings.speed_list, settings.SpeedButton_spacing)
 HighscoresInMenu = HighscoresInMenuClass()
+TotalStatsInMenu = TotalStatsInMenuClass()
 
 Snake = SnakeClass(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
 Apple = AppleClass(settings.grid, settings.grid_border, settings.color_apple)
