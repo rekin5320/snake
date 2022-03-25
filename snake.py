@@ -864,6 +864,7 @@ file_handler = logging.FileHandler(filename=settings.path_log1, mode="a")
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.INFO)
 logger.addHandler(stdout_handler)
 
 #### Main game code ####
