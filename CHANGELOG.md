@@ -2,6 +2,9 @@
 
 ## Unreleased
 * Separate highscores for different speeds
+* Count and show number of games played and time spent
+* Host assets on Discord, because sometimes files downloaded from GDrive were empty
+* Added GNU GPLv3 license
 
 ## Release 1.2 (2022-03-19)
 * Use `pathlib` to work with paths
