@@ -502,7 +502,7 @@ def menu_redraw():
     global LastScore
     window.fill(settings.color_window_background)
     SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) // 2, 4.5 * settings.grid)
-    HighscoreInMenu.draw()
+    HighscoresInMenu.draw()
     if LastScore:
         LastScore.draw((settings.window_width - LastScore.text_width) // 2, 205)
     ButtonPlay.draw()
@@ -578,13 +578,13 @@ def game_main():
             Data.highscore = Snake.score
         NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {settings.speed})", settings.color_newhighscore, settings.font_size_newhighscore)
         NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
-        HighscoreInMenu.update()
+        HighscoresInMenu.update()
     elif Snake.score > Data.highscore:
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
         Data.highscore = Snake.score
         NewHighscoreText = Text(f"new highscore: {Snake.score}", settings.color_newhighscore, settings.font_size_newhighscore)
         NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
-        HighscoreInMenu.update()
+        HighscoresInMenu.update()
     Data.write()
 
     global LastScore
@@ -874,7 +874,7 @@ CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * se
 
 SpeedText = Text("Speed:", settings.color_font, settings.font_size_speed)
 SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_list) - 1) * (settings.SpeedButton_width + settings.SpeedButton_spacing) + settings.SpeedButton_width + 0.5 * settings.grid), 0.5 * settings.grid, settings.SpeedButton_width, settings.SpeedButton_height, settings.color_button, settings.color_button_focused, settings.color_font, settings.font_size_speed, settings.speed_list, settings.SpeedButton_spacing)
-HighscoreInMenu = HighscoresInMenuClass()
+HighscoresInMenu = HighscoresInMenuClass()
 
 Snake = SnakeClass(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
 Apple = AppleClass(settings.grid, settings.grid_border, settings.color_apple)
