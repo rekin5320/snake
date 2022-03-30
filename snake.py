@@ -57,7 +57,13 @@ def base64_decode(text):
     return decodedtext
 
 
+def round_to_3_places(num):
+    return int(num * 1000 + 0.5) / 1000
+
+
 def format_time(seconds):
+    if not isinstance(seconds, int):
+        seconds = int(seconds + 0.5)
     return f"{seconds // 60:02}:{seconds % 60:02}"
 
 
@@ -276,7 +282,7 @@ class File:  # Data
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
             self.datadict["total_games"] = self.total_games
-            self.datadict["total_time"] = self.total_time
+            self.datadict["total_time"] = round_to_3_places(self.total_time)
             with self.path_data.open("w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
@@ -599,7 +605,7 @@ def game_main():
     pygame.mixer.music.play()
 
     Data.total_games += 1
-    Data.total_time += Snake.fpsCounter // settings.fps
+    Data.total_time += Snake.fpsCounter / settings.fps
     TotalStatsInMenu.update()
     # new record
     if Snake.score > Data.highscores_speed[(speed_str := str(settings.speed))]:
