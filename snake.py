@@ -345,6 +345,7 @@ class SnakeClass:
         self.xyList = [(self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)]
         self.fpsCounter = 0
         self.score = 1
+        self.has_started = False
 
     def move(self):
         global game_notOver
@@ -549,7 +550,8 @@ def game_main():
 
         if Snake.fpsCounter % settings.move_delay == 0:
             game_redraw()
-        Snake.fpsCounter += 1
+        if Snake.has_started:
+            Snake.fpsCounter += 1
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -558,26 +560,35 @@ def game_main():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             game_notOver = False
+
         if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not Snake.right_current:
             Snake.left = True
             Snake.right = False
             Snake.up = False
             Snake.down = False
-        if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not Snake.left_current:
+            if not Snake.has_started:
+                Snake.has_started = True
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not Snake.left_current:
             Snake.left = False
             Snake.right = True
             Snake.up = False
             Snake.down = False
-        if (keys[pygame.K_UP] or keys[pygame.K_w]) and not Snake.down_current:
+            if not Snake.has_started:
+                Snake.has_started = True
+        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and not Snake.down_current:
             Snake.left = False
             Snake.right = False
             Snake.up = True
             Snake.down = False
-        if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and not Snake.up_current:
+            if not Snake.has_started:
+                Snake.has_started = True
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and not Snake.up_current:
             Snake.left = False
             Snake.right = False
             Snake.up = False
             Snake.down = True
+            if not Snake.has_started:
+                Snake.has_started = True
 
         if Snake.fpsCounter % settings.move_delay == 0:
             Snake.move()
