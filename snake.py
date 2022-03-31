@@ -329,13 +329,13 @@ def checkFiles():
 
 
 class SnakeClass:
-    def __init__(self, grid, border, color_head, colors_tail):
-        self.grid = grid
-        self.border = border
-        self.velocity = grid
-        self.color_head = color_head
-        self.colors_tail = colors_tail
-        self.colors_tail_len = len(colors_tail)
+    def __init__(self):
+        self.grid = settings.grid
+        self.border = settings.grid_border
+        self.velocity = settings.grid
+        self.color_head = (255, 255, 255)
+        self.colors_tail = [(0, 255, 0), (14, 205, 14)]
+        self.colors_tail_len = len(self.colors_tail)
         self.reinit()
 
     def reinit(self):
@@ -371,7 +371,7 @@ class SnakeClass:
             self.y += self.velocity
         self.head_location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
 
-        if self.x == settings.game_x - self.grid or self.x == settings.game_width + self.grid or self.y == settings.game_y - self.grid or self.y == settings.game_height + settings.label_height:
+        if self.x == settings.game_x - self.grid or self.x == settings.game_width + self.grid or self.y == settings.game_y - self.grid or self.y == settings.game_height + settings.topbar_height:
             game_notOver = False
 
         for pair in self.xyList[:-1]:  # collision with itself
@@ -394,10 +394,10 @@ class SnakeClass:
 
 
 class AppleClass:
-    def __init__(self, grid, border, color_apple):
-        self.grid = grid
-        self.border = border
-        self.color = color_apple
+    def __init__(self):
+        self.grid = settings.grid
+        self.border = settings.grid_border
+        self.color = (255, 0, 0)
         self.move()
 
     def move(self):
@@ -414,20 +414,21 @@ class AppleClass:
 
 
 class TopBarClass:
-    def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.width = settings.topbar_width
+        self.height = settings.topbar_height
+        self.font_size = int(1.04 * settings.grid)
 
     def draw(self):
-        Time = Text(f"time: {format_time(Snake.fpsCounter // settings.fps)}", settings.color_font, settings.label_font_size)
+        Time = Text(f"time: {format_time(Snake.fpsCounter // settings.fps)}", settings.color_font, self.font_size)
         Time.draw(1.4 * settings.grid, (self.height - Time.text_height) // 2)
 
-        Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, settings.label_font_size)
+        Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, self.font_size)
         Score.draw((self.width - Score.text_width) // 2, (self.height - Score.text_height) // 2)
 
-        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscores_speed[str(settings.speed)])}", settings.color_font, settings.label_font_size)
+        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscores_speed[str(settings.speed)])}", settings.color_font, self.font_size)
         HighscoreOnBar.draw(self.width - settings.grid - HighscoreOnBar.text_width - 0.4 * settings.grid, (self.height - HighscoreOnBar.text_height) // 2)
 
 
@@ -770,22 +771,16 @@ class settings:
     grid_border = 2
     window_width = grid * 33
     window_height = grid * 26
-    label_x = 0
-    label_y = 0
-    label_width = window_width
-    label_height = 2 * grid
-    label_font_size = int(grid * 1.04)
+    topbar_width = window_width
+    topbar_height = 2 * grid
     game_x = grid
-    game_y = label_height
+    game_y = topbar_height
     game_width = window_width - 2 * grid  # odd multiples of grid
-    game_height = window_height - label_height - grid  # odd multiples of grid
+    game_height = window_height - topbar_height - grid  # odd multiples of grid
 
     color_window_background = (1, 170, 64)
     color_error_backgorund = (208, 26, 26)
     color_game_background = (0, 0, 0)
-    color_snake_head = (255, 255, 255)
-    colors_snake_tail = [(0, 255, 0), (14, 205, 14)]
-    color_apple = (255, 0, 0)
     color_button = (254, 151, 12)
     color_button_focused = (195, 122, 20)
     color_font = (255, 255, 255)
@@ -917,9 +912,9 @@ SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_lis
 HighscoresInMenu = HighscoresInMenuClass()
 TotalStatsInMenu = TotalStatsInMenuClass()
 
-Snake = SnakeClass(settings.grid, settings.grid_border, settings.color_snake_head, settings.colors_snake_tail)
-Apple = AppleClass(settings.grid, settings.grid_border, settings.color_apple)
-TopBar = TopBarClass(settings.label_x, settings.label_y, settings.label_width, settings.label_height)
+Snake = SnakeClass()
+Apple = AppleClass()
+TopBar = TopBarClass()
 CurrentSpeedText = CurrentSpeedTextClass()
 
 menu_main()
