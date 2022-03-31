@@ -329,12 +329,13 @@ def checkFiles():
 
 
 class SnakeClass:
-    def __init__(self, grid, border, color_head, color_tail):
+    def __init__(self, grid, border, color_head, colors_tail):
         self.grid = grid
         self.border = border
         self.velocity = grid
         self.color_head = color_head
-        self.color_tail = color_tail
+        self.colors_tail = colors_tail
+        self.colors_tail_len = len(colors_tail)
         self.reinit()
 
     def reinit(self):
@@ -386,8 +387,9 @@ class SnakeClass:
             self.xyList.pop(0)
 
     def draw(self):
-        for pair in self.xyList[:-1]:
-            pygame.draw.rect(window, self.color_tail, pair)
+        shift = (len(self.xyList) - 2) % self.colors_tail_len
+        for i, segment in enumerate(self.xyList[:-1]):
+            pygame.draw.rect(window, self.colors_tail[(i - shift) % self.colors_tail_len], segment)
         pygame.draw.rect(window, self.color_head, self.xyList[-1])
 
 
@@ -782,7 +784,7 @@ class settings:
     color_error_backgorund = (208, 26, 26)
     color_game_background = (0, 0, 0)
     color_snake_head = (255, 255, 255)
-    color_snake_tail = (0, 255, 0)
+    colors_snake_tail = [(0, 255, 0), (14, 205, 14)]
     color_apple = (255, 0, 0)
     color_button = (254, 151, 12)
     color_button_focused = (195, 122, 20)
@@ -915,7 +917,7 @@ SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_lis
 HighscoresInMenu = HighscoresInMenuClass()
 TotalStatsInMenu = TotalStatsInMenuClass()
 
-Snake = SnakeClass(settings.grid, settings.grid_border, settings.color_snake_head, settings.color_snake_tail)
+Snake = SnakeClass(settings.grid, settings.grid_border, settings.color_snake_head, settings.colors_snake_tail)
 Apple = AppleClass(settings.grid, settings.grid_border, settings.color_apple)
 TopBar = TopBarClass(settings.label_x, settings.label_y, settings.label_width, settings.label_height)
 CurrentSpeedText = CurrentSpeedTextClass()

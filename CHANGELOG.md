@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+* Tail segments have different colors
 
 ## Release 1.3.1 (2022-03-31)
 * Fixed walrus operator for Python 3.8 and 3.9
