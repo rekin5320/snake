@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## Release 1.3.1 (2022-03-31)
+* Fixed walrus operator for Python 3.8 and 3.9
+* Start counting time only after first move
+* Count total time more precisely
+
 ## Release 1.3 (2022-03-25)
 * Separate highscores for different speeds
 * Count and show number of games played and time spent

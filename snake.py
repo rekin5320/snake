@@ -763,7 +763,7 @@ def error_screen(text):
 ############## Settings ##############
 
 class settings:
-    version = "1.3"
+    version = "1.3.1"
     grid = 25
     grid_border = 2
     window_width = grid * 33
