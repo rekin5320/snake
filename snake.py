@@ -556,51 +556,59 @@ def game_main():
             if event.type == pygame.QUIT:
                 game_notOver = False
             elif joystick and event.type == pygame.JOYAXISMOTION:
-                if joystick.get_axis(3) < -settings.joystick_sentivity and Snake.dirx_current != 1:  # ← -x
-                    Snake.dirx = -1
-                    Snake.diry = 0
-                    if not Snake.has_started:
-                        Snake.has_started = True
-                elif joystick.get_axis(3) > settings.joystick_sentivity and Snake.dirx_current != -1:  # → +x
-                    Snake.dirx = 1
-                    Snake.diry = 0
-                    if not Snake.has_started:
-                        Snake.has_started = True
-                elif joystick.get_axis(4) < -settings.joystick_sentivity and Snake.diry_current != 1:  # ↑ -y
-                    Snake.dirx = 0
-                    Snake.diry = -1
-                    if not Snake.has_started:
-                        Snake.has_started = True
-                elif joystick.get_axis(4) > settings.joystick_sentivity and Snake.diry_current != -1:  # ↓ +y
-                    Snake.dirx = 0
-                    Snake.diry = 1
-                    if not Snake.has_started:
-                        Snake.has_started = True
+                if joystick.get_axis(3) < -settings.joystick_sentivity:  # ← -x
+                    if Snake.dirx_current == 0:
+                        Snake.dirx = -1
+                        Snake.diry = 0
+                        if not Snake.has_started:
+                            Snake.has_started = True
+                elif joystick.get_axis(3) > settings.joystick_sentivity:  # → +x
+                    if Snake.dirx_current == 0:
+                        Snake.dirx = 1
+                        Snake.diry = 0
+                        if not Snake.has_started:
+                            Snake.has_started = True
+                elif joystick.get_axis(4) < -settings.joystick_sentivity:  # ↑ -y
+                    if Snake.diry_current == 0:
+                        Snake.dirx = 0
+                        Snake.diry = -1
+                        if not Snake.has_started:
+                            Snake.has_started = True
+                elif joystick.get_axis(4) > settings.joystick_sentivity:  # ↓ +y
+                    if Snake.diry_current == 0:
+                        Snake.dirx = 0
+                        Snake.diry = 1
+                        if not Snake.has_started:
+                            Snake.has_started = True
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             game_notOver = False
 
-        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and Snake.dirx_current != 1:  # ← -x
-            Snake.dirx = -1
-            Snake.diry = 0
-            if not Snake.has_started:
-                Snake.has_started = True
-        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and Snake.dirx_current != -1:  # → +x
-            Snake.dirx = 1
-            Snake.diry = 0
-            if not Snake.has_started:
-                Snake.has_started = True
-        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and Snake.diry_current != 1:  # ↑ -y
-            Snake.dirx = 0
-            Snake.diry = -1
-            if not Snake.has_started:
-                Snake.has_started = True
-        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and Snake.diry_current != -1:  # ↓ +y
-            Snake.dirx = 0
-            Snake.diry = 1
-            if not Snake.has_started:
-                Snake.has_started = True
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:  # ← -x
+            if Snake.dirx_current == 0:
+                Snake.dirx = -1
+                Snake.diry = 0
+                if not Snake.has_started:
+                    Snake.has_started = True
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:  # → +x
+            if Snake.dirx_current == 0:
+                Snake.dirx = 1
+                Snake.diry = 0
+                if not Snake.has_started:
+                    Snake.has_started = True
+        elif keys[pygame.K_UP] or keys[pygame.K_w]:  # ↑ -y
+            if Snake.diry_current == 0:
+                Snake.dirx = 0
+                Snake.diry = -1
+                if not Snake.has_started:
+                    Snake.has_started = True
+        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:  # ↓ +y
+            if Snake.diry_current == 0:
+                Snake.dirx = 0
+                Snake.diry = 1
+                if not Snake.has_started:
+                    Snake.has_started = True
 
         if Snake.fpsCounter % settings.move_delay == 0:
             Snake.move()
