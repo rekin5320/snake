@@ -187,11 +187,7 @@ class ButtonSpeed(Button):
 
     def click(self):
         if self.is_pointed():
-            settings.speed = self.desired_value
-            settings.move_delay = settings.fps / settings.speed
-            logger.info(f"Changed speed to {self.desired_value}")
-            Data.write()
-            CurrentSpeedText.update()
+            settings.change_speed_to(self.desired_value)
 
     def is_highlighted(self):
         return super().is_pointed() or settings.speed == self.desired_value
@@ -224,23 +220,16 @@ class ButtonSpeedGroup:
         self.inc = True
 
     def change_speed(self):
-        if self.dec:
-            self.decrease()
-            self.dec, self.inc = False, False
-        elif self.inc:
-            self.increase()
-            self.dec, self.inc = False, False
-        Data.write()
-
-    @staticmethod
-    def decrease():
-        if (i := settings.speed_list.index(settings.speed)) > 0:
-            settings.speed = settings.speed_list[i - 1]
-
-    @staticmethod
-    def increase():
-        if (i := settings.speed_list.index(settings.speed)) < len(settings.speed_list) - 1:
-            settings.speed = settings.speed_list[i + 1]
+        if self.dec or self.inc:
+            i = settings.speed_list.index(settings.speed)
+            if self.dec:
+                if i > 0:
+                    settings.change_speed_to(settings.speed_list[i - 1])
+                    self.dec, self.inc = False, False
+            else:
+                if i < len(settings.speed_list) - 1:
+                    settings.change_speed_to(settings.speed_list[i + 1])
+                    self.dec, self.inc = False, False
 
 
 class ButtonCmds:
@@ -877,6 +866,14 @@ class settings:
     speed = 5  # default speed (aka movesPerSecond) (fps divisor)
     speed_list = [5, 10, 15, 30, 60]
     move_delay = fps / speed
+
+    @classmethod
+    def change_speed_to(cls, s):
+        cls.speed = s
+        cls.move_delay = cls.fps / cls.speed
+        logger.info(f"Changed speed to {s}")
+        Data.write()
+        CurrentSpeedText.update()
 
     joystick_sentivity = 0.91
 
