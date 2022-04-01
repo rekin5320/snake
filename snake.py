@@ -351,7 +351,7 @@ class SnakeClass:
         self.border = settings.grid_border
         self.velocity = settings.grid
         self.color_head = (255, 255, 255)
-        self.colors_tail = [(0, 255, 0), (14, 205, 14)]
+        self.colors_tail = [(3, 255, 3), (2, 232, 2), (1, 187, 0)]
         self.colors_tail_len = len(self.colors_tail)
         self.reinit()
 
@@ -413,9 +413,8 @@ class SnakeClass:
             self.xyList.pop(0)
 
     def draw(self):
-        shift = (len(self.xyList) - 2) % self.colors_tail_len
-        for i, segment in enumerate(self.xyList[:-1]):
-            pygame.draw.rect(window, self.colors_tail[(i - shift) % self.colors_tail_len], segment)
+        for i, segment in enumerate(self.xyList[:-1], start=2):
+            pygame.draw.rect(window, self.colors_tail[(self.score - i) % self.colors_tail_len], segment)
         pygame.draw.rect(window, self.color_head, self.xyList[-1])
 
 
