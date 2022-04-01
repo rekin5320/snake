@@ -634,7 +634,7 @@ def game_main():
     TotalStatsInMenu.update()
     # new record
     if Snake.score > Data.highscores_speed[(speed_str := str(settings.speed))]:
-        logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
+        logger.info(f"Highscore beaten, old: {Data.highscores_speed[speed_str]}, new: {Snake.score} (speed {settings.speed})")
         Data.highscores_speed[speed_str] = Snake.score
         if Snake.score > Data.highscore:
             Data.highscore = Snake.score
