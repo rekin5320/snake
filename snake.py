@@ -677,6 +677,8 @@ def game_redraw():
 def gameover_main():
     GameOver.draw((settings.window_width - GameOver.text_width) // 2, (settings.window_height - GameOver.text_height) // 2)
     show_gameOver = True
+    if joysticks:
+        joysticks[0].rumble(0.2, 0.8, 500)
 
     while show_gameOver:
         clock.tick(settings.fps)
@@ -701,6 +703,8 @@ def gameover_main():
         pygame.display.update()
 
     pygame.mixer.music.pause()
+    if joysticks:
+        joysticks[0].stop_rumble()
 
 
 def creditss_main():
