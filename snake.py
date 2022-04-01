@@ -201,6 +201,7 @@ class ButtonSpeedGroup:
     def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_values_list, spacing):
         self.width = (len(settings.speed_list) - 1) * (width + spacing) + width
         self.height = height
+        self.dec, self.inc = False, False
 
         self.ButtonsList = []
         for index, value in enumerate(desired_values_list):
@@ -213,6 +214,33 @@ class ButtonSpeedGroup:
     def draw(self):
         for button in self.ButtonsList:
             button.draw()
+
+    def await_decrease(self):
+        self.dec = True
+        self.inc = False
+
+    def await_increase(self):
+        self.dec = False
+        self.inc = True
+
+    def change_speed(self):
+        if self.dec:
+            self.decrease()
+            self.dec, self.inc = False, False
+        elif self.inc:
+            self.increase()
+            self.dec, self.inc = False, False
+        Data.write()
+
+    @staticmethod
+    def decrease():
+        if (i := settings.speed_list.index(settings.speed)) > 0:
+            settings.speed = settings.speed_list[i - 1]
+
+    @staticmethod
+    def increase():
+        if (i := settings.speed_list.index(settings.speed)) < len(settings.speed_list) - 1:
+            settings.speed = settings.speed_list[i + 1]
 
 
 class ButtonCmds:
@@ -526,6 +554,13 @@ def menu_main():
             menu = False
         if keys[pygame.K_SPACE]:
             game = True
+
+        if keys[pygame.K_MINUS]:
+            SpeedButtons.await_decrease()
+        elif keys[pygame.K_EQUALS] and (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]):
+            SpeedButtons.await_increase()
+        else:
+            SpeedButtons.change_speed()
 
         if game:
             game_main()
