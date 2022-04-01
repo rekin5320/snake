@@ -348,35 +348,26 @@ class SnakeClass:
         self.xyList = [(self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)]
         self.fpsCounter = 0
         self.score = 1
-        self.has_started = False
 
     def change_dir_left(self):
         if self.dirx_current == 0:
             self.dirx = -1
             self.diry = 0
-            if not self.has_started:
-                self.has_started = True
 
     def change_dir_right(self):
         if self.dirx_current == 0:
             self.dirx = 1
             self.diry = 0
-            if not self.has_started:
-                self.has_started = True
 
     def change_dir_up(self):
         if self.diry_current == 0:
             self.dirx = 0
             self.diry = -1
-            if not self.has_started:
-                self.has_started = True
 
     def change_dir_down(self):
         if self.diry_current == 0:
             self.dirx = 0
             self.diry = 1
-            if not self.has_started:
-                self.has_started = True
 
     def move(self):
         global game_notOver
@@ -577,7 +568,7 @@ def game_main():
 
         if Snake.fpsCounter % settings.move_delay == 0:
             game_redraw()
-        if Snake.has_started:
+        if Snake.dirx or Snake.diry:  # snake started moving
             Snake.fpsCounter += 1
 
         for event in pygame.event.get():
