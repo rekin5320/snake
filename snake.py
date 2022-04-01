@@ -566,28 +566,28 @@ def game_main():
             if event.type == pygame.QUIT:
                 game_notOver = False
             elif event.type == pygame.JOYAXISMOTION:
-                if joysticks[event.joy].get_axis(3) > settings.joystick_sentivity and not Snake.left_current:  # right
+                if joystick.get_axis(3) > settings.joystick_sentivity and not Snake.left_current:  # right
                     Snake.left = False
                     Snake.right = True
                     Snake.up = False
                     Snake.down = False
                     if not Snake.has_started:
                         Snake.has_started = True
-                elif joysticks[event.joy].get_axis(3) < - settings.joystick_sentivity and not Snake.right_current:  # left
+                elif joystick.get_axis(3) < - settings.joystick_sentivity and not Snake.right_current:  # left
                     Snake.left = True
                     Snake.right = False
                     Snake.up = False
                     Snake.down = False
                     if not Snake.has_started:
                         Snake.has_started = True
-                elif joysticks[event.joy].get_axis(4) > settings.joystick_sentivity and not Snake.up_current:  # down
+                elif joystick.get_axis(4) > settings.joystick_sentivity and not Snake.up_current:  # down
                     Snake.left = False
                     Snake.right = False
                     Snake.up = False
                     Snake.down = True
                     if not Snake.has_started:
                         Snake.has_started = True
-                elif joysticks[event.joy].get_axis(4) < - settings.joystick_sentivity and not Snake.down_current:  # up
+                elif joystick.get_axis(4) < - settings.joystick_sentivity and not Snake.down_current:  # up
                     Snake.left = False
                     Snake.right = False
                     Snake.up = True
@@ -677,8 +677,8 @@ def game_redraw():
 def gameover_main():
     GameOver.draw((settings.window_width - GameOver.text_width) // 2, (settings.window_height - GameOver.text_height) // 2)
     show_gameOver = True
-    if joysticks:
-        joysticks[0].rumble(0.2, 0.8, 500)
+    if joystick:
+        joystick.rumble(0.2, 0.8, 500)
 
     while show_gameOver:
         clock.tick(settings.fps)
@@ -703,8 +703,8 @@ def gameover_main():
         pygame.display.update()
 
     pygame.mixer.music.pause()
-    if joysticks:
-        joysticks[0].stop_rumble()
+    if joystick:
+        joystick.stop_rumble()
 
 
 def creditss_main():
@@ -923,7 +923,7 @@ pygame.display.init()
 pygame.mixer.init()
 pygame.font.init()
 pygame.joystick.init()
-joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() else False
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((settings.window_width, settings.window_height), vsync=1)
 pygame.display.set_caption(f"Snake v{settings.version}")
