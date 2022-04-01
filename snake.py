@@ -45,6 +45,27 @@ class MyPath(type(Path())):
         return self.exists() and self.size() > 0
 
 
+class Tee:
+    """
+    Duplicates the given stream into a file.
+    Inspired by https://stackoverflow.com/a/616686
+    """
+
+    def __init__(self, out_stream, filename, mode):
+        self.file = open(filename, mode)
+        self.out_stream = out_stream
+
+    def __del__(self):
+        self.file.close()
+
+    def write(self, data):
+        self.file.write(data)
+        self.out_stream.write(data)
+
+    def flush(self):
+        self.file.flush()
+
+
 def base64_encode(text):
     encodedtext_bytes = base64.b64encode(text.encode("utf-8"))
     encodedtext = str(encodedtext_bytes, "utf-8")
@@ -901,7 +922,7 @@ if settings.path_log2.exists():
 if settings.path_log1.exists():
     settings.path_log1.replace(settings.path_log2)
 
-sys.stderr = open(settings.path_log1, "a")
+sys.stderr = Tee(sys.stderr, settings.path_log1, "a")
 
 for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
     logging.root.removeHandler(handler)
