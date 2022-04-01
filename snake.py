@@ -565,6 +565,35 @@ def game_main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_notOver = False
+            elif event.type == pygame.JOYAXISMOTION:
+                if joysticks[event.joy].get_axis(3) > settings.joystick_sentivity and not Snake.left_current:  # right
+                    Snake.left = False
+                    Snake.right = True
+                    Snake.up = False
+                    Snake.down = False
+                    if not Snake.has_started:
+                        Snake.has_started = True
+                elif joysticks[event.joy].get_axis(3) < - settings.joystick_sentivity and not Snake.right_current:  # left
+                    Snake.left = True
+                    Snake.right = False
+                    Snake.up = False
+                    Snake.down = False
+                    if not Snake.has_started:
+                        Snake.has_started = True
+                elif joysticks[event.joy].get_axis(4) > settings.joystick_sentivity and not Snake.up_current:  # down
+                    Snake.left = False
+                    Snake.right = False
+                    Snake.up = False
+                    Snake.down = True
+                    if not Snake.has_started:
+                        Snake.has_started = True
+                elif joysticks[event.joy].get_axis(4) < - settings.joystick_sentivity and not Snake.down_current:  # up
+                    Snake.left = False
+                    Snake.right = False
+                    Snake.up = True
+                    Snake.down = False
+                    if not Snake.has_started:
+                        Snake.has_started = True
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
@@ -841,6 +870,8 @@ class settings:
     speed_list = [5, 10, 15, 30, 60]
     move_delay = fps / speed
 
+    joystick_sentivity = 0.91
+
 
 ############# Main code #############
 
@@ -887,6 +918,8 @@ logger.info(f"System: {platform.system()}, version: {platform.release()}")
 pygame.display.init()
 pygame.mixer.init()
 pygame.font.init()
+pygame.joystick.init()
+joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((settings.window_width, settings.window_height), vsync=1)
 pygame.display.set_caption(f"Snake v{settings.version}")
