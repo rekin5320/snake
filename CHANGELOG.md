@@ -2,6 +2,9 @@
 
 ## Unreleased
 * Tail segments have different colors
+* Basic gamepad support - moving with joystick (tested on Xbox One S Controller)
+* Optimizations
+* Change speed using +/- keys in menu
 
 ## Release 1.3.1 (2022-03-31)
 * Fixed walrus operator for Python 3.8 and 3.9
