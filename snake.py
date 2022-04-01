@@ -339,14 +339,10 @@ class SnakeClass:
         self.reinit()
 
     def reinit(self):
-        self.left = False
-        self.right = False
-        self.up = False
-        self.down = False
-        self.left_current = False
-        self.right_current = False
-        self.up_current = False
-        self.down_current = False
+        self.dirx = 0
+        self.diry = 0
+        self.dirx_current = 0
+        self.diry_current = 0
         self.x = (settings.game_width - self.grid) // 2 + settings.game_x
         self.y = (settings.game_height - self.grid) // 2 + settings.game_y
         self.xyList = [(self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)]
@@ -356,19 +352,13 @@ class SnakeClass:
 
     def move(self):
         global game_notOver
-        self.left_current = self.left
-        self.right_current = self.right
-        self.up_current = self.up
-        self.down_current = self.down
+        self.dirx_current = self.dirx
+        self.diry_current = self.diry
 
-        if self.left_current:
-            self.x -= self.velocity
-        elif self.right_current:
-            self.x += self.velocity
-        elif self.up_current:
-            self.y -= self.velocity
-        elif self.down_current:
-            self.y += self.velocity
+        if self.dirx != 0:
+            self.x += self.dirx * self.velocity
+        elif self.diry != 0:
+            self.y += self.diry * self.velocity
         self.head_location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
 
         if self.x == settings.game_x - self.grid or self.x == settings.game_width + self.grid or self.y == settings.game_y - self.grid or self.y == settings.game_height + settings.topbar_height:
@@ -565,33 +555,25 @@ def game_main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_notOver = False
-            elif event.type == pygame.JOYAXISMOTION:
-                if joystick.get_axis(3) > settings.joystick_sentivity and not Snake.left_current:  # right
-                    Snake.left = False
-                    Snake.right = True
-                    Snake.up = False
-                    Snake.down = False
+            elif joystick and event.type == pygame.JOYAXISMOTION:
+                if joystick.get_axis(3) < -settings.joystick_sentivity and Snake.dirx_current != 1:  # ← -x
+                    Snake.dirx = -1
+                    Snake.diry = 0
                     if not Snake.has_started:
                         Snake.has_started = True
-                elif joystick.get_axis(3) < - settings.joystick_sentivity and not Snake.right_current:  # left
-                    Snake.left = True
-                    Snake.right = False
-                    Snake.up = False
-                    Snake.down = False
+                elif joystick.get_axis(3) > settings.joystick_sentivity and Snake.dirx_current != -1:  # → +x
+                    Snake.dirx = 1
+                    Snake.diry = 0
                     if not Snake.has_started:
                         Snake.has_started = True
-                elif joystick.get_axis(4) > settings.joystick_sentivity and not Snake.up_current:  # down
-                    Snake.left = False
-                    Snake.right = False
-                    Snake.up = False
-                    Snake.down = True
+                elif joystick.get_axis(4) < -settings.joystick_sentivity and Snake.diry_current != 1:  # ↑ -y
+                    Snake.dirx = 0
+                    Snake.diry = -1
                     if not Snake.has_started:
                         Snake.has_started = True
-                elif joystick.get_axis(4) < - settings.joystick_sentivity and not Snake.down_current:  # up
-                    Snake.left = False
-                    Snake.right = False
-                    Snake.up = True
-                    Snake.down = False
+                elif joystick.get_axis(4) > settings.joystick_sentivity and Snake.diry_current != -1:  # ↓ +y
+                    Snake.dirx = 0
+                    Snake.diry = 1
                     if not Snake.has_started:
                         Snake.has_started = True
 
@@ -599,32 +581,24 @@ def game_main():
         if keys[pygame.K_ESCAPE]:
             game_notOver = False
 
-        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not Snake.right_current:
-            Snake.left = True
-            Snake.right = False
-            Snake.up = False
-            Snake.down = False
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and Snake.dirx_current != 1:  # ← -x
+            Snake.dirx = -1
+            Snake.diry = 0
             if not Snake.has_started:
                 Snake.has_started = True
-        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not Snake.left_current:
-            Snake.left = False
-            Snake.right = True
-            Snake.up = False
-            Snake.down = False
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and Snake.dirx_current != -1:  # → +x
+            Snake.dirx = 1
+            Snake.diry = 0
             if not Snake.has_started:
                 Snake.has_started = True
-        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and not Snake.down_current:
-            Snake.left = False
-            Snake.right = False
-            Snake.up = True
-            Snake.down = False
+        elif (keys[pygame.K_UP] or keys[pygame.K_w]) and Snake.diry_current != 1:  # ↑ -y
+            Snake.dirx = 0
+            Snake.diry = -1
             if not Snake.has_started:
                 Snake.has_started = True
-        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and not Snake.up_current:
-            Snake.left = False
-            Snake.right = False
-            Snake.up = False
-            Snake.down = True
+        elif (keys[pygame.K_DOWN] or keys[pygame.K_s]) and Snake.diry_current != -1:  # ↓ +y
+            Snake.dirx = 0
+            Snake.diry = 1
             if not Snake.has_started:
                 Snake.has_started = True
 
