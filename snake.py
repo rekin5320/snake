@@ -389,23 +389,23 @@ class SnakeClass:
 
     def change_dir_left(self):
         if self.dirx_current == 0:
-            self.dirx = -1
+            self.dirx = -self.velocity
             self.diry = 0
 
     def change_dir_right(self):
         if self.dirx_current == 0:
-            self.dirx = 1
+            self.dirx = self.velocity
             self.diry = 0
 
     def change_dir_up(self):
         if self.diry_current == 0:
             self.dirx = 0
-            self.diry = -1
+            self.diry = -self.velocity
 
     def change_dir_down(self):
         if self.diry_current == 0:
             self.dirx = 0
-            self.diry = 1
+            self.diry = self.velocity
 
     def move(self):
         global game_notOver
@@ -413,9 +413,9 @@ class SnakeClass:
         self.diry_current = self.diry
 
         if self.dirx != 0:
-            self.x += self.dirx * self.velocity
+            self.x += self.dirx
         elif self.diry != 0:
-            self.y += self.diry * self.velocity
+            self.y += self.diry
         self.head_location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
 
         if self.x == settings.game_x - self.grid or self.x == settings.game_width + self.grid or self.y == settings.game_y - self.grid or self.y == settings.game_height + settings.topbar_height:
