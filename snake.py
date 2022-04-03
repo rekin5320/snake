@@ -95,7 +95,7 @@ class Text:
         else:
             self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
         self.text = self.font.render(text, True, color)
-        self.text_width, self.text_height = self.text.get_size()
+        self.width, self.height = self.text.get_size()
 
     def draw(self, x, y):
         window.blit(self.text, (x, y))
@@ -142,12 +142,9 @@ class LongText:
         for line in textList:
             self.rendredTextList.append(Text(line, color, font_size))
 
-        self.text_width = self.rendredTextList[0].text_width
-        for line in self.rendredTextList:
-            if line.text_width > self.text_width:
-                self.text_width = line.text_width
-        self.line_height = self.rendredTextList[0].text_height
-        self.text_height = len(self.rendredTextList) * self.line_height + (len(self.rendredTextList) - 1) * line_spacing
+        self.width = max(T.width for T in self.rendredTextList)
+        self.line_height = self.rendredTextList[0].height
+        self.height = len(self.rendredTextList) * (self.line_height + self.line_spacing) - self.line_spacing
 
     def draw(self, x, y):
         i = 0
@@ -198,7 +195,7 @@ class Button:
             self.background2.draw(self.x, self.y)
         else:
             self.background1.draw(self.x, self.y)
-        self.text.draw(self.x + (self.width - self.text.text_width) // 2, self.y + (self.height - self.text.text_height) // 2)
+        self.text.draw(self.x + (self.width - self.text.width) // 2, self.y + (self.height - self.text.height) // 2)
 
 
 class ButtonSpeed(Button):
@@ -475,20 +472,20 @@ class TopBarClass:
 
     def draw(self):
         Time = Text(f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_font, self.font_size)
-        Time.draw(1.4 * conf.grid, (self.height - Time.text_height) // 2)
+        Time.draw(1.4 * conf.grid, (self.height - Time.height) // 2)
 
         Score = Text(f"score: {decimals(Snake.score)}", conf.color_font, self.font_size)
-        Score.draw((self.width - Score.text_width) // 2, (self.height - Score.text_height) // 2)
+        Score.draw((self.width - Score.width) // 2, (self.height - Score.height) // 2)
 
         HighscoreOnBar = Text(f"highscore: {decimals(Data.highscores_speed[str(conf.speed)])}", conf.color_font, self.font_size)
-        HighscoreOnBar.draw(self.width - conf.grid - HighscoreOnBar.text_width - 0.4 * conf.grid, (self.height - HighscoreOnBar.text_height) // 2)
+        HighscoreOnBar.draw(self.width - conf.grid - HighscoreOnBar.width - 0.4 * conf.grid, (self.height - HighscoreOnBar.height) // 2)
 
 
 class CurrentSpeedTextClass:
     def __init__(self):
         self.update()
         self.x = 1.4 * conf.grid
-        self.y = 25 * conf.grid + (conf.grid - self.text.text_height) // 2
+        self.y = 25 * conf.grid + (conf.grid - self.text.height) // 2
 
     def update(self):
         self.text = Text(f"speed: {conf.speed}", conf.color_font, conf.font_size_currentspeed)
@@ -506,12 +503,12 @@ class HighscoresInMenuClass:
         self.font_size1 = 23
         self.font_size2 = 21
         self.update()
-        self.height = self.y2 + self.text2.text_height
+        self.height = self.y2 + self.text2.height
 
     def update(self):
         self.text1 = Text("Highscores:", self.color, self.font_size1)
         self.text2 = LongText(f"• overall: {Data.highscore} \n " + " \n ".join([f"• {k}: {v}" for k, v in Data.highscores_speed.items()]), self.color, self.font_size2, line_spacing=6)
-        self.y2 = self.text1.text_height + 10
+        self.y2 = self.text1.height + 10
 
     def draw(self):
         self.text1.draw(self.x1, self.y1)
@@ -525,7 +522,7 @@ class TotalStatsInMenuClass:
         self.color = conf.color_font
         self.font_size = 20
         self.update()
-        self.y2 = self.y1 + self.text_games.text_height + 5
+        self.y2 = self.y1 + self.text_games.height + 5
 
     def update(self):
         self.text_games = Text(f"total games: {Data.total_games}", self.color, self.font_size)
@@ -588,17 +585,17 @@ def menu_main():
 def menu_redraw():
     global LastScore
     window.fill(conf.color_window_background)
-    SnakeLogo.draw((conf.window_width - SnakeLogo.text_width) // 2, 4.5 * conf.grid)
+    SnakeLogo.draw((conf.window_width - SnakeLogo.width) // 2, 4.5 * conf.grid)
     HighscoresInMenu.draw()
     TotalStatsInMenu.draw()
     if LastScore:
-        LastScore.draw((conf.window_width - LastScore.text_width) // 2, 205)
+        LastScore.draw((conf.window_width - LastScore.width) // 2, 205)
     ButtonPlay.draw()
     ButtonExit.draw()
-    Author.draw(conf.window_width - Author.text_width - 0.4 * conf.grid, conf.window_height - Author.text_height - 0.4 * conf.grid)
+    Author.draw(conf.window_width - Author.width - 0.4 * conf.grid, conf.window_height - Author.height - 0.4 * conf.grid)
     WebsiteButton.draw()
     CreditsButton.draw()
-    SpeedText.draw(conf.window_width - SpeedButtons.width_total - 0.5 * conf.grid - SpeedText.text_width - SpeedButtons.spacing, 0.5 * conf.grid + (SpeedButtons.height - SpeedText.text_height) / 2)
+    SpeedText.draw(conf.window_width - SpeedButtons.width_total - 0.5 * conf.grid - SpeedText.width - SpeedButtons.spacing, 0.5 * conf.grid + (SpeedButtons.height - SpeedText.height) / 2)
     SpeedButtons.draw()
 
     pygame.display.update()
@@ -665,13 +662,13 @@ def game_main():
         if Snake.score > Data.highscore:
             Data.highscore = Snake.score
         NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {conf.speed})", conf.color_newhighscore, conf.font_size_newhighscore)
-        NewHighscoreText.draw((conf.window_width - NewHighscoreText.text_width) // 2, (conf.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
+        NewHighscoreText.draw((conf.window_width - NewHighscoreText.width) // 2, (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10)
         HighscoresInMenu.update()
     elif Snake.score > Data.highscore:
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {conf.speed})")
         Data.highscore = Snake.score
         NewHighscoreText = Text(f"new highscore: {Snake.score}", conf.color_newhighscore, conf.font_size_newhighscore)
-        NewHighscoreText.draw((conf.window_width - NewHighscoreText.text_width) // 2, (conf.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
+        NewHighscoreText.draw((conf.window_width - NewHighscoreText.width) // 2, (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10)
         HighscoresInMenu.update()
     Data.write()
 
@@ -694,7 +691,7 @@ def game_redraw():
 
 
 def gameover_main():
-    GameOver.draw((conf.window_width - GameOver.text_width) // 2, (conf.window_height - GameOver.text_height) // 2)
+    GameOver.draw((conf.window_width - GameOver.width) // 2, (conf.window_height - GameOver.height) // 2)
     show_gameOver = True
     if joystick:
         joystick.rumble(0.2, 0.8, 500)
@@ -757,7 +754,7 @@ def creditss_redraw():
     global CreditsText
     global CreditsBackButton
     window.fill(conf.color_window_background)
-    CreditsText.draw((conf.window_width - CreditsText.text_width) // 2, 90)
+    CreditsText.draw((conf.window_width - CreditsText.width) // 2, 90)
     CreditsBackButton.draw()
     pygame.display.update()
 
@@ -777,7 +774,7 @@ def loading_screen(function, loading_text, error_text):
         clock.tick(conf.fps)
         window.fill(conf.color_window_background)
         Loading = LoadingTexts[time // conf.fps % 4]
-        Loading.draw((conf.window_width - Loading.text_width) / 2, (conf.window_height - Loading.text_height) / 2)
+        Loading.draw((conf.window_width - Loading.width) / 2, (conf.window_height - Loading.height) / 2)
         pygame.display.update()
         time += 1
 
@@ -810,7 +807,7 @@ def error_screen(text):
             error = False
 
         window.fill(conf.color_error_backgorund)
-        ErrorText.draw((conf.window_width - ErrorText.text_width) / 2, (conf.window_height - ErrorText.text_height) / 2 - 60)
+        ErrorText.draw((conf.window_width - ErrorText.width) / 2, (conf.window_height - ErrorText.height) / 2 - 60)
         ButtonExit2.draw()
         pygame.display.update()
 
