@@ -941,8 +941,7 @@ joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() else False
 clock = pygame.time.Clock()
 window = pygame.display.set_mode((conf.window_width, conf.window_height), vsync=1)
 pygame.display.set_caption(f"Snake v{conf.version}")
-Icon = pygame.image.load(conf.path_icon)
-pygame.display.set_icon(Icon)
+pygame.display.set_icon(pygame.image.load(conf.path_icon))
 
 loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.")
 Data = File()
