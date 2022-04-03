@@ -173,7 +173,7 @@ class RoundedRectangle:
 
 
 class Button:
-    def __init__(self, x, y, width, height, color1, color2, color_text, text, font_size, command=None, radius=9):
+    def __init__(self, x, y, width, height, text, font_size, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command=None, radius=9):
         self.x = x
         self.y = y
         self.width = width
@@ -202,8 +202,8 @@ class Button:
 
 
 class ButtonSpeed(Button):
-    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_value):
-        super().__init__(x, y, width, height, color1, color2, color_text, str(desired_value), font_size, radius=4)
+    def __init__(self, x, y, width, height, font_size, desired_value):
+        super().__init__(x, y, width, height, str(desired_value), font_size, radius=4)
         self.desired_value = desired_value
 
     def click(self):
@@ -215,14 +215,20 @@ class ButtonSpeed(Button):
 
 
 class ButtonSpeedGroup:
-    def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_values_list, spacing):
-        self.width = (len(conf.speed_list) - 1) * (width + spacing) + width
-        self.height = height
+    def __init__(self):
+        self.speed_list = conf.speed_list
+        self.width_single = 40
+        self.spacing = 11
+        self.width_total = len(conf.speed_list) * (self.width_single + self.spacing) - self.spacing
+        self.height = 35
+        self.x = conf.window_width - self.width_total - 0.5 * conf.grid
+        self.y = 0.5 * conf.grid
+        self.font_size = 22
         self.dec, self.inc = False, False
 
         self.ButtonsList = []
-        for index, value in enumerate(desired_values_list):
-            self.ButtonsList.append(ButtonSpeed(x + index * (spacing + width), y, width, height, color1, color2, color_text, font_size, value))
+        for index, value in enumerate(self.speed_list):
+            self.ButtonsList.append(ButtonSpeed(self.x + index * (self.spacing + self.width_single), self.y, self.width_single, self.height, self.font_size, value))
 
     def click(self):
         for button in self.ButtonsList:
@@ -592,7 +598,7 @@ def menu_redraw():
     Author.draw(conf.window_width - Author.text_width - 0.4 * conf.grid, conf.window_height - Author.text_height - 0.4 * conf.grid)
     WebsiteButton.draw()
     CreditsButton.draw()
-    SpeedText.draw(conf.window_width - SpeedButtons.width - 0.5 * conf.grid - SpeedText.text_width - conf.SpeedButton_spacing, 0.5 * conf.grid + (conf.SpeedButton_height - SpeedText.text_height) / 2)
+    SpeedText.draw(conf.window_width - SpeedButtons.width_total - 0.5 * conf.grid - SpeedText.text_width - SpeedButtons.spacing, 0.5 * conf.grid + (SpeedButtons.height - SpeedText.text_height) / 2)
     SpeedButtons.draw()
 
     pygame.display.update()
@@ -728,7 +734,7 @@ def creditss_main():
 
     # I do not prerender it, as it is unlikely to be used often
     CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", conf.color_font, conf.font_size_creditsscene, line_lenght=52)
-    CreditsBackButton = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Back", conf.button_text_size, ButtonCmds.creditssFalse)
+    CreditsBackButton = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Back", conf.button_font_size, command=ButtonCmds.creditssFalse)
 
     while creditss:
         clock.tick(conf.fps)
@@ -787,7 +793,7 @@ def error_screen(text):
     global mouse
     error = True
     ErrorText = LongText(text, conf.color_font, conf.font_size_error)
-    ButtonExit2 = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Exit", conf.button_text_size, ButtonCmds.exit1)
+    ButtonExit2 = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.exit1)
 
     while error:
         clock.tick(conf.fps)
@@ -827,36 +833,23 @@ class conf:
     color_window_background = (1, 170, 64)
     color_error_backgorund = (208, 26, 26)
     color_game_background = (0, 0, 0)
-    color_button = (254, 151, 12)
-    color_button_focused = (195, 122, 20)
     color_font = (255, 255, 255)
-    color_gameover = (255, 0, 0)
     color_newhighscore = (0, 0, 255)
-    color_snakeLogo = (255, 255, 255)
-    color_author = (215, 215, 215)
 
     font_size_loading = 35
     font_size_error = 30
-    font_size_gameover = 77
     font_size_newhighscore = 33
-    font_size_snakeLogo = 62
     font_size_lastscore = 27
-    font_size_author = 21
     font_size_website = 21
     font_size_creditsscene = 25
-    font_size_speed = 22
     font_size_currentspeed = 17
 
     button_width = grid * 10
     button_height = grid * 4
-    button_text_size = 35
-    button_text_color = (255, 255, 255)
+    button_font_size = 35
 
     ButtonPlay_y = 275
     ButtonExit_y = 420
-    SpeedButton_width = 40
-    SpeedButton_height = 35
-    SpeedButton_spacing = 15
 
     if os.name == "nt":
         path_gameDirectory = MyPath.home() / "AppData" / "Roaming" / ".snake"  # ~\AppData\Roaming\.snake\
@@ -956,17 +949,17 @@ Data = File()
 Data.read()
 
 # Prerendered objects
-GameOver = Text("GAME  OVER", conf.color_gameover, conf.font_size_gameover)
-SnakeLogo = Text("Snake Game", conf.color_snakeLogo, conf.font_size_snakeLogo)
-Author = Text("Michał Machnikowski 2022", conf.color_author, conf.font_size_author)
+GameOver = Text("GAME  OVER", (255, 0, 0), 77)
+SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
+Author = Text("Michał Machnikowski 2022", (215, 215, 215), 21)
 
-ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Play", conf.button_text_size, ButtonCmds.gameTrue)
-ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Exit", conf.button_text_size, ButtonCmds.menuFalse)
-WebsiteButton = Button(0.5 * conf.grid, conf.window_height - 2.5 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, conf.color_button, conf.color_button_focused, conf.button_text_color, "website", conf.font_size_website, ButtonCmds.website, radius=7)
-CreditsButton = Button(int(6 * conf.grid), conf.window_height - 2.5 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, conf.color_button, conf.color_button_focused, conf.button_text_color, "credits", conf.font_size_website, ButtonCmds.creditssTrue, radius=7)
+ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size, command=ButtonCmds.gameTrue)
+ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.menuFalse)
+WebsiteButton = Button(0.5 * conf.grid, conf.window_height - 2.5 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=ButtonCmds.website, radius=7)
+CreditsButton = Button(int(6 * conf.grid), conf.window_height - 2.5 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, command=ButtonCmds.creditssTrue, radius=7)
 
-SpeedText = Text("Speed:", conf.color_font, conf.font_size_speed)
-SpeedButtons = ButtonSpeedGroup(conf.window_width - ((len(conf.speed_list) - 1) * (conf.SpeedButton_width + conf.SpeedButton_spacing) + conf.SpeedButton_width + 0.5 * conf.grid), 0.5 * conf.grid, conf.SpeedButton_width, conf.SpeedButton_height, conf.color_button, conf.color_button_focused, conf.color_font, conf.font_size_speed, conf.speed_list, conf.SpeedButton_spacing)
+SpeedText = Text("Speed:", conf.color_font, 22)
+SpeedButtons = ButtonSpeedGroup()
 HighscoresInMenu = HighscoresInMenuClass()
 TotalStatsInMenu = TotalStatsInMenuClass()
 
