@@ -90,8 +90,8 @@ def format_time(seconds):
 
 class Text:
     def __init__(self, text, color, font_size):
-        if settings.path_font.is_good():
-            self.font = pygame.font.Font(settings.path_font, font_size)
+        if conf.path_font.is_good():
+            self.font = pygame.font.Font(conf.path_font, font_size)
         else:
             self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
         self.text = self.font.render(text, True, color)
@@ -208,15 +208,15 @@ class ButtonSpeed(Button):
 
     def click(self):
         if self.is_pointed():
-            settings.change_speed_to(self.desired_value)
+            conf.change_speed_to(self.desired_value)
 
     def is_highlighted(self):
-        return super().is_pointed() or settings.speed == self.desired_value
+        return super().is_pointed() or conf.speed == self.desired_value
 
 
 class ButtonSpeedGroup:
     def __init__(self, x, y, width, height, color1, color2, color_text, font_size, desired_values_list, spacing):
-        self.width = (len(settings.speed_list) - 1) * (width + spacing) + width
+        self.width = (len(conf.speed_list) - 1) * (width + spacing) + width
         self.height = height
         self.dec, self.inc = False, False
 
@@ -242,14 +242,14 @@ class ButtonSpeedGroup:
 
     def change_speed(self):
         if self.dec or self.inc:
-            i = settings.speed_list.index(settings.speed)
+            i = conf.speed_list.index(conf.speed)
             if self.dec:
                 if i > 0:
-                    settings.change_speed_to(settings.speed_list[i - 1])
+                    conf.change_speed_to(conf.speed_list[i - 1])
                     self.dec, self.inc = False, False
             else:
-                if i < len(settings.speed_list) - 1:
-                    settings.change_speed_to(settings.speed_list[i + 1])
+                if i < len(conf.speed_list) - 1:
+                    conf.change_speed_to(conf.speed_list[i + 1])
                     self.dec, self.inc = False, False
 
 
@@ -270,7 +270,7 @@ class ButtonCmds:
 
     @staticmethod
     def website():
-        webbrowser.open(settings.url_website, new=0, autoraise=True)
+        webbrowser.open(conf.url_website, new=0, autoraise=True)
 
     @staticmethod
     def creditssTrue():
@@ -285,11 +285,11 @@ class ButtonCmds:
 
 class File:  # Data
     def __init__(self):
-        self.path_data = settings.path_data
+        self.path_data = conf.path_data
 
     def read(self):
         try:
-            with settings.path_version.open("r") as file:
+            with conf.path_version.open("r") as file:
                 self.version = base64_decode(file.readline())
 
             with self.path_data.open("r") as file:
@@ -298,13 +298,13 @@ class File:  # Data
             self.datadict = json.loads(data)
             self.highscore = self.datadict.get("highscore", 0)
             highscores_speed = self.datadict.get("highscores_speed", {})
-            self.highscores_speed = {i: highscores_speed.get(i, 0) for i in map(str, sorted(settings.speed_list))}
+            self.highscores_speed = {i: highscores_speed.get(i, 0) for i in map(str, sorted(conf.speed_list))}
             self.total_games = self.datadict.get("total_games", 0)
             self.total_time = self.datadict.get("total_time", 0)
 
             if "speed" in self.datadict:
-                settings.speed = self.datadict["speed"]
-                settings.move_delay = settings.fps / settings.speed
+                conf.speed = self.datadict["speed"]
+                conf.move_delay = conf.fps / conf.speed
 
         except:
             logger.exception("Error while reading game data:")
@@ -316,7 +316,7 @@ class File:  # Data
     def write(self):
         try:
             logger.debug("Writing data")
-            self.datadict["speed"] = settings.speed
+            self.datadict["speed"] = conf.speed
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
             self.datadict["total_games"] = self.total_games
@@ -324,7 +324,7 @@ class File:  # Data
             with self.path_data.open("w") as file:
                 file.write(base64_encode(json.dumps(self.datadict)))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
-            settings.path_version.write_text(base64_encode(settings.version))
+            conf.path_version.write_text(base64_encode(conf.version))
 
         except Exception as err:
             logger.error(err)
@@ -347,30 +347,30 @@ def download_if_needed(path: MyPath, url, name):
 
 
 def checkFiles():
-    if not settings.path_version.is_good():
+    if not conf.path_version.is_good():
         logger.warning("Version file did not exist, trying to create")
-        settings.path_version.write_text(base64_encode(settings.version))
+        conf.path_version.write_text(base64_encode(conf.version))
         logger.warning("Version file successfully created")
 
-    if not settings.path_data.is_good():
+    if not conf.path_data.is_good():
         logger.warning("Data file did not exist, trying to create")
-        with settings.path_data.open("w") as file:
+        with conf.path_data.open("w") as file:
             file.write(base64_encode(json.dumps({})))
             file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         logger.warning("Data file successfully created")
 
-    download_if_needed(settings.path_font, settings.url_font, "Font")
-    download_if_needed(settings.path_music_Game, settings.url_music_Game, "Game music")
-    download_if_needed(settings.path_music_GameOver, settings.url_music_GameOver, "GameOver music")
+    download_if_needed(conf.path_font, conf.url_font, "Font")
+    download_if_needed(conf.path_music_Game, conf.url_music_Game, "Game music")
+    download_if_needed(conf.path_music_GameOver, conf.url_music_GameOver, "GameOver music")
 
     logger.info("Checking files done")
 
 
 class SnakeClass:
     def __init__(self):
-        self.grid = settings.grid
-        self.border = settings.grid_border
-        self.velocity = settings.grid
+        self.grid = conf.grid
+        self.border = conf.grid_border
+        self.velocity = conf.grid
         self.color_head = (255, 255, 255)
         self.colors_tail = [(3, 255, 3), (2, 232, 2), (1, 187, 0)]
         self.colors_tail_len = len(self.colors_tail)
@@ -381,8 +381,8 @@ class SnakeClass:
         self.diry = 0
         self.dirx_current = 0
         self.diry_current = 0
-        self.x = (settings.game_width - self.grid) // 2 + settings.game_x
-        self.y = (settings.game_height - self.grid) // 2 + settings.game_y
+        self.x = (conf.game_width - self.grid) // 2 + conf.game_x
+        self.y = (conf.game_height - self.grid) // 2 + conf.game_y
         self.xyList = [(self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)]
         self.fpsCounter = 0
         self.score = 1
@@ -418,7 +418,7 @@ class SnakeClass:
             self.y += self.diry
         self.head_location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
 
-        if self.x == settings.game_x - self.grid or self.x == settings.game_width + self.grid or self.y == settings.game_y - self.grid or self.y == settings.game_height + settings.topbar_height:
+        if self.x == conf.game_x - self.grid or self.x == conf.game_width + self.grid or self.y == conf.game_y - self.grid or self.y == conf.game_height + conf.topbar_height:
             game_notOver = False
 
         for pair in self.xyList[:-1]:  # collision with itself
@@ -441,14 +441,14 @@ class SnakeClass:
 
 class AppleClass:
     def __init__(self):
-        self.grid = settings.grid
-        self.border = settings.grid_border
+        self.grid = conf.grid
+        self.border = conf.grid_border
         self.color = (255, 0, 0)
         self.move()
 
     def move(self):
-        self.x = randrange(0, settings.game_width // self.grid) * self.grid + settings.game_x
-        self.y = randrange(0, settings.game_height // self.grid) * self.grid + settings.game_y
+        self.x = randrange(0, conf.game_width // self.grid) * self.grid + conf.game_x
+        self.y = randrange(0, conf.game_height // self.grid) * self.grid + conf.game_y
         self.location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
         for pair in Snake.xyList:
             if pair == self.location:
@@ -463,29 +463,29 @@ class TopBarClass:
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.width = settings.topbar_width
-        self.height = settings.topbar_height
-        self.font_size = int(1.04 * settings.grid)
+        self.width = conf.topbar_width
+        self.height = conf.topbar_height
+        self.font_size = int(1.04 * conf.grid)
 
     def draw(self):
-        Time = Text(f"time: {format_time(Snake.fpsCounter // settings.fps)}", settings.color_font, self.font_size)
-        Time.draw(1.4 * settings.grid, (self.height - Time.text_height) // 2)
+        Time = Text(f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_font, self.font_size)
+        Time.draw(1.4 * conf.grid, (self.height - Time.text_height) // 2)
 
-        Score = Text(f"score: {decimals(Snake.score)}", settings.color_font, self.font_size)
+        Score = Text(f"score: {decimals(Snake.score)}", conf.color_font, self.font_size)
         Score.draw((self.width - Score.text_width) // 2, (self.height - Score.text_height) // 2)
 
-        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscores_speed[str(settings.speed)])}", settings.color_font, self.font_size)
-        HighscoreOnBar.draw(self.width - settings.grid - HighscoreOnBar.text_width - 0.4 * settings.grid, (self.height - HighscoreOnBar.text_height) // 2)
+        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscores_speed[str(conf.speed)])}", conf.color_font, self.font_size)
+        HighscoreOnBar.draw(self.width - conf.grid - HighscoreOnBar.text_width - 0.4 * conf.grid, (self.height - HighscoreOnBar.text_height) // 2)
 
 
 class CurrentSpeedTextClass:
     def __init__(self):
         self.update()
-        self.x = 1.4 * settings.grid
-        self.y = 25 * settings.grid + (settings.grid - self.text.text_height) // 2
+        self.x = 1.4 * conf.grid
+        self.y = 25 * conf.grid + (conf.grid - self.text.text_height) // 2
 
     def update(self):
-        self.text = Text(f"speed: {settings.speed}", settings.color_font, settings.font_size_currentspeed)
+        self.text = Text(f"speed: {conf.speed}", conf.color_font, conf.font_size_currentspeed)
 
     def draw(self):
         self.text.draw(self.x, self.y)
@@ -493,10 +493,10 @@ class CurrentSpeedTextClass:
 
 class HighscoresInMenuClass:
     def __init__(self):
-        self.x1 = 0.4 * settings.grid
-        self.x2 = settings.grid
-        self.y1 = 0.35 * settings.grid
-        self.color = settings.color_font
+        self.x1 = 0.4 * conf.grid
+        self.x2 = conf.grid
+        self.y1 = 0.35 * conf.grid
+        self.color = conf.color_font
         self.font_size1 = 23
         self.font_size2 = 21
         self.update()
@@ -514,9 +514,9 @@ class HighscoresInMenuClass:
 
 class TotalStatsInMenuClass:
     def __init__(self):
-        self.x = 0.4 * settings.grid
+        self.x = 0.4 * conf.grid
         self.y1 = HighscoresInMenu.height + 7
-        self.color = settings.color_font
+        self.color = conf.color_font
         self.font_size = 20
         self.update()
         self.y2 = self.y1 + self.text_games.text_height + 5
@@ -545,7 +545,7 @@ def menu_main():
 
     LastScore = None
     while menu:
-        clock.tick(settings.fps)
+        clock.tick(conf.fps)
 
         mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
@@ -581,18 +581,18 @@ def menu_main():
 
 def menu_redraw():
     global LastScore
-    window.fill(settings.color_window_background)
-    SnakeLogo.draw((settings.window_width - SnakeLogo.text_width) // 2, 4.5 * settings.grid)
+    window.fill(conf.color_window_background)
+    SnakeLogo.draw((conf.window_width - SnakeLogo.text_width) // 2, 4.5 * conf.grid)
     HighscoresInMenu.draw()
     TotalStatsInMenu.draw()
     if LastScore:
-        LastScore.draw((settings.window_width - LastScore.text_width) // 2, 205)
+        LastScore.draw((conf.window_width - LastScore.text_width) // 2, 205)
     ButtonPlay.draw()
     ButtonExit.draw()
-    Author.draw(settings.window_width - Author.text_width - 0.4 * settings.grid, settings.window_height - Author.text_height - 0.4 * settings.grid)
+    Author.draw(conf.window_width - Author.text_width - 0.4 * conf.grid, conf.window_height - Author.text_height - 0.4 * conf.grid)
     WebsiteButton.draw()
     CreditsButton.draw()
-    SpeedText.draw(settings.window_width - SpeedButtons.width - 0.5 * settings.grid - SpeedText.text_width - settings.SpeedButton_spacing, 0.5 * settings.grid + (settings.SpeedButton_height - SpeedText.text_height) / 2)
+    SpeedText.draw(conf.window_width - SpeedButtons.width - 0.5 * conf.grid - SpeedText.text_width - conf.SpeedButton_spacing, 0.5 * conf.grid + (conf.SpeedButton_height - SpeedText.text_height) / 2)
     SpeedButtons.draw()
 
     pygame.display.update()
@@ -601,16 +601,16 @@ def menu_redraw():
 def game_main():
     global game_notOver
     global game
-    pygame.mixer.music.load(settings.path_music_Game)
+    pygame.mixer.music.load(conf.path_music_Game)
     pygame.mixer.music.play(loops=-1)
     Snake.reinit()
     Apple.move()
     game_notOver = True
 
     while game_notOver:
-        clock.tick(settings.fps)
+        clock.tick(conf.fps)
 
-        if Snake.fpsCounter % settings.move_delay == 0:
+        if Snake.fpsCounter % conf.move_delay == 0:
             game_redraw()
         if Snake.dirx or Snake.diry:  # snake started moving
             Snake.fpsCounter += 1
@@ -619,13 +619,13 @@ def game_main():
             if event.type == pygame.QUIT:
                 game_notOver = False
             elif joystick and event.type == pygame.JOYAXISMOTION:
-                if joystick.get_axis(3) < -settings.joystick_sentivity:  # ← -x
+                if joystick.get_axis(3) < -conf.joystick_sentivity:  # ← -x
                     Snake.change_dir_left()
-                elif joystick.get_axis(3) > settings.joystick_sentivity:  # → +x
+                elif joystick.get_axis(3) > conf.joystick_sentivity:  # → +x
                     Snake.change_dir_right()
-                elif joystick.get_axis(4) < -settings.joystick_sentivity:  # ↑ -y
+                elif joystick.get_axis(4) < -conf.joystick_sentivity:  # ↑ -y
                     Snake.change_dir_up()
-                elif joystick.get_axis(4) > settings.joystick_sentivity:  # ↓ +y
+                elif joystick.get_axis(4) > conf.joystick_sentivity:  # ↓ +y
                     Snake.change_dir_down()
 
         keys = pygame.key.get_pressed()
@@ -641,36 +641,36 @@ def game_main():
         elif keys[pygame.K_DOWN] or keys[pygame.K_s]:  # ↓ +y
             Snake.change_dir_down()
 
-        if Snake.fpsCounter % settings.move_delay == 0:
+        if Snake.fpsCounter % conf.move_delay == 0:
             Snake.move()
 
-    logger.info(f"Game over, score: {Snake.score} (speed: {settings.speed}, time: {format_time(Snake.fpsCounter // settings.fps)})")
+    logger.info(f"Game over, score: {Snake.score} (speed: {conf.speed}, time: {format_time(Snake.fpsCounter // conf.fps)})")
     pygame.mixer.music.pause()
-    pygame.mixer.music.load(settings.path_music_GameOver)
+    pygame.mixer.music.load(conf.path_music_GameOver)
     pygame.mixer.music.play()
 
     Data.total_games += 1
-    Data.total_time += Snake.fpsCounter / settings.fps
+    Data.total_time += Snake.fpsCounter / conf.fps
     TotalStatsInMenu.update()
     # new record
-    if Snake.score > Data.highscores_speed[(speed_str := str(settings.speed))]:
-        logger.info(f"Highscore beaten, old: {Data.highscores_speed[speed_str]}, new: {Snake.score} (speed {settings.speed})")
+    if Snake.score > Data.highscores_speed[(speed_str := str(conf.speed))]:
+        logger.info(f"Highscore beaten, old: {Data.highscores_speed[speed_str]}, new: {Snake.score} (speed {conf.speed})")
         Data.highscores_speed[speed_str] = Snake.score
         if Snake.score > Data.highscore:
             Data.highscore = Snake.score
-        NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {settings.speed})", settings.color_newhighscore, settings.font_size_newhighscore)
-        NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
+        NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {conf.speed})", conf.color_newhighscore, conf.font_size_newhighscore)
+        NewHighscoreText.draw((conf.window_width - NewHighscoreText.text_width) // 2, (conf.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
         HighscoresInMenu.update()
     elif Snake.score > Data.highscore:
-        logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {settings.speed})")
+        logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {conf.speed})")
         Data.highscore = Snake.score
-        NewHighscoreText = Text(f"new highscore: {Snake.score}", settings.color_newhighscore, settings.font_size_newhighscore)
-        NewHighscoreText.draw((settings.window_width - NewHighscoreText.text_width) // 2, (settings.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
+        NewHighscoreText = Text(f"new highscore: {Snake.score}", conf.color_newhighscore, conf.font_size_newhighscore)
+        NewHighscoreText.draw((conf.window_width - NewHighscoreText.text_width) // 2, (conf.window_height - GameOver.text_height) // 2 - GameOver.text_height + NewHighscoreText.text_height - 10)
         HighscoresInMenu.update()
     Data.write()
 
     global LastScore
-    LastScore = Text(f"last score: {Snake.score}", settings.color_font, settings.font_size_lastscore)
+    LastScore = Text(f"last score: {Snake.score}", conf.color_font, conf.font_size_lastscore)
 
     gameover_main()
 
@@ -678,8 +678,8 @@ def game_main():
 
 
 def game_redraw():
-    window.fill(settings.color_window_background)
-    pygame.draw.rect(window, settings.color_game_background, (settings.game_x, settings.game_y, settings.game_width, settings.game_height))
+    window.fill(conf.color_window_background)
+    pygame.draw.rect(window, conf.color_game_background, (conf.game_x, conf.game_y, conf.game_width, conf.game_height))
     Snake.draw()
     Apple.draw()
     TopBar.draw()
@@ -688,13 +688,13 @@ def game_redraw():
 
 
 def gameover_main():
-    GameOver.draw((settings.window_width - GameOver.text_width) // 2, (settings.window_height - GameOver.text_height) // 2)
+    GameOver.draw((conf.window_width - GameOver.text_width) // 2, (conf.window_height - GameOver.text_height) // 2)
     show_gameOver = True
     if joystick:
         joystick.rumble(0.2, 0.8, 500)
 
     while show_gameOver:
-        clock.tick(settings.fps)
+        clock.tick(conf.fps)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -706,7 +706,7 @@ def gameover_main():
         pygame.display.update()
 
     while True:  # wait for key to be released to avoid pressing it on menu
-        clock.tick(settings.fps)
+        clock.tick(conf.fps)
 
         pygame.event.get()
         keys = pygame.key.get_pressed()
@@ -727,11 +727,11 @@ def creditss_main():
     global CreditsBackButton
 
     # I do not prerender it, as it is unlikely to be used often
-    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", settings.color_font, settings.font_size_creditsscene, line_lenght=52)
-    CreditsBackButton = Button((settings.window_width - settings.button_width) // 2, 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Back", settings.button_text_size, ButtonCmds.creditssFalse)
+    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", conf.color_font, conf.font_size_creditsscene, line_lenght=52)
+    CreditsBackButton = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Back", conf.button_text_size, ButtonCmds.creditssFalse)
 
     while creditss:
-        clock.tick(settings.fps)
+        clock.tick(conf.fps)
 
         mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
@@ -750,8 +750,8 @@ def creditss_main():
 def creditss_redraw():
     global CreditsText
     global CreditsBackButton
-    window.fill(settings.color_window_background)
-    CreditsText.draw((settings.window_width - CreditsText.text_width) // 2, 90)
+    window.fill(conf.color_window_background)
+    CreditsText.draw((conf.window_width - CreditsText.text_width) // 2, 90)
     CreditsBackButton.draw()
     pygame.display.update()
 
@@ -761,17 +761,17 @@ def loading_screen(function, loading_text, error_text):
     thread.start()
     time = 0
     LoadingTexts = (
-        Text(loading_text, settings.color_font, settings.font_size_loading),
-        Text(f"{loading_text}.", settings.color_font, settings.font_size_loading),
-        Text(f"{loading_text}..", settings.color_font, settings.font_size_loading),
-        Text(f"{loading_text}...", settings.color_font, settings.font_size_loading)
+        Text(loading_text, conf.color_font, conf.font_size_loading),
+        Text(f"{loading_text}.", conf.color_font, conf.font_size_loading),
+        Text(f"{loading_text}..", conf.color_font, conf.font_size_loading),
+        Text(f"{loading_text}...", conf.color_font, conf.font_size_loading)
     )
 
     while thread.is_alive():
-        clock.tick(settings.fps)
-        window.fill(settings.color_window_background)
-        Loading = LoadingTexts[time // settings.fps % 4]
-        Loading.draw((settings.window_width - Loading.text_width) / 2, (settings.window_height - Loading.text_height) / 2)
+        clock.tick(conf.fps)
+        window.fill(conf.color_window_background)
+        Loading = LoadingTexts[time // conf.fps % 4]
+        Loading.draw((conf.window_width - Loading.text_width) / 2, (conf.window_height - Loading.text_height) / 2)
         pygame.display.update()
         time += 1
 
@@ -786,11 +786,11 @@ def error_screen(text):
     global error
     global mouse
     error = True
-    ErrorText = LongText(text, settings.color_font, settings.font_size_error)
-    ButtonExit2 = Button((settings.window_width - settings.button_width) // 2, 500, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.exit1)
+    ErrorText = LongText(text, conf.color_font, conf.font_size_error)
+    ButtonExit2 = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Exit", conf.button_text_size, ButtonCmds.exit1)
 
     while error:
-        clock.tick(settings.fps)
+        clock.tick(conf.fps)
 
         mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
@@ -803,15 +803,15 @@ def error_screen(text):
         if keys[pygame.K_ESCAPE]:
             error = False
 
-        window.fill(settings.color_error_backgorund)
-        ErrorText.draw((settings.window_width - ErrorText.text_width) / 2, (settings.window_height - ErrorText.text_height) / 2 - 60)
+        window.fill(conf.color_error_backgorund)
+        ErrorText.draw((conf.window_width - ErrorText.text_width) / 2, (conf.window_height - ErrorText.text_height) / 2 - 60)
         ButtonExit2.draw()
         pygame.display.update()
 
 
-############## Settings ##############
+####### Settings / Config #######
 
-class settings:
+class conf:
     version = "1.3.1"
     grid = 25
     grid_border = 2
@@ -902,27 +902,27 @@ class settings:
 
 #### Initilizing game data ####
 # moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
-if not settings.path_gameDirectory.exists():
-    settings.path_gameDirectory.mkdir()
-if not settings.path_logDirectory.exists():
-    settings.path_logDirectory.mkdir()
-if not settings.path_assetsDirectory.exists():
-    settings.path_assetsDirectory.mkdir()
+if not conf.path_gameDirectory.exists():
+    conf.path_gameDirectory.mkdir()
+if not conf.path_logDirectory.exists():
+    conf.path_logDirectory.mkdir()
+if not conf.path_assetsDirectory.exists():
+    conf.path_assetsDirectory.mkdir()
 
-if not settings.path_icon.exists():
-    settings.path_icon.write_bytes(base64.b64decode(settings.icon_content))
+if not conf.path_icon.exists():
+    conf.path_icon.write_bytes(base64.b64decode(conf.icon_content))
 
 #### Logging configuration ####
-if settings.path_log4.exists():
-    settings.path_log4.unlink()
-if settings.path_log3.exists():
-    settings.path_log3.replace(settings.path_log4)
-if settings.path_log2.exists():
-    settings.path_log2.replace(settings.path_log3)
-if settings.path_log1.exists():
-    settings.path_log1.replace(settings.path_log2)
+if conf.path_log4.exists():
+    conf.path_log4.unlink()
+if conf.path_log3.exists():
+    conf.path_log3.replace(conf.path_log4)
+if conf.path_log2.exists():
+    conf.path_log2.replace(conf.path_log3)
+if conf.path_log1.exists():
+    conf.path_log1.replace(conf.path_log2)
 
-sys.stderr = Tee(sys.stderr, settings.path_log1, "a")
+sys.stderr = Tee(sys.stderr, conf.path_log1, "a")
 
 for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
     logging.root.removeHandler(handler)
@@ -930,7 +930,7 @@ for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
-file_handler = logging.FileHandler(filename=settings.path_log1, mode="a")
+file_handler = logging.FileHandler(filename=conf.path_log1, mode="a")
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 stdout_handler = logging.StreamHandler(sys.stdout)
@@ -938,7 +938,7 @@ stdout_handler.setLevel(logging.INFO)
 logger.addHandler(stdout_handler)
 
 #### Main game code ####
-logger.info(f"Starting Snake v{settings.version}")
+logger.info(f"Starting Snake v{conf.version}")
 logger.info(f"System: {platform.system()}, version: {platform.release()}")
 pygame.display.init()
 pygame.mixer.init()
@@ -946,9 +946,9 @@ pygame.font.init()
 pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() else False
 clock = pygame.time.Clock()
-window = pygame.display.set_mode((settings.window_width, settings.window_height), vsync=1)
-pygame.display.set_caption(f"Snake v{settings.version}")
-Icon = pygame.image.load(settings.path_icon)
+window = pygame.display.set_mode((conf.window_width, conf.window_height), vsync=1)
+pygame.display.set_caption(f"Snake v{conf.version}")
+Icon = pygame.image.load(conf.path_icon)
 pygame.display.set_icon(Icon)
 
 loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.")
@@ -956,17 +956,17 @@ Data = File()
 Data.read()
 
 # Prerendered objects
-GameOver = Text("GAME  OVER", settings.color_gameover, settings.font_size_gameover)
-SnakeLogo = Text("Snake Game", settings.color_snakeLogo, settings.font_size_snakeLogo)
-Author = Text("Michał Machnikowski 2022", settings.color_author, settings.font_size_author)
+GameOver = Text("GAME  OVER", conf.color_gameover, conf.font_size_gameover)
+SnakeLogo = Text("Snake Game", conf.color_snakeLogo, conf.font_size_snakeLogo)
+Author = Text("Michał Machnikowski 2022", conf.color_author, conf.font_size_author)
 
-ButtonPlay = Button((settings.window_width - settings.button_width) // 2, settings.ButtonPlay_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Play", settings.button_text_size, ButtonCmds.gameTrue)
-ButtonExit = Button((settings.window_width - settings.button_width) // 2, settings.ButtonExit_y, settings.button_width, settings.button_height, settings.color_button, settings.color_button_focused, settings.button_text_color, "Exit", settings.button_text_size, ButtonCmds.menuFalse)
-WebsiteButton = Button(0.5 * settings.grid, settings.window_height - 2.5 * settings.grid, int(4.85 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "website", settings.font_size_website, ButtonCmds.website, radius=7)
-CreditsButton = Button(int(6 * settings.grid), settings.window_height - 2.5 * settings.grid, int(4.65 * settings.grid), 2 * settings.grid, settings.color_button, settings.color_button_focused, settings.button_text_color, "credits", settings.font_size_website, ButtonCmds.creditssTrue, radius=7)
+ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Play", conf.button_text_size, ButtonCmds.gameTrue)
+ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, conf.color_button, conf.color_button_focused, conf.button_text_color, "Exit", conf.button_text_size, ButtonCmds.menuFalse)
+WebsiteButton = Button(0.5 * conf.grid, conf.window_height - 2.5 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, conf.color_button, conf.color_button_focused, conf.button_text_color, "website", conf.font_size_website, ButtonCmds.website, radius=7)
+CreditsButton = Button(int(6 * conf.grid), conf.window_height - 2.5 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, conf.color_button, conf.color_button_focused, conf.button_text_color, "credits", conf.font_size_website, ButtonCmds.creditssTrue, radius=7)
 
-SpeedText = Text("Speed:", settings.color_font, settings.font_size_speed)
-SpeedButtons = ButtonSpeedGroup(settings.window_width - ((len(settings.speed_list) - 1) * (settings.SpeedButton_width + settings.SpeedButton_spacing) + settings.SpeedButton_width + 0.5 * settings.grid), 0.5 * settings.grid, settings.SpeedButton_width, settings.SpeedButton_height, settings.color_button, settings.color_button_focused, settings.color_font, settings.font_size_speed, settings.speed_list, settings.SpeedButton_spacing)
+SpeedText = Text("Speed:", conf.color_font, conf.font_size_speed)
+SpeedButtons = ButtonSpeedGroup(conf.window_width - ((len(conf.speed_list) - 1) * (conf.SpeedButton_width + conf.SpeedButton_spacing) + conf.SpeedButton_width + 0.5 * conf.grid), 0.5 * conf.grid, conf.SpeedButton_width, conf.SpeedButton_height, conf.color_button, conf.color_button_focused, conf.color_font, conf.font_size_speed, conf.speed_list, conf.SpeedButton_spacing)
 HighscoresInMenu = HighscoresInMenuClass()
 TotalStatsInMenu = TotalStatsInMenuClass()
 
