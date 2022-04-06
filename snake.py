@@ -169,6 +169,15 @@ class RoundedRectangle:
         pygame.draw.circle(window, self.color, (x + self.radius, y + self.height - self.radius), self.radius)
 
 
+def draw_roundedrectangle(color, x, y, width, height, radius):
+    pygame.draw.rect(window, color, (x + radius, y, width - 2 * radius, height))
+    pygame.draw.rect(window, color, (x, y + radius, width, height - 2 * radius))
+    pygame.draw.circle(window, color, (x + radius, y + radius), radius)
+    pygame.draw.circle(window, color, (x + width - radius, y + radius), radius)
+    pygame.draw.circle(window, color, (x + width - radius, y + height - radius), radius)
+    pygame.draw.circle(window, color, (x + radius, y + height - radius), radius)
+
+
 class Button:
     def __init__(self, x, y, width, height, text, font_size, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command=None, radius=9):
         self.x = x
@@ -377,6 +386,7 @@ class SnakeClass:
         self.color_head = (255, 255, 255)
         self.colors_tail = [(3, 255, 3), (2, 232, 2), (1, 187, 0)]
         self.colors_tail_len = len(self.colors_tail)
+        self.radius = 2
         self.reinit()
 
     def reinit(self):
@@ -438,8 +448,8 @@ class SnakeClass:
 
     def draw(self):
         for i, segment in enumerate(self.xyList[:-1], start=2):
-            pygame.draw.rect(window, self.colors_tail[(self.score - i) % self.colors_tail_len], segment)
-        pygame.draw.rect(window, self.color_head, self.xyList[-1])
+            draw_roundedrectangle(self.colors_tail[(self.score - i) % self.colors_tail_len], *segment, self.radius)
+        draw_roundedrectangle(self.color_head, *self.xyList[-1], self.radius)
 
 
 class AppleClass:
@@ -447,6 +457,7 @@ class AppleClass:
         self.grid = conf.grid
         self.border = conf.grid_border
         self.color = (255, 0, 0)
+        self.radius = 2
         self.move()
 
     def move(self):
@@ -459,7 +470,7 @@ class AppleClass:
                 break
 
     def draw(self):
-        pygame.draw.rect(window, self.color, self.location)
+        draw_roundedrectangle(self.color, *self.location, self.radius)
 
 
 class TopBarClass:
