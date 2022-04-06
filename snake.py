@@ -215,7 +215,7 @@ class ButtonSpeed(Button):
         self.desired_value = desired_value
 
     def click(self):
-        if self.is_pointed():
+        if self.is_pointed() and conf.speed != self.desired_value:
             conf.change_speed_to(self.desired_value)
 
     def is_highlighted(self):
