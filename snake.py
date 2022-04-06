@@ -169,13 +169,15 @@ class RoundedRectangle:
         pygame.draw.circle(window, self.color, (x + self.radius, y + self.height - self.radius), self.radius)
 
 
-def draw_roundedrectangle(color, x, y, width, height, radius):
-    pygame.draw.rect(window, color, (x + radius, y, width - 2 * radius, height))
-    pygame.draw.rect(window, color, (x, y + radius, width, height - 2 * radius))
-    pygame.draw.circle(window, color, (x + radius, y + radius), radius)
-    pygame.draw.circle(window, color, (x + width - radius, y + radius), radius)
-    pygame.draw.circle(window, color, (x + width - radius, y + height - radius), radius)
-    pygame.draw.circle(window, color, (x + radius, y + height - radius), radius)
+def draw_tile(color, x, y):
+    w = conf.tile_width
+    r = conf.tile_radius
+    pygame.draw.rect(window, color, (x + r, y, w - 2 * r, w))
+    pygame.draw.rect(window, color, (x, y + r, w, w - 2 * r))
+    pygame.draw.circle(window, color, (x + r, y + r), r)
+    pygame.draw.circle(window, color, (x + w - r, y + r), r)
+    pygame.draw.circle(window, color, (x + w - r, y + w - r), r)
+    pygame.draw.circle(window, color, (x + r, y + w - r), r)
 
 
 class Button:
@@ -380,13 +382,10 @@ def checkFiles():
 
 class SnakeClass:
     def __init__(self):
-        self.grid = conf.grid
-        self.border = conf.grid_border
         self.velocity = conf.grid
         self.color_head = (255, 255, 255)
         self.colors_tail = [(3, 255, 3), (2, 232, 2), (1, 187, 0)]
         self.colors_tail_len = len(self.colors_tail)
-        self.radius = 2
         self.reinit()
 
     def reinit(self):
@@ -394,9 +393,9 @@ class SnakeClass:
         self.diry = 0
         self.dirx_current = 0
         self.diry_current = 0
-        self.x = (conf.game_width - self.grid) // 2 + conf.game_x
-        self.y = (conf.game_height - self.grid) // 2 + conf.game_y
-        self.xyList = [(self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)]
+        self.x = (conf.game_width - conf.grid) // 2 + conf.game_x
+        self.y = (conf.game_height - conf.grid) // 2 + conf.game_y
+        self.xyList = [(self.x + conf.grid_border, self.y + conf.grid_border)]
         self.fpsCounter = 0
         self.score = 1
 
@@ -429,9 +428,9 @@ class SnakeClass:
             self.x += self.dirx
         elif self.diry != 0:
             self.y += self.diry
-        self.head_location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
+        self.head_location = (self.x + conf.grid_border, self.y + conf.grid_border)
 
-        if self.x == conf.game_x - self.grid or self.x == conf.game_width + self.grid or self.y == conf.game_y - self.grid or self.y == conf.game_height + conf.topbar_height:
+        if self.x == conf.game_x - conf.grid or self.x == conf.game_width + conf.grid or self.y == conf.game_y - conf.grid or self.y == conf.game_height + conf.topbar_height:
             game_notOver = False
 
         for pair in self.xyList[:-1]:  # collision with itself
@@ -447,30 +446,28 @@ class SnakeClass:
             self.xyList.pop(0)
 
     def draw(self):
-        for i, segment in enumerate(self.xyList[:-1], start=2):
-            draw_roundedrectangle(self.colors_tail[(self.score - i) % self.colors_tail_len], *segment, self.radius)
-        draw_roundedrectangle(self.color_head, *self.xyList[-1], self.radius)
+        for i, pos in enumerate(self.xyList[:-1], start=2):
+            draw_tile(self.colors_tail[(self.score - i) % self.colors_tail_len], *pos)
+        draw_tile(self.color_head, *self.xyList[-1])
 
 
 class AppleClass:
     def __init__(self):
-        self.grid = conf.grid
-        self.border = conf.grid_border
         self.color = (255, 0, 0)
-        self.radius = 2
+        self.width = conf.grid - 2 * conf.grid_border
         self.move()
 
     def move(self):
-        self.x = randrange(0, conf.game_width // self.grid) * self.grid + conf.game_x
-        self.y = randrange(0, conf.game_height // self.grid) * self.grid + conf.game_y
-        self.location = (self.x + self.border, self.y + self.border, self.grid - 2 * self.border, self.grid - 2 * self.border)
-        for pair in Snake.xyList:
-            if pair == self.location:
+        self.x = randrange(0, conf.game_width // conf.grid) * conf.grid + conf.game_x
+        self.y = randrange(0, conf.game_height // conf.grid) * conf.grid + conf.game_y
+        self.location = (self.x + conf.grid_border, self.y + conf.grid_border)
+        for pos in Snake.xyList:
+            if pos == self.location:
                 self.move()
                 break
 
     def draw(self):
-        draw_roundedrectangle(self.color, *self.location, self.radius)
+        draw_tile(self.color, *self.location)
 
 
 class TopBarClass:
@@ -837,6 +834,8 @@ class conf:
     game_y = topbar_height
     game_width = window_width - 2 * grid  # odd multiples of grid
     game_height = window_height - topbar_height - grid  # odd multiples of grid
+    tile_width = grid - 2 * grid_border
+    tile_radius = 2
 
     color_window_background = (1, 170, 64)
     color_error_backgorund = (208, 26, 26)
