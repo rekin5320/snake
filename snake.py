@@ -397,7 +397,7 @@ class SnakeClass:
         self.y = (conf.game_height - conf.grid) // 2 + conf.game_y
         self.xyList = [(self.x + conf.grid_border, self.y + conf.grid_border)]
         self.fpsCounter = 0
-        self.score = 1
+        self.score = 0
 
     def change_dir_left(self):
         if self.dirx_current == 0:
@@ -446,7 +446,7 @@ class SnakeClass:
             self.xyList.pop(0)
 
     def draw(self):
-        for i, pos in enumerate(self.xyList[:-1], start=2):
+        for i, pos in enumerate(self.xyList[:-1], start=1):
             draw_tile(self.colors_tail[(self.score - i) % self.colors_tail_len], *pos)
         draw_tile(self.color_head, *self.xyList[-1])
 
