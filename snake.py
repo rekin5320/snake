@@ -330,6 +330,8 @@ class File:  # Data
     def write(self):
         try:
             logger.debug("Writing data")
+            conf.path_data.rename(conf.path_data_backup)
+            conf.path_version.rename(conf.path_version_backup)
             self.datadict["speed"] = conf.speed
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
@@ -863,7 +865,9 @@ class conf:
     else:
         path_gameDirectory = MyPath.home() / ".snake"  # ~/.snake/
     path_data = path_gameDirectory / "data"  # ~/.snake/data
+    path_data_backup = path_gameDirectory / "data.backup"  # ~/.snake/data.backup
     path_version = path_gameDirectory / "version"  # ~/.snake/version
+    path_version_backup = path_gameDirectory / "version.backup"  # ~/.snake/version.backup
     path_assetsDirectory = path_gameDirectory / "assets"  # ~/.snake/assets/
     path_font = path_assetsDirectory / "OpenSans-Bold.ttf"
     path_music_Game = path_assetsDirectory / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
