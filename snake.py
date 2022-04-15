@@ -20,10 +20,9 @@ import requests
 
 def decimals(n):
     """
-    Inserts spaces between every three digits.
-    See https://stackoverflow.com/a/17484665
+    Inserts spaces as thousands separator.
     """
-    return format(n, ",").replace(",", " ")
+    return f"{n:,}".replace(",", " ")
 
 
 class MyThread(threading.Thread):
