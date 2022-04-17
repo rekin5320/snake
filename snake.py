@@ -329,8 +329,8 @@ class File:  # Data
     def write(self):
         try:
             logger.debug("Writing data")
-            conf.path_data.rename(conf.path_data_backup)
-            conf.path_version.rename(conf.path_version_backup)
+            conf.path_data.replace(conf.path_data_backup)
+            conf.path_version.replace(conf.path_version_backup)
             self.datadict["speed"] = conf.speed
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
