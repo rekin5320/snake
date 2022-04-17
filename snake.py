@@ -862,22 +862,22 @@ class conf:
     ButtonExit_y = 420
 
     if os.name == "nt":
-        path_gameDirectory = MyPath.home() / "AppData" / "Roaming" / ".snake"  # ~\AppData\Roaming\.snake\
+        path_gameDir = MyPath.home() / "AppData" / "Roaming" / ".snake"  # ~\AppData\Roaming\.snake\
     else:
-        path_gameDirectory = MyPath.home() / ".snake"  # ~/.snake/
-    path_data = path_gameDirectory / "data"  # ~/.snake/data
-    path_data_backup = path_gameDirectory / "data.backup"  # ~/.snake/data.backup
-    path_version = path_gameDirectory / "version"  # ~/.snake/version
-    path_assetsDirectory = path_gameDirectory / "assets"  # ~/.snake/assets/
-    path_font = path_assetsDirectory / "OpenSans-Bold.ttf"
-    path_music_Game = path_assetsDirectory / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
-    path_music_GameOver = path_assetsDirectory / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
-    path_icon = path_assetsDirectory / "icon.png"
-    path_logDirectory = path_gameDirectory / "logs"  # ~/.snake/logs/
-    path_log1 = path_logDirectory / "1.log"
-    path_log2 = path_logDirectory / "2.log"
-    path_log3 = path_logDirectory / "3.log"
-    path_log4 = path_logDirectory / "4.log"
+        path_gameDir = MyPath.home() / ".snake"  # ~/.snake/
+    path_data = path_gameDir / "data"  # ~/.snake/data
+    path_data_backup = path_gameDir / "data.backup"  # ~/.snake/data.backup
+    path_version = path_gameDir / "version"  # ~/.snake/version
+    path_assetsDir = path_gameDir / "assets"  # ~/.snake/assets/
+    path_font = path_assetsDir / "OpenSans-Bold.ttf"
+    path_music_Game = path_assetsDir / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
+    path_music_GameOver = path_assetsDir / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
+    path_icon = path_assetsDir / "icon.png"
+    path_logDir = path_gameDir / "logs"  # ~/.snake/logs/
+    path_log1 = path_logDir / "1.log"
+    path_log2 = path_logDir / "2.log"
+    path_log3 = path_logDir / "3.log"
+    path_log4 = path_logDir / "4.log"
 
     url_font = "https://cdn.discordapp.com/attachments/854111213709557821/956506488115974164/OpenSans-Bold.ttf"
     url_music_Game = "https://cdn.discordapp.com/attachments/854111213709557821/956506487579095070/Tristan_Lohengrin_-_Happy_8bit_Loop_01.ogg"
@@ -906,12 +906,12 @@ class conf:
 
 #### Initilizing game data ####
 # moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
-if not conf.path_gameDirectory.exists():
-    conf.path_gameDirectory.mkdir()
-if not conf.path_logDirectory.exists():
-    conf.path_logDirectory.mkdir()
-if not conf.path_assetsDirectory.exists():
-    conf.path_assetsDirectory.mkdir()
+if not conf.path_gameDir.exists():
+    conf.path_gameDir.mkdir()
+if not conf.path_logDir.exists():
+    conf.path_logDir.mkdir()
+if not conf.path_assetsDir.exists():
+    conf.path_assetsDir.mkdir()
 
 if not conf.path_icon.exists():
     conf.path_icon.write_bytes(base64.b64decode(conf.icon_content))
