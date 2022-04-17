@@ -336,9 +336,10 @@ class File:  # Data
             self.datadict["highscores_speed"] = self.highscores_speed
             self.datadict["total_games"] = self.total_games
             self.datadict["total_time"] = round_to_3_places(self.total_time)
-            logger.debug(json.dumps(self.datadict))
+            data = json.dumps(self.datadict, separators=(",", ":"))
+            logger.debug(data)
             with self.path_data.open("w") as file:
-                file.write(base64_encode(json.dumps(self.datadict)))
+                file.write(base64_encode(data))
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
             conf.path_version.write_text(base64_encode(conf.version))
 
