@@ -578,9 +578,9 @@ def menu_main():
         if keys[pygame.K_SPACE]:
             game = True
 
-        if keys[pygame.K_MINUS]:
+        if keys[pygame.K_MINUS] or keys[pygame.K_KP_MINUS]:
             SpeedButtons.await_decrease()
-        elif keys[pygame.K_EQUALS] and (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]):
+        elif (keys[pygame.K_EQUALS] and (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT])) or keys[pygame.K_KP_PLUS]:
             SpeedButtons.await_increase()
         else:
             SpeedButtons.change_speed()
