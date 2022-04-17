@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+* Snake segments and apple have rounded corners
+* Count score from 0
+* Back up game data
+* Other improvements
 
 ## Release 1.4.0 (2022-04-03)
 * Tail segments have different colors
