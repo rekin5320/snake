@@ -330,6 +330,7 @@ class File:  # Data
         try:
             logger.debug("Writing data")
             conf.path_data.replace(conf.path_data_backup)
+            self.datadict["version"] = conf.version
             self.datadict["speed"] = conf.speed
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
