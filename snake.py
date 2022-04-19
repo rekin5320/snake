@@ -101,7 +101,7 @@ class Text:
 
 
 class LongText:
-    def __init__(self, text, color, font_size, line_lenght=40, line_spacing=6):
+    def __init__(self, text, color, font_size, line_length=40, line_spacing=6):
         self.line_spacing = line_spacing
 
         # splitting text into lines
@@ -116,13 +116,13 @@ class LongText:
                 curr_line = ""
                 i += 1
 
-            elif line_lenght - len(curr_line) - 1 >= len(words[i]):
+            elif line_length - len(curr_line) - 1 >= len(words[i]):
                 if len(curr_line):
                     curr_line += " "
                 curr_line += words[i]
                 i += 1
 
-            elif len(words[i]) >= line_lenght:
+            elif len(words[i]) >= line_length:
                 textList.append(curr_line)
                 textList.append(words[i])
                 curr_line = ""
@@ -633,13 +633,13 @@ def game_main():
             if event.type == pygame.QUIT:
                 game_notOver = False
             elif joystick and event.type == pygame.JOYAXISMOTION:
-                if joystick.get_axis(3) < -conf.joystick_sentivity:  # ← -x
+                if joystick.get_axis(3) < -conf.joystick_sensitivity:  # ← -x
                     Snake.change_dir_left()
-                elif joystick.get_axis(3) > conf.joystick_sentivity:  # → +x
+                elif joystick.get_axis(3) > conf.joystick_sensitivity:  # → +x
                     Snake.change_dir_right()
-                elif joystick.get_axis(4) < -conf.joystick_sentivity:  # ↑ -y
+                elif joystick.get_axis(4) < -conf.joystick_sensitivity:  # ↑ -y
                     Snake.change_dir_up()
-                elif joystick.get_axis(4) > conf.joystick_sentivity:  # ↓ +y
+                elif joystick.get_axis(4) > conf.joystick_sensitivity:  # ↓ +y
                     Snake.change_dir_down()
 
         keys = pygame.key.get_pressed()
@@ -741,7 +741,7 @@ def creditss_main():
     global CreditsBackButton
 
     # I do not prerender it, as it is unlikely to be used often
-    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", conf.color_font, conf.font_size_creditsscene, line_lenght=52)
+    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", conf.color_font, conf.font_size_creditsscene, line_length=52)
     CreditsBackButton = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Back", conf.button_font_size, command=ButtonCmds.creditssFalse)
 
     while creditss:
@@ -817,7 +817,7 @@ def error_screen(text):
         if keys[pygame.K_ESCAPE]:
             error = False
 
-        window.fill(conf.color_error_backgorund)
+        window.fill(conf.color_error_background)
         ErrorText.draw((conf.window_width - ErrorText.width) / 2, (conf.window_height - ErrorText.height) / 2 - 60)
         ButtonExit2.draw()
         pygame.display.update()
@@ -841,7 +841,7 @@ class conf:
     tile_radius = 2
 
     color_window_background = (1, 170, 64)
-    color_error_backgorund = (208, 26, 26)
+    color_error_background = (208, 26, 26)
     color_game_background = (0, 0, 0)
     color_font = (255, 255, 255)
     color_newhighscore = (0, 0, 255)
@@ -899,12 +899,12 @@ class conf:
         Data.write()
         CurrentSpeedText.update()
 
-    joystick_sentivity = 0.91
+    joystick_sensitivity = 0.91
 
 
 ############# Main code #############
 
-#### Initilizing game data ####
+#### Initializing game data ####
 # moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
 if not conf.path_gameDir.exists():
     conf.path_gameDir.mkdir()
