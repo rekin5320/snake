@@ -81,10 +81,13 @@ def round_to_3_places(num):
     return int(num * 1000 + 0.5) / 1000
 
 
-def format_time(seconds):
-    if not isinstance(seconds, int):
-        seconds = int(seconds + 0.5)
-    return f"{seconds // 60:02}:{seconds % 60:02}"
+def format_time(seconds, milliseconds=False):
+    if milliseconds:
+        return f"{seconds // 60:02.0f}:{seconds % 60:02.3f}"
+    else:
+        if not isinstance(seconds, int):
+            seconds = int(seconds + 0.5)
+        return f"{seconds // 60:02}:{seconds % 60:02}"
 
 
 class Text:
@@ -658,7 +661,7 @@ def game_main():
         if Snake.fpsCounter % conf.move_delay == 0:
             Snake.move()
 
-    logger.info(f"Game over, score: {Snake.score} (speed: {conf.speed}, time: {format_time(Snake.fpsCounter // conf.fps)})")
+    logger.info(f"Game over, score: {Snake.score} (speed: {conf.speed}, time: {format_time(Snake.fpsCounter / conf.fps, milliseconds=True)})")
     pygame.mixer.music.pause()
     pygame.mixer.music.load(conf.path_music_GameOver)
     pygame.mixer.music.play()
