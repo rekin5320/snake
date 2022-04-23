@@ -339,10 +339,8 @@ class File:  # Data
             self.datadict["highscores_speed"] = self.highscores_speed
             self.datadict["total_games"] = self.total_games
             self.datadict["total_time"] = round_to_3_places(self.total_time)
-            data = json.dumps(self.datadict, separators=(",", ":"))
-            logger.debug(data)
             with self.path_data.open("w") as file:
-                file.write(base64_encode(data))
+                file.write(self.dump_data())
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
             conf.path_version.write_text(base64_encode(conf.version))
 
@@ -350,6 +348,9 @@ class File:  # Data
             logger.error(err)
             logger.error(traceback.format_exc())
             error_screen("Error while writing game data")
+
+    def dump_data(self):
+        return base64_encode(json.dumps(self.datadict, separators=(",", ":")))
 
 
 def download_if_needed(path: MyPath, url, name):
@@ -984,5 +985,6 @@ CurrentSpeedText = CurrentSpeedTextClass()
 menu_main()
 
 logger.info("Quitting")
+logger.debug(Data.dump_data())
 
 pygame.quit()
