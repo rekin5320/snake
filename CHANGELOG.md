@@ -1,9 +1,12 @@
 # Changelog
 
 ## Unreleased
+
+## Release 1.5.0 (2022-04-23)
 * Snake segments and apple have rounded corners
 * Count score from 0
 * Back up game data
+* Render the game at 120 FPS for smoother gameplay
 * Other improvements
 
 ## Release 1.4.0 (2022-04-03)
