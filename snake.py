@@ -83,7 +83,7 @@ def round_to_3_places(num):
 
 def format_time(seconds, milliseconds=False):
     if milliseconds:
-        return f"{seconds // 60:02.0f}:{seconds % 60:02.3f}"
+        return f"{seconds // 60:02.0f}:{seconds % 60:06.3f}"
     else:
         if not isinstance(seconds, int):
             seconds = int(seconds + 0.5)
