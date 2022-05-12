@@ -91,11 +91,11 @@ def format_time(seconds, milliseconds=False):
 
 
 class Text:
-    def __init__(self, text, color, font_size):
-        if conf.path_font.is_good():
-            self.font = pygame.font.Font(conf.path_font, font_size)
-        else:
+    def __init__(self, text, color, font_size, sysfont=False):
+        if sysfont:
             self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
+        else:
+            self.font = pygame.font.Font(conf.path_font, font_size)
         self.text = self.font.render(text, True, color)
         self.width, self.height = self.text.get_size()
 
@@ -774,15 +774,15 @@ def creditss_redraw():
     pygame.display.update()
 
 
-def loading_screen(function, loading_text, error_text):
+def loading_screen(function, loading_text, error_text, sysfont=False):
     thread = MyThread(target=function, daemon=True)
     thread.start()
     time = 0
     LoadingTexts = (
-        Text(loading_text, conf.color_font, conf.font_size_loading),
-        Text(f"{loading_text}.", conf.color_font, conf.font_size_loading),
-        Text(f"{loading_text}..", conf.color_font, conf.font_size_loading),
-        Text(f"{loading_text}...", conf.color_font, conf.font_size_loading)
+        Text(loading_text, conf.color_font, conf.font_size_loading, sysfont=sysfont),
+        Text(f"{loading_text}.", conf.color_font, conf.font_size_loading, sysfont=sysfont),
+        Text(f"{loading_text}..", conf.color_font, conf.font_size_loading, sysfont=sysfont),
+        Text(f"{loading_text}...", conf.color_font, conf.font_size_loading, sysfont=sysfont)
     )
 
     while thread.is_alive():
@@ -958,7 +958,7 @@ window = pygame.display.set_mode((conf.window_width, conf.window_height), vsync=
 pygame.display.set_caption(f"Snake v{conf.version}")
 pygame.display.set_icon(pygame.image.load(conf.path_icon))
 
-loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.")
+loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.", sysfont=not conf.path_font.is_good())
 Data = File()
 Data.read()
 
