@@ -106,47 +106,42 @@ class Text:
 class LongText:
     def __init__(self, text, color, font_size, line_length=40, line_spacing=6):
         self.line_spacing = line_spacing
+        lines = self.split_into_lines(text, line_length)
+        self.rendredTextList = [Text(line, color, font_size) for line in lines]
+        self.width = max(T.width for T in self.rendredTextList)
+        self.line_height = self.rendredTextList[0].height
+        self.height = len(self.rendredTextList) * (self.line_height + self.line_spacing) - self.line_spacing
 
-        # splitting text into lines
+    @staticmethod
+    def split_into_lines(text, line_length):
         words = text.split(" ")
-
+        words_len = len(words)
         i = 0
         textList = []
         curr_line = ""
-        while i < len(words):
+        while i < words_len:
             if words[i] == "\n":
                 textList.append(curr_line)
                 curr_line = ""
                 i += 1
-
             elif line_length - len(curr_line) - 1 >= len(words[i]):
-                if len(curr_line):
+                if curr_line:
                     curr_line += " "
                 curr_line += words[i]
                 i += 1
-
             elif len(words[i]) >= line_length:
                 textList.append(curr_line)
                 textList.append(words[i])
                 curr_line = ""
                 i += 1
-
             else:
                 textList.append(curr_line)
                 curr_line = ""
 
-        if len(curr_line):
+        if curr_line:
             textList.append(curr_line)
 
-        #
-
-        self.rendredTextList = []
-        for line in textList:
-            self.rendredTextList.append(Text(line, color, font_size))
-
-        self.width = max(T.width for T in self.rendredTextList)
-        self.line_height = self.rendredTextList[0].height
-        self.height = len(self.rendredTextList) * (self.line_height + self.line_spacing) - self.line_spacing
+        return textList
 
     def draw(self, x, y):
         i = 0
