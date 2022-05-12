@@ -107,10 +107,10 @@ class LongText:
     def __init__(self, text, color, font_size, line_length=40, line_spacing=6):
         self.line_spacing = line_spacing
         lines = self.split_into_lines(text, line_length)
-        self.rendredTextList = [Text(line, color, font_size) for line in lines]
-        self.width = max(T.width for T in self.rendredTextList)
-        self.line_height = self.rendredTextList[0].height
-        self.height = len(self.rendredTextList) * (self.line_height + self.line_spacing) - self.line_spacing
+        self.renderedTextList = [Text(line, color, font_size) for line in lines]
+        self.width = max(T.width for T in self.renderedTextList)
+        self.line_height = self.renderedTextList[0].height
+        self.height = len(self.renderedTextList) * (self.line_height + self.line_spacing) - self.line_spacing
 
     @staticmethod
     def split_into_lines(text, line_length):
@@ -145,7 +145,7 @@ class LongText:
 
     def draw(self, x, y):
         i = 0
-        for line in self.rendredTextList:
+        for line in self.renderedTextList:
             line.draw(x, y + i)
             i += self.line_height + self.line_spacing
 
