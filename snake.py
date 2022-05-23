@@ -18,7 +18,7 @@ import requests
 
 ######## Classes, functions and definitions ########
 
-def decimals(n):
+def thousands_separators(n):
     """
     Inserts spaces as thousands separator.
     """
@@ -484,10 +484,10 @@ class TopBarClass:
         Time = Text(f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_font, self.font_size)
         Time.draw(1.4 * conf.grid, (self.height - Time.height) // 2)
 
-        Score = Text(f"score: {decimals(Snake.score)}", conf.color_font, self.font_size)
+        Score = Text(f"score: {thousands_separators(Snake.score)}", conf.color_font, self.font_size)
         Score.draw((self.width - Score.width) // 2, (self.height - Score.height) // 2)
 
-        HighscoreOnBar = Text(f"highscore: {decimals(Data.highscores_speed[str(conf.speed)])}", conf.color_font, self.font_size)
+        HighscoreOnBar = Text(f"highscore: {thousands_separators(Data.highscores_speed[str(conf.speed)])}", conf.color_font, self.font_size)
         HighscoreOnBar.draw(self.width - conf.grid - HighscoreOnBar.width - 0.4 * conf.grid, (self.height - HighscoreOnBar.height) // 2)
 
 
