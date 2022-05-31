@@ -214,8 +214,8 @@ class ButtonSpeedGroup:
         self.spacing = 11
         self.width_total = len(conf.speed_list) * (self.width_single + self.spacing) - self.spacing
         self.height = 35
-        self.x = conf.window_width - self.width_total - 0.5 * conf.grid
-        self.y = 0.5 * conf.grid
+        self.x = conf.window_width - self.width_total - conf.margin
+        self.y = conf.margin
         self.font_size = 22
         self.dec, self.inc = False, False
 
@@ -494,19 +494,19 @@ class CurrentSpeedTextClass:
 
 class HighscoresInMenuClass:
     def __init__(self):
-        self.x1 = 0.4 * conf.grid
-        self.x2 = conf.grid
-        self.y1 = 0.35 * conf.grid
+        self.x1 = conf.margin
+        self.x2 = conf.margin + 15
+        self.y1 = conf.margin - 4
         self.color = conf.color_font
         self.font_size1 = 23
         self.font_size2 = 21
         self.update()
-        self.height = self.y2 + self.text2.height
+        self.y_bottom = self.y2 + self.text2.height
 
     def update(self):
         self.text1 = Text("Highscores:", self.color, self.font_size1)
         self.text2 = LongText(f"• overall: {Data.highscore} \n " + " \n ".join([f"• {k}: {v}" for k, v in Data.highscores_speed.items()]), self.color, self.font_size2, line_spacing=6)
-        self.y2 = self.text1.height + 10
+        self.y2 = conf.margin + self.text1.height
 
     def draw(self):
         self.text1.draw(self.x1, self.y1)
@@ -515,8 +515,8 @@ class HighscoresInMenuClass:
 
 class TotalStatsInMenuClass:
     def __init__(self):
-        self.x = 0.4 * conf.grid
-        self.y1 = HighscoresInMenu.height + 7
+        self.x = conf.margin
+        self.y1 = HighscoresInMenu.y_bottom + 7
         self.color = conf.color_font
         self.font_size = 20
         self.update()
@@ -538,9 +538,9 @@ class VolumeWidgetInMenuClass:
         self.spacing = 10
 
         self.update()
-        self.y_text = SpeedButtons.ButtonsList[0].height + 20
+        self.y_text = conf.margin + SpeedButtons.ButtonsList[0].height + 9
         self.y_buttons = self.y_text + (self.text.height - self.button_dim) // 2
-        self.x_button_minus = conf.window_width - 12 - self.button_dim
+        self.x_button_minus = conf.window_width - conf.margin - self.button_dim
         self.x_button_plus = self.x_button_minus - self.spacing - self.button_dim
         self.button_minus = Button(self.x_button_minus, self.y_buttons, self.button_dim, self.button_dim, "−", self.font_size, command=VolumeWidgetInMenuClass.decrease)
         self.button_plus = Button(self.x_button_plus, self.y_buttons, self.button_dim, self.button_dim, "+", self.font_size, command=VolumeWidgetInMenuClass.increase)
@@ -548,7 +548,7 @@ class VolumeWidgetInMenuClass:
     def update(self):
         pygame.mixer.music.set_volume(volume)
         self.text = Text(f"Volume: {volume:.0%}", conf.color_font, self.font_size)
-        self.x_text = conf.window_width - 12 - 2 * self.spacing - 2 * self.button_dim - self.text.width
+        self.x_text = conf.window_width - conf.margin - 2 * (self.spacing + self.button_dim) - self.text.width
 
     @staticmethod
     def decrease():
@@ -633,10 +633,10 @@ def menu_redraw():
         LastScore.draw((conf.window_width - LastScore.width) // 2, 205)
     ButtonPlay.draw()
     ButtonExit.draw()
-    Author.draw(conf.window_width - Author.width - 0.4 * conf.grid, conf.window_height - Author.height - 0.4 * conf.grid)
+    Author.draw(conf.window_width - conf.margin - Author.width, conf.window_height - conf.margin - Author.height)
     WebsiteButton.draw()
     CreditsButton.draw()
-    SpeedText.draw(conf.window_width - SpeedButtons.width_total - 0.5 * conf.grid - SpeedText.width - SpeedButtons.spacing, 0.5 * conf.grid + (SpeedButtons.height - SpeedText.height) / 2)
+    SpeedText.draw(conf.window_width - conf.margin - SpeedButtons.width_total - SpeedButtons.spacing - SpeedText.width, conf.margin + (SpeedButtons.height - SpeedText.height) // 2)
     SpeedButtons.draw()
     VolumeWidgetInMenu.draw()
 
@@ -862,6 +862,7 @@ class conf:
     grid_border = 2
     window_width = grid * 33
     window_height = grid * 26
+    margin = 12
     topbar_width = window_width
     topbar_height = 2 * grid
     game_x = grid
@@ -996,8 +997,8 @@ Author = Text("Michał Machnikowski 2022", (215, 215, 215), 21)
 
 ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size, command=ButtonCmds.gameTrue)
 ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.menuFalse)
-WebsiteButton = Button(0.5 * conf.grid, conf.window_height - 2.5 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=ButtonCmds.website, radius=7)
-CreditsButton = Button(int(6 * conf.grid), conf.window_height - 2.5 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, command=ButtonCmds.creditssTrue, radius=7)
+WebsiteButton = Button(conf.margin, conf.window_height - conf.margin - 2 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=ButtonCmds.website, radius=7)
+CreditsButton = Button(conf.margin + int(5.5 * conf.grid), conf.window_height - conf.margin - 2 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, command=ButtonCmds.creditssTrue, radius=7)
 
 SpeedText = Text("Speed:", conf.color_font, 22)
 SpeedButtons = ButtonSpeedGroup()
