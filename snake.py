@@ -531,6 +531,47 @@ class TotalStatsInMenuClass:
         self.text_time.draw(self.x, self.y2)
 
 
+class VolumeWidgetInMenuClass:
+    def __init__(self):
+        self.button_dim = 22
+        self.font_size = 22
+        self.spacing = 10
+
+        self.update()
+        self.y_text = SpeedButtons.ButtonsList[0].height + 20
+        self.y_buttons = self.y_text + (self.text.height - self.button_dim) // 2
+        self.x_button_minus = conf.window_width - 12 - self.button_dim
+        self.x_button_plus = self.x_button_minus - self.spacing - self.button_dim
+        self.button_minus = Button(self.x_button_minus, self.y_buttons, self.button_dim, self.button_dim, "−", self.font_size, command=VolumeWidgetInMenuClass.decrease)
+        self.button_plus = Button(self.x_button_plus, self.y_buttons, self.button_dim, self.button_dim, "+", self.font_size, command=VolumeWidgetInMenuClass.increase)
+
+    def update(self):
+        pygame.mixer.music.set_volume(volume)
+        self.text = Text(f"Volume: {volume:.0%}", conf.color_font, self.font_size)
+        self.x_text = conf.window_width - 12 - 2 * self.spacing - 2 * self.button_dim - self.text.width
+
+    @staticmethod
+    def decrease():
+        global volume
+        volume -= 0.1
+        if volume < 0:
+            volume = 0
+        VolumeWidgetInMenu.update()
+
+    @staticmethod
+    def increase():
+        global volume
+        volume += 0.1
+        if volume > 1:
+            volume = 1
+        VolumeWidgetInMenu.update()
+
+    def draw(self):
+        self.button_minus.draw()
+        self.button_plus.draw()
+        self.text.draw(self.x_text, self.y_text)
+
+
 ########### Scenes managing ###########
 
 def menu_main():
@@ -558,6 +599,8 @@ def menu_main():
                 WebsiteButton.click()  # Website
                 CreditsButton.click()  # Credits
                 SpeedButtons.click()   # Speed buttons
+                VolumeWidgetInMenu.button_minus.click()
+                VolumeWidgetInMenu.button_plus.click()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
@@ -595,6 +638,7 @@ def menu_redraw():
     CreditsButton.draw()
     SpeedText.draw(conf.window_width - SpeedButtons.width_total - 0.5 * conf.grid - SpeedText.width - SpeedButtons.spacing, 0.5 * conf.grid + (SpeedButtons.height - SpeedText.height) / 2)
     SpeedButtons.draw()
+    VolumeWidgetInMenu.draw()
 
     pygame.display.update()
 
@@ -959,6 +1003,8 @@ SpeedText = Text("Speed:", conf.color_font, 22)
 SpeedButtons = ButtonSpeedGroup()
 HighscoresInMenu = HighscoresInMenuClass()
 TotalStatsInMenu = TotalStatsInMenuClass()
+volume = 0.9
+VolumeWidgetInMenu = VolumeWidgetInMenuClass()
 
 Snake = SnakeClass()
 Apple = AppleClass()
