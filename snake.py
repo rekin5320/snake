@@ -300,6 +300,7 @@ class File:  # Data
             self.highscores_speed = {i: highscores_speed.get(i, 0) for i in map(str, sorted(conf.speed_list))}
             self.total_games = self.datadict.get("total_games", 0)
             self.total_time = self.datadict.get("total_time", 0)
+            self.volume = self.datadict.get("volume", 0.9)
 
             if "speed" in self.datadict:
                 conf.speed = self.datadict["speed"]
@@ -322,6 +323,7 @@ class File:  # Data
             self.datadict["highscores_speed"] = self.highscores_speed
             self.datadict["total_games"] = self.total_games
             self.datadict["total_time"] = round_to_3_places(self.total_time)
+            self.datadict["volume"] = round(self.volume, 1)
             with self.path_data.open("w") as file:
                 file.write(self.dump_data())
                 file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
@@ -546,24 +548,26 @@ class VolumeWidgetInMenuClass:
         self.button_plus = Button(self.x_button_plus, self.y_buttons, self.button_dim, self.button_dim, "+", self.font_size, command=VolumeWidgetInMenuClass.increase)
 
     def update(self):
-        pygame.mixer.music.set_volume(volume)
-        self.text = Text(f"Volume: {volume:.0%}", conf.color_font, self.font_size)
+        pygame.mixer.music.set_volume(Data.volume)
+        self.text = Text(f"Volume: {Data.volume:.0%}", conf.color_font, self.font_size)
         self.x_text = conf.window_width - conf.margin - 2 * (self.spacing + self.button_dim) - self.text.width
 
     @staticmethod
     def decrease():
-        global volume
-        volume -= 0.1
-        if volume < 0:
-            volume = 0
+        Data.volume -= 0.1
+        if Data.volume < 0:
+            Data.volume = 0
+        logger.info(f"Changed volume to {Data.volume:.0%}")
+        Data.write()
         VolumeWidgetInMenu.update()
 
     @staticmethod
     def increase():
-        global volume
-        volume += 0.1
-        if volume > 1:
-            volume = 1
+        Data.volume += 0.1
+        if Data.volume > 1:
+            Data.volume = 1
+        logger.info(f"Changed volume to {Data.volume:.0%}")
+        Data.write()
         VolumeWidgetInMenu.update()
 
     def draw(self):
@@ -1004,7 +1008,6 @@ SpeedText = Text("Speed:", conf.color_font, 22)
 SpeedButtons = ButtonSpeedGroup()
 HighscoresInMenu = HighscoresInMenuClass()
 TotalStatsInMenu = TotalStatsInMenuClass()
-volume = 0.9
 VolumeWidgetInMenu = VolumeWidgetInMenuClass()
 
 Snake = SnakeClass()
