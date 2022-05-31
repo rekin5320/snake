@@ -158,23 +158,11 @@ class RoundedRectangle:
         self.color = color
 
     def draw(self, x, y):
-        pygame.draw.rect(window, self.color, (x + self.radius, y, self.width - 2 * self.radius, self.height))
-        pygame.draw.rect(window, self.color, (x, y + self.radius, self.width, self.height - 2 * self.radius))
-        pygame.draw.circle(window, self.color, (x + self.radius, y + self.radius), self.radius)
-        pygame.draw.circle(window, self.color, (x + self.width - self.radius, y + self.radius), self.radius)
-        pygame.draw.circle(window, self.color, (x + self.width - self.radius, y + self.height - self.radius), self.radius)
-        pygame.draw.circle(window, self.color, (x + self.radius, y + self.height - self.radius), self.radius)
+        pygame.draw.rect(window, self.color, (x, y, self.width, self.height), border_radius=self.radius)
 
 
 def draw_tile(color, x, y):
-    w = conf.tile_width
-    r = conf.tile_radius
-    pygame.draw.rect(window, color, (x + r, y, w - 2 * r, w))
-    pygame.draw.rect(window, color, (x, y + r, w, w - 2 * r))
-    pygame.draw.circle(window, color, (x + r, y + r), r)
-    pygame.draw.circle(window, color, (x + w - r, y + r), r)
-    pygame.draw.circle(window, color, (x + w - r, y + w - r), r)
-    pygame.draw.circle(window, color, (x + r, y + w - r), r)
+    pygame.draw.rect(window, color, (x, y, conf.tile_width, conf.tile_width), border_radius=conf.tile_radius)
 
 
 class Button:
