@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+* Volume can be changed
+* Code improvements
 
 ## Release 1.5.0 (2022-04-23)
 * Snake segments and apple have rounded corners
