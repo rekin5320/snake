@@ -453,10 +453,8 @@ class AppleClass:
         self.x = randrange(0, conf.game_width // conf.grid) * conf.grid + conf.game_x
         self.y = randrange(0, conf.game_height // conf.grid) * conf.grid + conf.game_y
         self.location = (self.x + conf.grid_border, self.y + conf.grid_border)
-        for pos in Snake.xyList:
-            if pos == self.location:
-                self.move()
-                break
+        if self.location in Snake.xyList:
+            self.move()
 
     def draw(self):
         draw_tile(self.color, *self.location)
