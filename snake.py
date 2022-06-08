@@ -19,9 +19,7 @@ import requests
 ######## Classes, functions and definitions ########
 
 def thousands_separators(n):
-    """
-    Inserts spaces as thousands separator.
-    """
+    """Inserts spaces as thousands separator."""
     return f"{n:,}".replace(",", " ")
 
 
@@ -49,7 +47,6 @@ class Tee:
     Duplicates the given stream into a file.
     Inspired by https://stackoverflow.com/a/616686
     """
-
     def __init__(self, out_stream, filename, mode):
         self.file = open(filename, mode)
         self.out_stream = out_stream
@@ -264,14 +261,6 @@ class ButtonCmds:
         menu = False
 
     @staticmethod
-    def exit1():
-        exit(1)
-
-    @staticmethod
-    def website():
-        webbrowser.open(conf.url_website, new=0, autoraise=True)
-
-    @staticmethod
     def creditssTrue():
         global creditss
         creditss = True
@@ -304,7 +293,7 @@ class File:  # Data
 
             if "speed" in self.datadict:
                 conf.speed = self.datadict["speed"]
-                conf.move_delay = conf.fps / conf.speed
+                conf.move_delay = conf.fps // conf.speed
 
         except:
             logger.exception("Error while reading game data:")
@@ -834,7 +823,7 @@ def error_screen(text):
     global mouse
     error = True
     ErrorText = LongText(text, conf.color_font, conf.font_size_error)
-    ButtonExit2 = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.exit1)
+    ButtonExit2 = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=lambda: sys.exit(1))
 
     while error:
         clock.tick(conf.fps)
@@ -923,7 +912,7 @@ class conf:
     fps = 120
     speed = 10  # default speed (aka movesPerSecond) (fps divisor)
     speed_list = [5, 10, 15, 30, 60]
-    move_delay = fps / speed
+    move_delay = fps // speed
 
     @classmethod
     def change_speed_to(cls, s):
@@ -999,7 +988,7 @@ Author = Text("Michał Machnikowski 2022", (215, 215, 215), 21)
 
 ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size, command=ButtonCmds.gameTrue)
 ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.menuFalse)
-WebsiteButton = Button(conf.margin, conf.window_height - conf.margin - 2 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=ButtonCmds.website, radius=7)
+WebsiteButton = Button(conf.margin, conf.window_height - conf.margin - 2 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=lambda: webbrowser.open(conf.url_website, new=0, autoraise=True), radius=7)
 CreditsButton = Button(conf.margin + int(5.5 * conf.grid), conf.window_height - conf.margin - 2 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, command=ButtonCmds.creditssTrue, radius=7)
 
 SpeedText = Text("Speed:", conf.color_font, 22)
