@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+* Added bananas, eating of which removes one point
 * Volume can be changed
 * Code improvements
 

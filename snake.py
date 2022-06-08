@@ -420,11 +420,18 @@ class SnakeClass:
 
         self.xyList.append(self.head_location)
 
-        if self.x == Apple.x and self.y == Apple.y:  # ate the apple
+        if self.head_location == Apple.location:  # ate the apple
             self.score += 1
             Apple.move()
         else:
             self.xyList.pop(0)
+
+        if self.head_location == Banana.location:
+            self.score -= 1
+            self.xyList.pop(0)
+            if self.score < 0:
+                game_notOver = False
+            Banana.move()
 
     def draw(self):
         for i, pos in enumerate(self.xyList[:-1], start=1):
@@ -435,14 +442,31 @@ class SnakeClass:
 class AppleClass:
     def __init__(self):
         self.color = (255, 0, 0)
-        self.width = conf.grid - 2 * conf.grid_border
-        self.move()
+        self.width = conf.tile_width
+        self.location = None
 
     def move(self):
         self.x = randrange(0, conf.game_width // conf.grid) * conf.grid + conf.game_x
         self.y = randrange(0, conf.game_height // conf.grid) * conf.grid + conf.game_y
         self.location = (self.x + conf.grid_border, self.y + conf.grid_border)
-        if self.location in Snake.xyList:
+        if self.location in Snake.xyList or self.location == Banana.location:
+            self.move()
+
+    def draw(self):
+        draw_tile(self.color, *self.location)
+
+
+class BananaClass:
+    def __init__(self):
+        self.color = (255, 255, 0)
+        self.width = conf.tile_width
+        self.location = None
+
+    def move(self):
+        self.x = randrange(0, conf.game_width // conf.grid) * conf.grid + conf.game_x
+        self.y = randrange(0, conf.game_height // conf.grid) * conf.grid + conf.game_y
+        self.location = (self.x + conf.grid_border, self.y + conf.grid_border)
+        if self.location in Snake.xyList or self.location == Apple.location:
             self.move()
 
     def draw(self):
@@ -641,6 +665,7 @@ def game_main():
     pygame.mixer.music.play(loops=-1)
     Snake.reinit()
     Apple.move()
+    Banana.move()
     game_notOver = True
 
     while game_notOver:
@@ -718,6 +743,7 @@ def game_redraw():
     pygame.draw.rect(window, conf.color_game_background, (conf.game_x, conf.game_y, conf.game_width, conf.game_height))
     Snake.draw()
     Apple.draw()
+    Banana.draw()
     TopBar.draw()
     CurrentSpeedText.draw()
     pygame.display.update()
@@ -999,6 +1025,7 @@ VolumeWidgetInMenu = VolumeWidgetInMenuClass()
 
 Snake = SnakeClass()
 Apple = AppleClass()
+Banana = BananaClass()
 TopBar = TopBarClass()
 CurrentSpeedText = CurrentSpeedTextClass()
 
