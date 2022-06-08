@@ -460,6 +460,7 @@ class BananaClass:
     def __init__(self):
         self.color = (255, 255, 0)
         self.width = conf.tile_width
+        self.lifetime_default = conf.fps * 10  # seconds
         self.location = None
 
     def move(self):
@@ -468,6 +469,8 @@ class BananaClass:
         self.location = (self.x + conf.grid_border, self.y + conf.grid_border)
         if self.location in Snake.xyList or self.location == Apple.location:
             self.move()
+        else:
+            self.lifetime = self.lifetime_default
 
     def draw(self):
         draw_tile(self.color, *self.location)
@@ -675,6 +678,9 @@ def game_main():
             game_redraw()
         if Snake.dirx or Snake.diry:  # snake started moving
             Snake.fpsCounter += 1
+            Banana.lifetime -= 1
+            if Banana.lifetime == 0:
+                Banana.move()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
