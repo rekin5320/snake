@@ -74,10 +74,6 @@ def base64_decode(text):
     return decodedtext
 
 
-def round_to_3_places(num):
-    return int(num * 1000 + 0.5) / 1000
-
-
 def format_time(seconds, milliseconds=False):
     if milliseconds:
         return f"{seconds // 60:02.0f}:{seconds % 60:06.3f}"
@@ -311,7 +307,7 @@ class File:  # Data
             self.datadict["highscore"] = self.highscore
             self.datadict["highscores_speed"] = self.highscores_speed
             self.datadict["total_games"] = self.total_games
-            self.datadict["total_time"] = round_to_3_places(self.total_time)
+            self.datadict["total_time"] = round(self.total_time, 3)
             self.datadict["volume"] = round(self.volume, 1)
             with self.path_data.open("w") as file:
                 file.write(self.dump_data())
