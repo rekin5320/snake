@@ -954,86 +954,86 @@ class conf:
 
 
 ############# Main code #############
+if __name__ == "__main__":
+    #### Initializing game data ####
+    # moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
+    if not conf.path_gameDir.exists():
+        conf.path_gameDir.mkdir()
+    if not conf.path_logDir.exists():
+        conf.path_logDir.mkdir()
+    if not conf.path_assetsDir.exists():
+        conf.path_assetsDir.mkdir()
 
-#### Initializing game data ####
-# moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
-if not conf.path_gameDir.exists():
-    conf.path_gameDir.mkdir()
-if not conf.path_logDir.exists():
-    conf.path_logDir.mkdir()
-if not conf.path_assetsDir.exists():
-    conf.path_assetsDir.mkdir()
+    if not conf.path_icon.exists():
+        conf.path_icon.write_bytes(base64.b64decode(conf.icon_content))
 
-if not conf.path_icon.exists():
-    conf.path_icon.write_bytes(base64.b64decode(conf.icon_content))
+    #### Logging configuration ####
+    if conf.path_log4.exists():
+        conf.path_log4.unlink()
+    if conf.path_log3.exists():
+        conf.path_log3.replace(conf.path_log4)
+    if conf.path_log2.exists():
+        conf.path_log2.replace(conf.path_log3)
+    if conf.path_log1.exists():
+        conf.path_log1.replace(conf.path_log2)
 
-#### Logging configuration ####
-if conf.path_log4.exists():
-    conf.path_log4.unlink()
-if conf.path_log3.exists():
-    conf.path_log3.replace(conf.path_log4)
-if conf.path_log2.exists():
-    conf.path_log2.replace(conf.path_log3)
-if conf.path_log1.exists():
-    conf.path_log1.replace(conf.path_log2)
+    sys.stderr = Tee(sys.stderr, conf.path_log1, "a")
 
-sys.stderr = Tee(sys.stderr, conf.path_log1, "a")
+    for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
+        logging.root.removeHandler(handler)
 
-for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
-    logging.root.removeHandler(handler)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
+    file_handler = logging.FileHandler(filename=conf.path_log1, mode="a")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.INFO)
+    logger.addHandler(stdout_handler)
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
-file_handler = logging.FileHandler(filename=conf.path_log1, mode="a")
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
-stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.INFO)
-logger.addHandler(stdout_handler)
+    #### Main game code ####
+    logger.info(f"Starting Snake v{conf.version}")
+    logger.info(f"System: {platform.system()}, version: {platform.release()}")
+    pygame.display.init()
+    pygame.mixer.init()
+    pygame.font.init()
+    pygame.joystick.init()
+    joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() else False
+    clock = pygame.time.Clock()
+    window = pygame.display.set_mode((conf.window_width, conf.window_height), vsync=1)
+    pygame.display.set_caption(f"Snake v{conf.version}")
+    pygame.display.set_icon(pygame.image.load(conf.path_icon))
 
-#### Main game code ####
-logger.info(f"Starting Snake v{conf.version}")
-logger.info(f"System: {platform.system()}, version: {platform.release()}")
-pygame.display.init()
-pygame.mixer.init()
-pygame.font.init()
-pygame.joystick.init()
-joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() else False
-clock = pygame.time.Clock()
-window = pygame.display.set_mode((conf.window_width, conf.window_height), vsync=1)
-pygame.display.set_caption(f"Snake v{conf.version}")
-pygame.display.set_icon(pygame.image.load(conf.path_icon))
+    loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.", sysfont=not conf.path_font.is_good())
+    Data = File()
+    Data.read()
 
-loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.", sysfont=not conf.path_font.is_good())
-Data = File()
-Data.read()
+    # Prerendered objects
+    GameOver = Text("GAME  OVER", (255, 0, 0), 77)
+    SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
+    Author = Text("Michał Machnikowski 2022", (215, 215, 215), 21)
 
-# Prerendered objects
-GameOver = Text("GAME  OVER", (255, 0, 0), 77)
-SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
-Author = Text("Michał Machnikowski 2022", (215, 215, 215), 21)
+    ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size, command=ButtonCmds.gameTrue)
+    ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.menuFalse)
+    WebsiteButton = Button(conf.margin, conf.window_height - conf.margin - 2 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=lambda: webbrowser.open(conf.url_website, new=0, autoraise=True), radius=7)
+    CreditsButton = Button(conf.margin + int(5.5 * conf.grid), conf.window_height - conf.margin - 2 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, command=ButtonCmds.creditssTrue, radius=7)
 
-ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size, command=ButtonCmds.gameTrue)
-ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.menuFalse)
-WebsiteButton = Button(conf.margin, conf.window_height - conf.margin - 2 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=lambda: webbrowser.open(conf.url_website, new=0, autoraise=True), radius=7)
-CreditsButton = Button(conf.margin + int(5.5 * conf.grid), conf.window_height - conf.margin - 2 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, command=ButtonCmds.creditssTrue, radius=7)
+    SpeedText = Text("Speed:", conf.color_font, 22)
+    SpeedButtons = ButtonSpeedGroup()
+    HighscoresInMenu = HighscoresInMenuClass()
+    TotalStatsInMenu = TotalStatsInMenuClass()
+    VolumeWidgetInMenu = VolumeWidgetInMenuClass()
 
-SpeedText = Text("Speed:", conf.color_font, 22)
-SpeedButtons = ButtonSpeedGroup()
-HighscoresInMenu = HighscoresInMenuClass()
-TotalStatsInMenu = TotalStatsInMenuClass()
-VolumeWidgetInMenu = VolumeWidgetInMenuClass()
+    Snake = SnakeClass()
+    Apple = AppleClass()
+    Banana = BananaClass()
+    TopBar = TopBarClass()
+    CurrentSpeedText = CurrentSpeedTextClass()
 
-Snake = SnakeClass()
-Apple = AppleClass()
-Banana = BananaClass()
-TopBar = TopBarClass()
-CurrentSpeedText = CurrentSpeedTextClass()
+    menu_main()
 
-menu_main()
+    logger.info("Quitting")
+    logger.debug(Data.dump_data())
 
-logger.info("Quitting")
-logger.debug(Data.dump_data())
-
-pygame.quit()
+    pygame.quit()
