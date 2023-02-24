@@ -80,7 +80,8 @@ def format_time(seconds, milliseconds=False):
     else:
         if not isinstance(seconds, int):
             seconds = round(seconds)
-        return f"{seconds // 60:02}:{seconds % 60:02}"
+        minutes, seconds = divmod(seconds, 60)
+        return f"{minutes:02}:{seconds:02}"
 
 
 class Text:
