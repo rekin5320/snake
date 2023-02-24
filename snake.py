@@ -609,7 +609,7 @@ def menu_main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 menu = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 ButtonPlay.click()     # Game
                 ButtonExit.click()     # Exit
                 WebsiteButton.click()  # Website
