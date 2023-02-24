@@ -426,6 +426,7 @@ class SnakeClass:
             self.score -= 1
             self.xyList.pop(0)
             if self.score < 0:
+                self.score = 0
                 game_notOver = False
             Banana.move()
 
