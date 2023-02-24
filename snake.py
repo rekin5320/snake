@@ -79,7 +79,7 @@ def format_time(seconds, milliseconds=False):
         return f"{seconds // 60:02.0f}:{seconds % 60:06.3f}"
     else:
         if not isinstance(seconds, int):
-            seconds = int(seconds + 0.5)
+            seconds = round(seconds)
         return f"{seconds // 60:02}:{seconds % 60:02}"
 
 
