@@ -431,8 +431,9 @@ class SnakeClass:
             Banana.move()
 
     def draw(self):
-        for i, pos in enumerate(self.xyList[:-1], start=1):
-            draw_tile(self.colors_tail[(self.score - i) % self.colors_tail_len], *pos)
+        for i, (x, y) in enumerate(self.xyList[:-1], start=1):
+            color_num = (self.score - i) % self.colors_tail_len
+            draw_tile(self.colors_tail[color_num], x, y)
         draw_tile(self.color_head, *self.xyList[-1])
 
 
