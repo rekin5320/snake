@@ -392,9 +392,6 @@ class SnakeClass:
         self.color_head = (255, 255, 255)
         self.colors_tail = [(3, 255, 3), (2, 232, 2), (1, 187, 0)]
         self.colors_tail_len = len(self.colors_tail)
-        self.reinit()
-
-    def reinit(self):
         self.dirx = 0
         self.diry = 0
         self.dirx_current = 0
@@ -691,9 +688,14 @@ def menu_redraw():
 def game_main():
     global game_notOver
     global game
+    global Snake
+    global Apple
+    global Banana
     pygame.mixer.music.load(conf.path_music_Game)
     pygame.mixer.music.play(loops=-1)
-    Snake.reinit()
+    Snake = SnakeClass()
+    Apple = AppleClass()
+    Banana = BananaClass()
     Apple.move()
     Banana.move()
     game_notOver = True
@@ -1017,9 +1019,6 @@ if __name__ == "__main__":
     TotalStatsInMenu = TotalStatsInMenuClass()
     VolumeWidgetInMenu = VolumeWidgetInMenuClass()
 
-    Snake = SnakeClass()
-    Apple = AppleClass()
-    Banana = BananaClass()
     TopBar = TopBarClass()
     CurrentSpeedText = CurrentSpeedTextClass()
 
