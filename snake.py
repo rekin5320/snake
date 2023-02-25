@@ -327,24 +327,25 @@ def check_directories():
             dir_path.mkdir()
 
 
+def rotate_log_files(log_paths):
+    if log_paths[-1].exists():
+        log_paths[-1].unlink()
+
+    for log1_path, log2_path in zip(log_paths[-2::-1], log_paths[-1:0:-1]):
+        if log1_path.exists():
+            log1_path.replace(log2_path)
+
+
 def configure_logging():
-    if conf.path_log4.exists():
-        conf.path_log4.unlink()
-    if conf.path_log3.exists():
-        conf.path_log3.replace(conf.path_log4)
-    if conf.path_log2.exists():
-        conf.path_log2.replace(conf.path_log3)
-    if conf.path_log1.exists():
-        conf.path_log1.replace(conf.path_log2)
-    sys.stderr = Tee(sys.stderr, conf.path_log1, "a")
-    for handler in logging.root.handlers[
-                   :]:  # this is needed in PyCharm and can be left for safety
+    log_paths = [conf.path_logDir / f"{i}.log" for i in range(1, conf.n_logs + 1)]
+    rotate_log_files(log_paths)
+    sys.stderr = Tee(sys.stderr, log_paths[0], "a")
+    for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
         logging.root.removeHandler(handler)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
-    file_handler = logging.FileHandler(filename=conf.path_log1, mode="a")
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
+    file_handler = logging.FileHandler(filename=log_paths[0], mode="a")
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     stdout_handler = logging.StreamHandler(sys.stdout)
@@ -948,10 +949,7 @@ class conf:
     path_music_GameOver = path_assetsDir / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
     path_icon = path_assetsDir / "icon_48px.png"
     path_logDir = path_gameDir / "logs"  # ~/.snake/logs/
-    path_log1 = path_logDir / "1.log"
-    path_log2 = path_logDir / "2.log"
-    path_log3 = path_logDir / "3.log"
-    path_log4 = path_logDir / "4.log"
+    n_logs = 4
 
     url_website = "http://tiny.cc/snake_website"
 
