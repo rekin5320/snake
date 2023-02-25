@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## Release 1.6.0 (2023-02-25)
 * Added bananas, eating of which removes one point
 * Volume can be changed
-* Buttons can now only be clicked with left mouse button 
-* Code improvements
+* Buttons can now only be clicked with left mouse button
+* Other improvements
 
 ## Release 1.5.0 (2022-04-23)
 * Snake segments and apple have rounded corners

@@ -879,7 +879,7 @@ def error_screen(text):
 ####### Settings / Config #######
 
 class conf:
-    version = "1.5.0"
+    version = "1.6.0"
     grid = 25
     grid_border = 2
     window_width = grid * 33
