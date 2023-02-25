@@ -114,6 +114,9 @@ class LongText:
                 textList.append(curr_line)
                 curr_line = ""
                 i += 1
+            elif words[i] == "\t":
+                curr_line += "    "
+                i += 1
             elif line_length - len(curr_line) - 1 >= len(words[i]):
                 if curr_line:
                     curr_line += " "
@@ -822,14 +825,14 @@ def about_main():
     AboutText = LongText(
         (
             "Credits: \n "
-            "Icon: \n "
-            "Icon made by Freepik from www.flaticon.com \n "
+            "- Icon: \n "
+            "\t Icon made by Freepik from www.flaticon.com \n "
             "\n "
-            "Music during gameplay: \n "
-            "Tristan Lohengrin - Happy 8bit Loop 01 \n "
+            "- Music during gameplay: \n "
+            "\t Tristan Lohengrin - Happy 8bit Loop 01 \n "
             "\n "
-            "Sound after loss: \n "
-            "Sad Trombone Wah Wah Wah Fail Sound Effect"
+            "- Sound after loss: \n "
+            "\t Sad Trombone Wah Wah Wah Fail Sound Effect"
         ),
         conf.color_font,
         conf.font_size_aboutscene,
