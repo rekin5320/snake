@@ -320,6 +320,13 @@ class File:  # Data
         return base64_encode(json.dumps(self.datadict, separators=(",", ":")))
 
 
+def check_directories():
+    """Check if game directories exists, if not - create them."""
+    for dir_path in (conf.path_gameDir, conf.path_logDir):
+        if not dir_path.exists():
+            dir_path.mkdir()
+
+
 def configure_logging():
     if conf.path_log4.exists():
         conf.path_log4.unlink()
@@ -358,6 +365,10 @@ def check_files():
             file.write(base64_encode(json.dumps({})))
             file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         logger.warning("Data file successfully created")
+
+    if not conf.path_assetsDir.exists():
+        logger.error(f"Game assets directory not found ({conf.path_assetsDir})")
+        sys.exit(1)
 
     for file_path in (conf.path_font, conf.path_music_Game, conf.path_music_GameOver, conf.path_icon):
         if not file_path.is_good():
@@ -962,19 +973,9 @@ class conf:
 
 ############# Main code #############
 if __name__ == "__main__":
-    #### Initializing game data ####
-    # moved from check_files() to make sure there is a game directory, so that the log file can be put there and game icon set
-    if not conf.path_gameDir.exists():
-        conf.path_gameDir.mkdir()
-    if not conf.path_logDir.exists():
-        conf.path_logDir.mkdir()
-    if not conf.path_assetsDir.exists():
-        conf.path_assetsDir.mkdir()
+    check_directories()
 
-    #### Logging configuration ####
     logger = configure_logging()
-
-    #### Main game code ####
     logger.info(f"Starting Snake v{conf.version}")
     logger.info(f"System: {platform.system()}, version: {platform.release()}")
 
