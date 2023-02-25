@@ -629,8 +629,8 @@ def menu_main():
                     game_main()
                 elif ButtonExit.is_pointed(mouse):
                     return
-                elif CreditsButton.is_pointed(mouse):
-                    creditss_main()
+                elif AboutButton.is_pointed(mouse):
+                    about_main()
                 WebsiteButton.click(mouse)
                 SpeedButtons.click(mouse)
                 VolumeWidgetInMenu.button_minus.click(mouse)
@@ -664,7 +664,7 @@ def menu_redraw(mouse):
     ButtonExit.draw(mouse)
     Author.draw(conf.window_width - conf.margin - Author.width, conf.window_height - conf.margin - Author.height)
     WebsiteButton.draw(mouse)
-    CreditsButton.draw(mouse)
+    AboutButton.draw(mouse)
     SpeedText.draw(
         conf.window_width - conf.margin - SpeedButtons.width_total - SpeedButtons.spacing - SpeedText.width,
         conf.margin + (SpeedButtons.height - SpeedText.height) // 2
@@ -814,13 +814,28 @@ def gameover_main():
         joystick.stop_rumble()
 
 
-def creditss_main():
-    global CreditsText
-    global CreditsBackButton
+def about_main():
+    global AboutText
+    global AboutBackButton
 
     # I do not prerender it, as it is unlikely to be used often
-    CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", conf.color_font, conf.font_size_creditsscene, line_length=52)
-    CreditsBackButton = Button(
+    AboutText = LongText(
+        (
+            "Credits: \n "
+            "Icon: \n "
+            "Icon made by Freepik from www.flaticon.com \n "
+            "\n "
+            "Music during gameplay: \n "
+            "Tristan Lohengrin - Happy 8bit Loop 01 \n "
+            "\n "
+            "Sound after loss: \n "
+            "Sad Trombone Wah Wah Wah Fail Sound Effect"
+        ),
+        conf.color_font,
+        conf.font_size_aboutscene,
+        line_length=52
+    )
+    AboutBackButton = Button(
         (conf.window_width - conf.button_width) // 2,
         500,
         conf.button_width,
@@ -837,22 +852,22 @@ def creditss_main():
             if event.type == pygame.QUIT:
                 return
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if CreditsBackButton.is_pointed(mouse):  # Back to menu
+                if AboutBackButton.is_pointed(mouse):  # Back to menu
                     return
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             return
 
-        creditss_redraw(mouse)
+        about_redraw(mouse)
 
 
-def creditss_redraw(mouse):
-    global CreditsText
-    global CreditsBackButton
+def about_redraw(mouse):
+    global AboutText
+    global AboutBackButton
     window.fill(conf.color_window_background)
-    CreditsText.draw((conf.window_width - CreditsText.width) // 2, 90)
-    CreditsBackButton.draw(mouse)
+    AboutText.draw((conf.window_width - AboutText.width) // 2, 90)
+    AboutBackButton.draw(mouse)
     pygame.display.update()
 
 
@@ -943,7 +958,7 @@ class conf:
     font_size_newhighscore = 33
     font_size_lastscore = 27
     font_size_website = 21
-    font_size_creditsscene = 25
+    font_size_aboutscene = 25
     font_size_currentspeed = 17
 
     button_width = grid * 10
@@ -1027,12 +1042,12 @@ if __name__ == "__main__":
         command=lambda: webbrowser.open(conf.url_website, new=0, autoraise=True),
         radius=7
     )
-    CreditsButton = Button(
+    AboutButton = Button(
         conf.margin + int(5.5 * conf.grid),
         conf.window_height - conf.margin - 2 * conf.grid,
         int(4.65 * conf.grid),
         2 * conf.grid,
-        "credits",
+        "about",
         conf.font_size_website,
         radius=7
     )
