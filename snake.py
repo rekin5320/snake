@@ -353,7 +353,18 @@ def configure_logging():
     return logger
 
 
-def check_files():
+def check_assets():
+    if not conf.path_assetsDir.exists():
+        logger.error(f"Game assets directory not found ({conf.path_assetsDir})")
+        sys.exit(1)
+
+    for file_path in (conf.path_font, conf.path_music_Game, conf.path_music_GameOver, conf.path_icon):
+        if not file_path.is_good():
+            logger.error(f'Asset "{file_path.name}" not found ({file_path})')
+            sys.exit(1)
+
+
+def check_data_files():
     if not conf.path_version.is_good():
         logger.warning("Version file did not exist, trying to create")
         conf.path_version.write_text(base64_encode(conf.version))
@@ -365,17 +376,6 @@ def check_files():
             file.write(base64_encode(json.dumps({})))
             file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         logger.warning("Data file successfully created")
-
-    if not conf.path_assetsDir.exists():
-        logger.error(f"Game assets directory not found ({conf.path_assetsDir})")
-        sys.exit(1)
-
-    for file_path in (conf.path_font, conf.path_music_Game, conf.path_music_GameOver, conf.path_icon):
-        if not file_path.is_good():
-            logger.error(f'Asset "{file_path.name}" not found ({file_path})')
-            sys.exit(1)
-
-    logger.info("Checking files done")
 
 
 class SnakeClass:
@@ -979,7 +979,9 @@ if __name__ == "__main__":
     logger.info(f"Starting Snake v{conf.version}")
     logger.info(f"System: {platform.system()}, version: {platform.release()}")
 
-    check_files()
+    check_assets()
+    check_data_files()
+    logger.info("Checking files done")
 
     pygame.display.init()
     pygame.mixer.init()
