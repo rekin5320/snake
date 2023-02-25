@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+* Don't download game assets, rely on local ones
+* Show log message level on stdout
+* Code improvements
+
 ## Release 1.6.0 (2023-02-25)
 * Added bananas, eating of which removes one point
 * Volume can be changed
