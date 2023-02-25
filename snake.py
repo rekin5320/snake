@@ -664,7 +664,6 @@ def menu_redraw(mouse):
         LastScore.draw((conf.window_width - LastScore.width) // 2, 205)
     ButtonPlay.draw(mouse)
     ButtonExit.draw(mouse)
-    Author.draw(conf.window_width - conf.margin - Author.width, conf.window_height - conf.margin - Author.height)
     WebsiteButton.draw(mouse)
     AboutButton.draw(mouse)
     SpeedText.draw(
@@ -1027,7 +1026,6 @@ if __name__ == "__main__":
     # Prerendered objects
     GameOver = Text("GAME  OVER", (255, 0, 0), 77)
     SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
-    Author = Text("Michał Machnikowski 2023", (215, 215, 215), 21)
 
     ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size)
     ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
