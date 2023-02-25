@@ -94,7 +94,7 @@ class Text:
 
 
 class LongText:
-    def __init__(self, text, color, font_size, line_length=40, line_spacing=6):
+    def __init__(self, text, color, font_size, line_length=40, line_spacing=1):
         self.line_spacing = line_spacing
         lines = self.split_into_lines(text, line_length)
         self.renderedTextList = [Text(line, color, font_size) for line in lines]
@@ -543,8 +543,7 @@ class HighscoresInMenuClass:
                 in Data.highscores_speed.items()
             ]),
             self.color,
-            self.font_size2,
-            line_spacing=6
+            self.font_size2
         )
         self.y2 = conf.margin + self.text1.height
 
@@ -832,20 +831,16 @@ def about_main():
             "\t Tristan Lohengrin - Happy 8bit Loop 01 \n "
             "\n "
             "- Sound after loss: \n "
-            "\t Sad Trombone Wah Wah Wah Fail Sound Effect"
+            "\t Sad Trombone Wah Wah Wah Fail Sound Effect \n "
+            "\n "
+            "© 2023 Michał Machnikowski \n "
+            "License: GNU General Public License version 3 (https://www.gnu.org/licenses/gpl-3.0.html)"
         ),
         conf.color_font,
         conf.font_size_aboutscene,
         line_length=52
     )
-    AboutBackButton = Button(
-        (conf.window_width - conf.button_width) // 2,
-        500,
-        conf.button_width,
-        conf.button_height,
-        "Back",
-        conf.button_font_size
-    )
+    AboutBackButton = Button((conf.window_width - conf.button_width) // 2, 540, 200, 70, "Back", 30)
 
     while True:
         clock.tick(conf.fps)
@@ -869,7 +864,7 @@ def about_redraw(mouse):
     global AboutText
     global AboutBackButton
     window.fill(conf.color_window_background)
-    AboutText.draw((conf.window_width - AboutText.width) // 2, 90)
+    AboutText.draw((conf.window_width - AboutText.width) // 2, 55)
     AboutBackButton.draw(mouse)
     pygame.display.update()
 
@@ -961,7 +956,7 @@ class conf:
     font_size_newhighscore = 33
     font_size_lastscore = 27
     font_size_website = 21
-    font_size_aboutscene = 25
+    font_size_aboutscene = 24
     font_size_currentspeed = 17
 
     button_width = grid * 10
