@@ -1015,7 +1015,7 @@ if __name__ == "__main__":
     # Prerendered objects
     GameOver = Text("GAME  OVER", (255, 0, 0), 77)
     SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
-    Author = Text("Michał Machnikowski 2022", (215, 215, 215), 21)
+    Author = Text("Michał Machnikowski 2023", (215, 215, 215), 21)
 
     ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size, command=ButtonCmds.gameTrue)
     ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.menuFalse)
