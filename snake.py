@@ -804,7 +804,7 @@ def creditss_main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 creditss = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 CreditsBackButton.click()  # Back to menu
 
         keys = pygame.key.get_pressed()
@@ -863,7 +863,7 @@ def error_screen(text):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 error = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 ButtonExit2.click()
 
         keys = pygame.key.get_pressed()

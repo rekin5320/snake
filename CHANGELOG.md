@@ -3,6 +3,7 @@
 ## Unreleased
 * Added bananas, eating of which removes one point
 * Volume can be changed
+* Buttons can now only be clicked with left mouse button 
 * Code improvements
 
 ## Release 1.5.0 (2022-04-23)
