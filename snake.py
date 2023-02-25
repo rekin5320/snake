@@ -339,18 +339,25 @@ def rotate_log_files(log_paths):
 def configure_logging():
     log_paths = [conf.path_logDir / f"{i}.log" for i in range(1, conf.n_logs + 1)]
     rotate_log_files(log_paths)
-    sys.stderr = Tee(sys.stderr, log_paths[0], "a")
+
     for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
         logging.root.removeHandler(handler)
+
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
+
+    sys.stderr = Tee(sys.stderr, log_paths[0], "a")
+    formatter_file = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
     file_handler = logging.FileHandler(filename=log_paths[0], mode="a")
-    file_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter_file)
     logger.addHandler(file_handler)
+
+    formatter_stdout = logging.Formatter("[%(levelname)s] %(message)s")
     stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setFormatter(formatter_stdout)
     stdout_handler.setLevel(logging.INFO)
     logger.addHandler(stdout_handler)
+
     return logger
 
 
