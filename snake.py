@@ -13,7 +13,6 @@ import traceback
 import webbrowser
 
 import pygame
-import requests
 
 
 ######## Classes, functions and definitions ########
@@ -85,11 +84,8 @@ def format_time(seconds, milliseconds=False):
 
 
 class Text:
-    def __init__(self, text, color, font_size, sysfont=False):
-        if sysfont:
-            self.font = pygame.font.SysFont("Verdana", font_size, bold=True)
-        else:
-            self.font = pygame.font.Font(conf.path_font, font_size)
+    def __init__(self, text, color, font_size):
+        self.font = pygame.font.Font(conf.path_font, font_size)
         self.text = self.font.render(text, True, color)
         self.width, self.height = self.text.get_size()
 
@@ -324,21 +320,7 @@ class File:  # Data
         return base64_encode(json.dumps(self.datadict, separators=(",", ":")))
 
 
-def download_if_needed(path: MyPath, url, name):
-    if not path.is_good():
-        logger.warning(f"{name} did not exist, trying to download")
-        try:
-            download = requests.get(url, allow_redirects=True)
-            path.write_bytes(download.content)
-        except Exception as err:
-            logger.error(err)
-            logger.error(traceback.format_exc())
-            raise err
-        else:
-            logger.warning(f"{name} successfully downloaded")
-
-
-def checkFiles():
+def check_files():
     if not conf.path_version.is_good():
         logger.warning("Version file did not exist, trying to create")
         conf.path_version.write_text(base64_encode(conf.version))
@@ -351,9 +333,10 @@ def checkFiles():
             file.write("\neyJqdXN0IGZvdW5kIGFuIEVhc3RlciBFZ2c/PyI6IHRydWV9")
         logger.warning("Data file successfully created")
 
-    download_if_needed(conf.path_font, conf.url_font, "Font")
-    download_if_needed(conf.path_music_Game, conf.url_music_Game, "Game music")
-    download_if_needed(conf.path_music_GameOver, conf.url_music_GameOver, "GameOver music")
+    for file_path in (conf.path_font, conf.path_music_Game, conf.path_music_GameOver, conf.path_icon):
+        if not file_path.is_good():
+            logger.error(f'Asset "{file_path.name}" not found ({file_path})')
+            sys.exit(1)
 
     logger.info("Checking files done")
 
@@ -823,15 +806,15 @@ def creditss_redraw():
     pygame.display.update()
 
 
-def loading_screen(function, loading_text, error_text, sysfont=False):
+def loading_screen(function, loading_text, error_text):
     thread = MyThread(target=function, daemon=True)
     thread.start()
     time = 0
     LoadingTexts = (
-        Text(loading_text, conf.color_font, conf.font_size_loading, sysfont=sysfont),
-        Text(f"{loading_text}.", conf.color_font, conf.font_size_loading, sysfont=sysfont),
-        Text(f"{loading_text}..", conf.color_font, conf.font_size_loading, sysfont=sysfont),
-        Text(f"{loading_text}...", conf.color_font, conf.font_size_loading, sysfont=sysfont)
+        Text(loading_text, conf.color_font, conf.font_size_loading),
+        Text(f"{loading_text}.", conf.color_font, conf.font_size_loading),
+        Text(f"{loading_text}..", conf.color_font, conf.font_size_loading),
+        Text(f"{loading_text}...", conf.color_font, conf.font_size_loading)
     )
 
     while thread.is_alive():
@@ -922,23 +905,18 @@ class conf:
     path_data = path_gameDir / "data"  # ~/.snake/data
     path_data_backup = path_gameDir / "data.backup"  # ~/.snake/data.backup
     path_version = path_gameDir / "version"  # ~/.snake/version
-    path_assetsDir = path_gameDir / "assets"  # ~/.snake/assets/
+    path_assetsDir = MyPath(__file__).resolve().parent / "assets"  # assets/
     path_font = path_assetsDir / "OpenSans-Bold.ttf"
     path_music_Game = path_assetsDir / "Tristan Lohengrin - Happy 8bit Loop 01.ogg"
     path_music_GameOver = path_assetsDir / "Sad Trombone Wah Wah Wah Fail Sound Effect.ogg"
-    path_icon = path_assetsDir / "icon.png"
+    path_icon = path_assetsDir / "icon_48px.png"
     path_logDir = path_gameDir / "logs"  # ~/.snake/logs/
     path_log1 = path_logDir / "1.log"
     path_log2 = path_logDir / "2.log"
     path_log3 = path_logDir / "3.log"
     path_log4 = path_logDir / "4.log"
 
-    url_font = "https://cdn.discordapp.com/attachments/854111213709557821/956506488115974164/OpenSans-Bold.ttf"
-    url_music_Game = "https://cdn.discordapp.com/attachments/854111213709557821/956506487579095070/Tristan_Lohengrin_-_Happy_8bit_Loop_01.ogg"
-    url_music_GameOver = "https://cdn.discordapp.com/attachments/854111213709557821/956506487902068746/Sad_Trombone_Wah_Wah_Wah_Fail_Sound_Effect.ogg"
     url_website = "http://tiny.cc/snake_website"
-
-    icon_content = "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAABR1BMVEUAAABeswAAgABrygBnuwBrygBowQBnvAAAbwFnvgDlNBdrywBpwADuORRtvQBrzgAAgABnvQABcAFovgBsygBrygBrygBowQAAcwBqwwBqxQAAfgBpxwBxzgALdwFfwQALhwBcvwAAbQFnvgAxogBrygBnvgAFgwBovwBsywAnkABpxgAAcgAAcQBsygAAcgBrygA7nQBryABowQAAgAB6rAMAbQEAbAEokABrygAXjwBovQBmxwBrygADgQA0pQBwtwFnxgAAgAAAbwFBrQBovwBrygBovwBrygBqwAAAcQAAgABqygAAcQBovwA8pAAPgABrywAAdQBqzAAAgABrywAvoQAAgQBGsQAAcgAdlgAAdQAnlgBXrwBpwwBnugBrygAAgAAAaQExogDeLBsWgAE8qQBdtQA5qABnuwBSrAB7qARZsgAJeIArAAAAX3RSTlMABOLg/fpo+uLi28yjWRsU+Pbr3dXBh35dVU8+OQz8/Pz39PDv59nUwLSlkpKIZ2dINCwhFPn59/Lw7ezq6enm5d3c09HQxMS6tbSrqKWMiXh1dHNsYlxXRUM9MCcjEayMVDsAAAHASURBVEjH1dVnUwIxEAbgnByCYgERFMHeBREBe++993rhxAL4/z/LJbckJ8lMZnSc8f3Ezu5zQzbcgFRSn883wud/CZobtqZKpdWRWsX5iG7YCWoq850eo5I9FdBmsHhUwIjBJaMAhngQUQALPGhTAB4eNHzvPqdvr++ziE+BBzuOVsfhHMZvuVzOf3BT2XiTwSeIWGI+jLEFSIaj8BQH6GfzV24MgMR/ya5BdBERjAFAjkgj7gA6zKfd1cBstzq1DhAAsIsFoM/qaAHRWmNYBMxzcmqdzQ/B8sJisEEX2199bT4Yd29vzg/7AUzTbh0A9gYNAkhZVRSAKQWwoyVargPIysCLnQFarnxYKRaLj6ScfbVzUgFwzh5a9mIr5UdOkrLLtDP2c7BMyzUAT6RsAXBaBWpo2QqgiZReABO/BnwAYs6v1C4DowDqMghpCRPyIANxAEah8GmyaDKQooDknc17kQxog0IwLgUoKQJ9SA60EA/YjkQ/PppmVxVIIC7YTjeqiBAAdgAxgGgXOge8USQEi46/tuNgQC/fw0zL/h1CYuBCkvw9cNkgpArCNkiqgk76BoxqSFmEXe7WM7X5L+xVXXt8wCY7AAAAAElFTkSuQmCC"
 
     fps = 120
     speed = 10  # default speed (aka movesPerSecond) (fps divisor)
@@ -959,16 +937,13 @@ class conf:
 ############# Main code #############
 if __name__ == "__main__":
     #### Initializing game data ####
-    # moved from checkFiles() to make sure there is a game directory, so that the log file can be put there and game icon set
+    # moved from check_files() to make sure there is a game directory, so that the log file can be put there and game icon set
     if not conf.path_gameDir.exists():
         conf.path_gameDir.mkdir()
     if not conf.path_logDir.exists():
         conf.path_logDir.mkdir()
     if not conf.path_assetsDir.exists():
         conf.path_assetsDir.mkdir()
-
-    if not conf.path_icon.exists():
-        conf.path_icon.write_bytes(base64.b64decode(conf.icon_content))
 
     #### Logging configuration ####
     if conf.path_log4.exists():
@@ -998,6 +973,9 @@ if __name__ == "__main__":
     #### Main game code ####
     logger.info(f"Starting Snake v{conf.version}")
     logger.info(f"System: {platform.system()}, version: {platform.release()}")
+
+    check_files()
+
     pygame.display.init()
     pygame.mixer.init()
     pygame.font.init()
@@ -1008,7 +986,6 @@ if __name__ == "__main__":
     pygame.display.set_caption(f"Snake v{conf.version}")
     pygame.display.set_icon(pygame.image.load(conf.path_icon))
 
-    loading_screen(checkFiles, "Loading", "Program encountered a problem while creating local files. Check Your Internet connection and try again.", sysfont=not conf.path_font.is_good())
     Data = File()
     Data.read()
 
