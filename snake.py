@@ -320,6 +320,32 @@ class File:  # Data
         return base64_encode(json.dumps(self.datadict, separators=(",", ":")))
 
 
+def configure_logging():
+    if conf.path_log4.exists():
+        conf.path_log4.unlink()
+    if conf.path_log3.exists():
+        conf.path_log3.replace(conf.path_log4)
+    if conf.path_log2.exists():
+        conf.path_log2.replace(conf.path_log3)
+    if conf.path_log1.exists():
+        conf.path_log1.replace(conf.path_log2)
+    sys.stderr = Tee(sys.stderr, conf.path_log1, "a")
+    for handler in logging.root.handlers[
+                   :]:  # this is needed in PyCharm and can be left for safety
+        logging.root.removeHandler(handler)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
+    file_handler = logging.FileHandler(filename=conf.path_log1, mode="a")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.INFO)
+    logger.addHandler(stdout_handler)
+    return logger
+
+
 def check_files():
     if not conf.path_version.is_good():
         logger.warning("Version file did not exist, trying to create")
@@ -946,29 +972,7 @@ if __name__ == "__main__":
         conf.path_assetsDir.mkdir()
 
     #### Logging configuration ####
-    if conf.path_log4.exists():
-        conf.path_log4.unlink()
-    if conf.path_log3.exists():
-        conf.path_log3.replace(conf.path_log4)
-    if conf.path_log2.exists():
-        conf.path_log2.replace(conf.path_log3)
-    if conf.path_log1.exists():
-        conf.path_log1.replace(conf.path_log2)
-
-    sys.stderr = Tee(sys.stderr, conf.path_log1, "a")
-
-    for handler in logging.root.handlers[:]:  # this is needed in PyCharm and can be left for safety
-        logging.root.removeHandler(handler)
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s [%(levelname)s] (Line %(lineno)d in %(funcName)s) - %(message)s")
-    file_handler = logging.FileHandler(filename=conf.path_log1, mode="a")
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(logging.INFO)
-    logger.addHandler(stdout_handler)
+    logger = configure_logging()
 
     #### Main game code ####
     logger.info(f"Starting Snake v{conf.version}")
