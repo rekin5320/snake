@@ -211,7 +211,13 @@ class ButtonSpeedGroup:
 
         self.ButtonsList = []
         for index, value in enumerate(self.speed_list):
-            self.ButtonsList.append(ButtonSpeed(self.x + index * (self.spacing + self.width_single), self.y, self.width_single, self.height, self.font_size, value))
+            self.ButtonsList.append(
+                ButtonSpeed(
+                    self.x + index * (self.spacing + self.width_single),
+                    self.y, self.width_single, self.height,
+                    self.font_size, value
+                )
+            )
 
     def click(self, mouse):
         for button in self.ButtonsList:
@@ -526,7 +532,17 @@ class HighscoresInMenuClass:
 
     def update(self):
         self.text1 = Text("Highscores:", self.color, self.font_size1)
-        self.text2 = LongText(f"• overall: {Data.highscore} \n " + " \n ".join([f"• {k}: {v}" for k, v in Data.highscores_speed.items()]), self.color, self.font_size2, line_spacing=6)
+        self.text2 = LongText(
+            f"• overall: {Data.highscore} \n "
+            + " \n ".join([
+                f"• {speed}: {score}"
+                for speed, score
+                in Data.highscores_speed.items()
+            ]),
+            self.color,
+            self.font_size2,
+            line_spacing=6
+        )
         self.y2 = conf.margin + self.text1.height
 
     def draw(self):
@@ -649,7 +665,10 @@ def menu_redraw(mouse):
     Author.draw(conf.window_width - conf.margin - Author.width, conf.window_height - conf.margin - Author.height)
     WebsiteButton.draw(mouse)
     CreditsButton.draw(mouse)
-    SpeedText.draw(conf.window_width - conf.margin - SpeedButtons.width_total - SpeedButtons.spacing - SpeedText.width, conf.margin + (SpeedButtons.height - SpeedText.height) // 2)
+    SpeedText.draw(
+        conf.window_width - conf.margin - SpeedButtons.width_total - SpeedButtons.spacing - SpeedText.width,
+        conf.margin + (SpeedButtons.height - SpeedText.height) // 2
+    )
     SpeedButtons.draw(mouse)
     VolumeWidgetInMenu.draw(mouse)
 
@@ -685,13 +704,19 @@ def game_main():
         if Snake.score > Data.highscore:
             Data.highscore = Snake.score
         NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {conf.speed})", conf.color_newhighscore, conf.font_size_newhighscore)
-        NewHighscoreText.draw((conf.window_width - NewHighscoreText.width) // 2, (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10)
+        NewHighscoreText.draw(
+            (conf.window_width - NewHighscoreText.width) // 2,
+            (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10
+        )
         HighscoresInMenu.update()
     elif Snake.score > Data.highscore:
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {conf.speed})")
         Data.highscore = Snake.score
         NewHighscoreText = Text(f"new highscore: {Snake.score}", conf.color_newhighscore, conf.font_size_newhighscore)
-        NewHighscoreText.draw((conf.window_width - NewHighscoreText.width) // 2, (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10)
+        NewHighscoreText.draw(
+            (conf.window_width - NewHighscoreText.width) // 2,
+            (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10
+        )
         HighscoresInMenu.update()
     Data.write()
 
@@ -795,7 +820,14 @@ def creditss_main():
 
     # I do not prerender it, as it is unlikely to be used often
     CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", conf.color_font, conf.font_size_creditsscene, line_length=52)
-    CreditsBackButton = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Back", conf.button_font_size)
+    CreditsBackButton = Button(
+        (conf.window_width - conf.button_width) // 2,
+        500,
+        conf.button_width,
+        conf.button_height,
+        "Back",
+        conf.button_font_size
+    )
 
     while True:
         clock.tick(conf.fps)
@@ -852,7 +884,15 @@ def loading_screen(function, loading_text, error_text):
 def error_screen(text):
     logger.critical(f"Error screen: {text}")
     ErrorText = LongText(text, conf.color_font, conf.font_size_error)
-    ButtonExit2 = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=lambda: sys.exit(1))
+    ButtonExit2 = Button(
+        (conf.window_width - conf.button_width) // 2,
+        500,
+        conf.button_width,
+        conf.button_height,
+        "Exit",
+        conf.button_font_size,
+        command=lambda: sys.exit(1)
+    )
 
     while True:
         clock.tick(conf.fps)
@@ -978,8 +1018,24 @@ if __name__ == "__main__":
 
     ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size)
     ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
-    WebsiteButton = Button(conf.margin, conf.window_height - conf.margin - 2 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=lambda: webbrowser.open(conf.url_website, new=0, autoraise=True), radius=7)
-    CreditsButton = Button(conf.margin + int(5.5 * conf.grid), conf.window_height - conf.margin - 2 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, radius=7)
+    WebsiteButton = Button(
+        conf.margin,
+        conf.window_height - conf.margin - 2 * conf.grid,
+        int(4.85 * conf.grid),
+        2 * conf.grid, "website",
+        conf.font_size_website,
+        command=lambda: webbrowser.open(conf.url_website, new=0, autoraise=True),
+        radius=7
+    )
+    CreditsButton = Button(
+        conf.margin + int(5.5 * conf.grid),
+        conf.window_height - conf.margin - 2 * conf.grid,
+        int(4.65 * conf.grid),
+        2 * conf.grid,
+        "credits",
+        conf.font_size_website,
+        radius=7
+    )
 
     SpeedText = Text("Speed:", conf.color_font, 22)
     SpeedButtons = ButtonSpeedGroup()
