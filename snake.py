@@ -166,18 +166,18 @@ class Button:
         self.text = Text(text, color_text, font_size)
         self.command = command
 
-    def is_pointed(self):
+    def is_pointed(self, mouse):
         return self.x <= mouse[0] <= self.x + self.width and self.y <= mouse[1] <= self.y + self.height
 
-    def is_highlighted(self):
-        return self.is_pointed()
+    def is_highlighted(self, mouse):
+        return self.is_pointed(mouse)
 
-    def click(self):
-        if self.is_pointed():
+    def click(self, mouse):
+        if self.is_pointed(mouse):
             self.command()
 
-    def draw(self):
-        if self.is_highlighted():
+    def draw(self, mouse):
+        if self.is_highlighted(mouse):
             self.background2.draw(self.x, self.y)
         else:
             self.background1.draw(self.x, self.y)
@@ -189,12 +189,12 @@ class ButtonSpeed(Button):
         super().__init__(x, y, width, height, str(desired_value), font_size, radius=4)
         self.desired_value = desired_value
 
-    def click(self):
-        if self.is_pointed() and conf.speed != self.desired_value:
+    def click(self, mouse):
+        if self.is_pointed(mouse) and conf.speed != self.desired_value:
             conf.change_speed_to(self.desired_value)
 
-    def is_highlighted(self):
-        return super().is_pointed() or conf.speed == self.desired_value
+    def is_highlighted(self, mouse):
+        return super().is_pointed(mouse) or conf.speed == self.desired_value
 
 
 class ButtonSpeedGroup:
@@ -213,13 +213,13 @@ class ButtonSpeedGroup:
         for index, value in enumerate(self.speed_list):
             self.ButtonsList.append(ButtonSpeed(self.x + index * (self.spacing + self.width_single), self.y, self.width_single, self.height, self.font_size, value))
 
-    def click(self):
+    def click(self, mouse):
         for button in self.ButtonsList:
-            button.click()
+            button.click(mouse)
 
-    def draw(self):
+    def draw(self, mouse):
         for button in self.ButtonsList:
-            button.draw()
+            button.draw(mouse)
 
     def await_decrease(self):
         self.dec = True
@@ -240,28 +240,6 @@ class ButtonSpeedGroup:
                 if i < len(conf.speed_list) - 1:
                     conf.change_speed_to(conf.speed_list[i + 1])
                     self.dec, self.inc = False, False
-
-
-class ButtonCmds:
-    @staticmethod
-    def gameTrue():
-        global game
-        game = True
-
-    @staticmethod
-    def menuFalse():
-        global menu
-        menu = False
-
-    @staticmethod
-    def creditssTrue():
-        global creditss
-        creditss = True
-
-    @staticmethod
-    def creditssFalse():
-        global creditss
-        creditss = False
 
 
 class File:  # Data
@@ -422,8 +400,9 @@ class SnakeClass:
             self.dirx = 0
             self.diry = self.velocity
 
-    def move(self):
-        global game_notOver
+    def move(self) -> bool:
+        """Move the snake. If the return value is True, game is over."""
+        game_over = False
         self.dirx_current = self.dirx
         self.diry_current = self.diry
 
@@ -434,11 +413,11 @@ class SnakeClass:
         self.head_location = (self.x + conf.grid_border, self.y + conf.grid_border)
 
         if self.x == conf.game_x - conf.grid or self.x == conf.game_width + conf.grid or self.y == conf.game_y - conf.grid or self.y == conf.game_height + conf.topbar_height:
-            game_notOver = False
+            game_over = True
 
         for pair in self.xyList[:-1]:  # collision with itself
             if self.head_location == pair:
-                game_notOver = False
+                game_over = True
 
         self.xyList.append(self.head_location)
 
@@ -453,8 +432,10 @@ class SnakeClass:
             self.xyList.pop(0)
             if self.score < 0:
                 self.score = 0
-                game_notOver = False
+                game_over = True
             Banana.move()
+
+        return game_over
 
     def draw(self):
         for i, (x, y) in enumerate(self.xyList[:-1], start=1):
@@ -608,47 +589,42 @@ class VolumeWidgetInMenuClass:
         Data.write()
         VolumeWidgetInMenu.update()
 
-    def draw(self):
-        self.button_minus.draw()
-        self.button_plus.draw()
+    def draw(self, mouse):
+        self.button_minus.draw(mouse)
+        self.button_plus.draw(mouse)
         self.text.draw(self.x_text, self.y_text)
 
 
 ########### Scenes managing ###########
 
 def menu_main():
-    global mouse
-    global menu
-    global game
-    global creditss
     global LastScore
 
-    menu = True
-    game = False
-    creditss = False
-
     LastScore = None
-    while menu:
+    while True:
         clock.tick(conf.fps)
 
         mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                menu = False
+                return
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                ButtonPlay.click()     # Game
-                ButtonExit.click()     # Exit
-                WebsiteButton.click()  # Website
-                CreditsButton.click()  # Credits
-                SpeedButtons.click()   # Speed buttons
-                VolumeWidgetInMenu.button_minus.click()
-                VolumeWidgetInMenu.button_plus.click()
+                if ButtonPlay.is_pointed(mouse):
+                    game_main()
+                elif ButtonExit.is_pointed(mouse):
+                    return
+                elif CreditsButton.is_pointed(mouse):
+                    creditss_main()
+                WebsiteButton.click(mouse)
+                SpeedButtons.click(mouse)
+                VolumeWidgetInMenu.button_minus.click(mouse)
+                VolumeWidgetInMenu.button_plus.click(mouse)
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
-            menu = False
+            return
         if keys[pygame.K_SPACE]:
-            game = True
+            game_main()
 
         if keys[pygame.K_MINUS] or keys[pygame.K_KP_MINUS]:
             SpeedButtons.await_decrease()
@@ -657,15 +633,10 @@ def menu_main():
         else:
             SpeedButtons.change_speed()
 
-        if game:
-            game_main()
-        if creditss:
-            creditss_main()
-
-        menu_redraw()
+        menu_redraw(mouse)
 
 
-def menu_redraw():
+def menu_redraw(mouse):
     global LastScore
     window.fill(conf.color_window_background)
     SnakeLogo.draw((conf.window_width - SnakeLogo.width) // 2, 4.5 * conf.grid)
@@ -673,21 +644,19 @@ def menu_redraw():
     TotalStatsInMenu.draw()
     if LastScore:
         LastScore.draw((conf.window_width - LastScore.width) // 2, 205)
-    ButtonPlay.draw()
-    ButtonExit.draw()
+    ButtonPlay.draw(mouse)
+    ButtonExit.draw(mouse)
     Author.draw(conf.window_width - conf.margin - Author.width, conf.window_height - conf.margin - Author.height)
-    WebsiteButton.draw()
-    CreditsButton.draw()
+    WebsiteButton.draw(mouse)
+    CreditsButton.draw(mouse)
     SpeedText.draw(conf.window_width - conf.margin - SpeedButtons.width_total - SpeedButtons.spacing - SpeedText.width, conf.margin + (SpeedButtons.height - SpeedText.height) // 2)
-    SpeedButtons.draw()
-    VolumeWidgetInMenu.draw()
+    SpeedButtons.draw(mouse)
+    VolumeWidgetInMenu.draw(mouse)
 
     pygame.display.update()
 
 
 def game_main():
-    global game_notOver
-    global game
     global Snake
     global Apple
     global Banana
@@ -698,47 +667,8 @@ def game_main():
     Banana = BananaClass()
     Apple.move()
     Banana.move()
-    game_notOver = True
 
-    while game_notOver:
-        clock.tick(conf.fps)
-
-        if Snake.fpsCounter % conf.move_delay == 0:
-            game_redraw()
-        if Snake.dirx or Snake.diry:  # snake started moving
-            Snake.fpsCounter += 1
-            Banana.lifetime -= 1
-            if Banana.lifetime == 0:
-                Banana.move()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_notOver = False
-            elif joystick and event.type == pygame.JOYAXISMOTION:
-                if joystick.get_axis(3) < -conf.joystick_sensitivity:  # ← -x
-                    Snake.change_dir_left()
-                elif joystick.get_axis(3) > conf.joystick_sensitivity:  # → +x
-                    Snake.change_dir_right()
-                elif joystick.get_axis(4) < -conf.joystick_sensitivity:  # ↑ -y
-                    Snake.change_dir_up()
-                elif joystick.get_axis(4) > conf.joystick_sensitivity:  # ↓ +y
-                    Snake.change_dir_down()
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE]:
-            game_notOver = False
-
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:  # ← -x
-            Snake.change_dir_left()
-        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:  # → +x
-            Snake.change_dir_right()
-        elif keys[pygame.K_UP] or keys[pygame.K_w]:  # ↑ -y
-            Snake.change_dir_up()
-        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:  # ↓ +y
-            Snake.change_dir_down()
-
-        if Snake.fpsCounter % conf.move_delay == 0:
-            Snake.move()
+    game_main_loop()
 
     logger.info(f"Game over, score: {Snake.score} (speed: {conf.speed}, time: {format_time(Snake.fpsCounter / conf.fps, milliseconds=True)})")
     pygame.mixer.music.pause()
@@ -770,7 +700,49 @@ def game_main():
 
     gameover_main()
 
-    game = False
+
+def game_main_loop():
+    while True:
+        clock.tick(conf.fps)
+
+        if Snake.fpsCounter % conf.move_delay == 0:
+            game_redraw()
+        if Snake.dirx or Snake.diry:  # snake started moving
+            Snake.fpsCounter += 1
+            Banana.lifetime -= 1
+            if Banana.lifetime == 0:
+                Banana.move()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+            elif joystick and event.type == pygame.JOYAXISMOTION:
+                if joystick.get_axis(3) < -conf.joystick_sensitivity:  # ← -x
+                    Snake.change_dir_left()
+                elif joystick.get_axis(3) > conf.joystick_sensitivity:  # → +x
+                    Snake.change_dir_right()
+                elif joystick.get_axis(4) < -conf.joystick_sensitivity:  # ↑ -y
+                    Snake.change_dir_up()
+                elif joystick.get_axis(4) > conf.joystick_sensitivity:  # ↓ +y
+                    Snake.change_dir_down()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            return
+
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:  # ← -x
+            Snake.change_dir_left()
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:  # → +x
+            Snake.change_dir_right()
+        elif keys[pygame.K_UP] or keys[pygame.K_w]:  # ↑ -y
+            Snake.change_dir_up()
+        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:  # ↓ +y
+            Snake.change_dir_down()
+
+        if Snake.fpsCounter % conf.move_delay == 0:
+            game_over = Snake.move()
+            if game_over:
+                return
 
 
 def game_redraw():
@@ -818,38 +790,37 @@ def gameover_main():
 
 
 def creditss_main():
-    global mouse
-    global creditss
     global CreditsText
     global CreditsBackButton
 
     # I do not prerender it, as it is unlikely to be used often
     CreditsText = LongText("Icon: \n Icon made by Freepik from www.flaticon.com \n \n Music during gameplay: \n Tristan Lohengrin - Happy 8bit Loop 01 \n \n Sound after loss: \n Sad Trombone Wah Wah Wah Fail Sound Effect", conf.color_font, conf.font_size_creditsscene, line_length=52)
-    CreditsBackButton = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Back", conf.button_font_size, command=ButtonCmds.creditssFalse)
+    CreditsBackButton = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Back", conf.button_font_size)
 
-    while creditss:
+    while True:
         clock.tick(conf.fps)
 
         mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                creditss = False
+                return
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                CreditsBackButton.click()  # Back to menu
+                if CreditsBackButton.is_pointed(mouse):  # Back to menu
+                    return
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
-            creditss = False
+            return
 
-        creditss_redraw()
+        creditss_redraw(mouse)
 
 
-def creditss_redraw():
+def creditss_redraw(mouse):
     global CreditsText
     global CreditsBackButton
     window.fill(conf.color_window_background)
     CreditsText.draw((conf.window_width - CreditsText.width) // 2, 90)
-    CreditsBackButton.draw()
+    CreditsBackButton.draw(mouse)
     pygame.display.update()
 
 
@@ -880,29 +851,26 @@ def loading_screen(function, loading_text, error_text):
 
 def error_screen(text):
     logger.critical(f"Error screen: {text}")
-    global error
-    global mouse
-    error = True
     ErrorText = LongText(text, conf.color_font, conf.font_size_error)
     ButtonExit2 = Button((conf.window_width - conf.button_width) // 2, 500, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=lambda: sys.exit(1))
 
-    while error:
+    while True:
         clock.tick(conf.fps)
 
         mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                error = False
+                return
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                ButtonExit2.click()
+                ButtonExit2.click(mouse)
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
-            error = False
+            return
 
         window.fill(conf.color_error_background)
         ErrorText.draw((conf.window_width - ErrorText.width) / 2, (conf.window_height - ErrorText.height) / 2 - 60)
-        ButtonExit2.draw()
+        ButtonExit2.draw(mouse)
         pygame.display.update()
 
 
@@ -1008,10 +976,10 @@ if __name__ == "__main__":
     SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
     Author = Text("Michał Machnikowski 2023", (215, 215, 215), 21)
 
-    ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size, command=ButtonCmds.gameTrue)
-    ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size, command=ButtonCmds.menuFalse)
+    ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size)
+    ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
     WebsiteButton = Button(conf.margin, conf.window_height - conf.margin - 2 * conf.grid, int(4.85 * conf.grid), 2 * conf.grid, "website", conf.font_size_website, command=lambda: webbrowser.open(conf.url_website, new=0, autoraise=True), radius=7)
-    CreditsButton = Button(conf.margin + int(5.5 * conf.grid), conf.window_height - conf.margin - 2 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, command=ButtonCmds.creditssTrue, radius=7)
+    CreditsButton = Button(conf.margin + int(5.5 * conf.grid), conf.window_height - conf.margin - 2 * conf.grid, int(4.65 * conf.grid), 2 * conf.grid, "credits", conf.font_size_website, radius=7)
 
     SpeedText = Text("Speed:", conf.color_font, 22)
     SpeedButtons = ButtonSpeedGroup()
