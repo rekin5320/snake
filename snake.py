@@ -987,7 +987,7 @@ if __name__ == "__main__":
     pygame.mixer.init()
     pygame.font.init()
     pygame.joystick.init()
-    joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() else False
+    joystick = pygame.joystick.Joystick(0) if pygame.joystick.get_count() else None
     clock = pygame.time.Clock()
     window = pygame.display.set_mode((conf.window_width, conf.window_height), vsync=1)
     pygame.display.set_caption(f"Snake v{conf.version}")
