@@ -664,6 +664,10 @@ def menu_redraw(mouse):
         LastScore.draw((conf.window_width - LastScore.width) // 2, 205)
     ButtonPlay.draw(mouse)
     ButtonExit.draw(mouse)
+    VersionNumberInMenu.draw(
+        conf.window_width - conf.margin - VersionNumberInMenu.width,
+        conf.window_height - conf.margin - VersionNumberInMenu.height
+    )
     WebsiteButton.draw(mouse)
     AboutButton.draw(mouse)
     SpeedText.draw(
@@ -1026,6 +1030,7 @@ if __name__ == "__main__":
     # Prerendered objects
     GameOver = Text("GAME  OVER", (255, 0, 0), 77)
     SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
+    VersionNumberInMenu = Text(f"v{conf.version}", (215, 215, 215), 19)
 
     ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size)
     ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
