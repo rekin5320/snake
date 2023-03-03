@@ -2,6 +2,8 @@
 
 ## Unreleased
 * Don't download game assets, rely on local ones
+* Added information about license in About
+* Show version number in menu in bottom right corner
 * Show log message level on stdout
 * Code improvements
 
