@@ -19,3 +19,13 @@ python3 -m pip install -r requirements.txt
 ```shell
 python3 snake.py
 ```
+
+## Playing
+Rules are simple – collect apples (red), avoid own tail and bananas (yellow)
+
+### Controls
+Moving: WASD or arrows
+
+To exit the ongoing game to the menu, press Escape
+
+Hint: you can use Space to play again faster – press once to skip Game Over and press Space again in the menu to start a new game
