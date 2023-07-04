@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import base64
+from collections.abc import Callable
 import json
 import logging.handlers
 import os
@@ -159,7 +160,7 @@ def draw_tile(color, x, y):
 
 
 class Button:
-    def __init__(self, x, y, width, height, text, font_size, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command=None, radius=9):
+    def __init__(self, x, y, width, height, text, font_size, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command: Callable = lambda: None, radius=9):
         self.x = x
         self.y = y
         self.width = width
