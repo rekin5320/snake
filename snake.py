@@ -927,13 +927,13 @@ class ErrorScreen:
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    return
+                    sys.exit(1)
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.ButtonExitError.click(mouse)
     
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
-                return
+                sys.exit(1)
 
             self.redraw(mouse)
     
