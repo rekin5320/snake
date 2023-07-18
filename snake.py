@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import base64
 from collections.abc import Callable
 import json
 import logging.handlers
@@ -14,6 +13,8 @@ import traceback
 import webbrowser
 
 import pygame
+
+from base64_utils import base64_decode, base64_encode
 
 
 ######## Classes, functions and definitions ########
@@ -60,18 +61,6 @@ class Tee:
 
     def flush(self):
         self.file.flush()
-
-
-def base64_encode(text):
-    encodedtext_bytes = base64.b64encode(text.encode("utf-8"))
-    encodedtext = str(encodedtext_bytes, "utf-8")
-    return encodedtext
-
-
-def base64_decode(text):
-    decodedtext_bytes = base64.b64decode(text)
-    decodedtext = str(decodedtext_bytes, "utf-8")
-    return decodedtext
 
 
 def format_time(seconds, milliseconds=False):
