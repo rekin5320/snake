@@ -278,7 +278,7 @@ class File:  # Data
 
         except:
             logger.exception("Error while reading game data:")
-            error_screen("Error while reading game data")
+            ErrorScreen("Error while reading game data")
 
         else:
             logger.info("Game data successfully read")
@@ -302,7 +302,7 @@ class File:  # Data
         except Exception as err:
             logger.error(err)
             logger.error(traceback.format_exc())
-            error_screen("Error while writing game data")
+            ErrorScreen("Error while writing game data")
 
     def dump_data(self):
         return base64_encode(json.dumps(self.datadict, separators=(",", ":")))
@@ -895,39 +895,52 @@ def loading_screen(function, loading_text, error_text):
     if thread.error:
         logger.error(thread.error)
         logger.error(thread.traceback)
-        error_screen(error_text)
+        ErrorScreen(error_text)
 
 
-def error_screen(text):
-    logger.critical(f"Error screen: {text}")
-    ErrorText = LongText(text, conf.color_font, conf.font_size_error)
-    ButtonExit2 = Button(
-        (conf.window_width - conf.button_width) // 2,
-        500,
-        conf.button_width,
-        conf.button_height,
-        "Exit",
-        conf.button_font_size,
-        command=lambda: sys.exit(1)
-    )
+class ErrorScreen:
+    color_background = (208, 26, 26)
+    font_size = 30
+    def __init__(self, message):
+        self.message = message
+        logger.critical(f"Error screen: {message}")
 
-    while True:
-        clock.tick(conf.fps)
+        self.ErrorText = LongText(message, conf.color_font, self.font_size)
+        self.text_x = (conf.window_width - self.ErrorText.width) / 2
+        self.text_y = (conf.window_height - self.ErrorText.height) / 2 - 60
+        self.ButtonExitError = Button(
+            (conf.window_width - conf.button_width) // 2,
+            500,
+            conf.button_width,
+            conf.button_height,
+            "Exit",
+            conf.button_font_size,
+            command=lambda: sys.exit(1)
+        )
 
-        mouse = pygame.mouse.get_pos()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        self.main_loop()
+    
+    def main_loop(self):
+        while True:
+            clock.tick(conf.fps)
+    
+            mouse = pygame.mouse.get_pos()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.ButtonExitError.click(mouse)
+    
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_ESCAPE]:
                 return
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                ButtonExit2.click(mouse)
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE]:
-            return
-
-        window.fill(conf.color_error_background)
-        ErrorText.draw((conf.window_width - ErrorText.width) / 2, (conf.window_height - ErrorText.height) / 2 - 60)
-        ButtonExit2.draw(mouse)
+            self.redraw(mouse)
+    
+    def redraw(self, mouse):
+        window.fill(self.color_background)
+        self.ErrorText.draw(self.text_x, self.text_y)
+        self.ButtonExitError.draw(mouse)
         pygame.display.update()
 
 
@@ -950,13 +963,11 @@ class conf:
     tile_radius = 2
 
     color_window_background = (1, 170, 64)
-    color_error_background = (208, 26, 26)
     color_game_background = (0, 0, 0)
     color_font = (255, 255, 255)
     color_newhighscore = (0, 0, 255)
 
     font_size_loading = 35
-    font_size_error = 30
     font_size_newhighscore = 33
     font_size_lastscore = 27
     font_size_website = 21
