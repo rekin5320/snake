@@ -748,26 +748,26 @@ def game_main_loop():
             if event.type == pygame.QUIT:
                 return
             elif joystick and event.type == pygame.JOYAXISMOTION:
-                if joystick.get_axis(3) < -conf.joystick_sensitivity:  # ← -x
+                if joystick.get_axis(3) < -conf.joystick_sensitivity:    # ← -x
                     Snake.change_dir_left()
-                elif joystick.get_axis(3) > conf.joystick_sensitivity:  # → +x
+                elif joystick.get_axis(3) > conf.joystick_sensitivity:   # → +x
                     Snake.change_dir_right()
                 elif joystick.get_axis(4) < -conf.joystick_sensitivity:  # ↑ -y
                     Snake.change_dir_up()
-                elif joystick.get_axis(4) > conf.joystick_sensitivity:  # ↓ +y
+                elif joystick.get_axis(4) > conf.joystick_sensitivity:   # ↓ +y
                     Snake.change_dir_down()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             return
 
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:  # ← -x
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:     # ← -x
             Snake.change_dir_left()
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:  # → +x
             Snake.change_dir_right()
-        elif keys[pygame.K_UP] or keys[pygame.K_w]:  # ↑ -y
+        elif keys[pygame.K_UP] or keys[pygame.K_w]:     # ↑ -y
             Snake.change_dir_up()
-        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:  # ↓ +y
+        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:   # ↓ +y
             Snake.change_dir_down()
 
         if Snake.fpsCounter % conf.move_delay == 0:
@@ -1004,6 +1004,7 @@ class conf:
 
 
 ############# Main code #############
+
 if __name__ == "__main__":
     check_directories()
 
@@ -1069,3 +1070,4 @@ if __name__ == "__main__":
     logger.debug(Data.dump_data())
 
     pygame.quit()
+
