@@ -489,13 +489,13 @@ class TopBarClass:
         self.font_size = int(1.04 * conf.grid)
 
     def draw(self):
-        Time = Text(f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_font, self.font_size)
+        Time = Text(f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_text, self.font_size)
         Time.draw(1.4 * conf.grid, (self.height - Time.height) // 2)
 
-        Score = Text(f"score: {thousands_separators(Snake.score)}", conf.color_font, self.font_size)
+        Score = Text(f"score: {thousands_separators(Snake.score)}", conf.color_text, self.font_size)
         Score.draw((self.width - Score.width) // 2, (self.height - Score.height) // 2)
 
-        HighscoreOnBar = Text(f"highscore: {thousands_separators(Data.highscores_speed[str(conf.speed)])}", conf.color_font, self.font_size)
+        HighscoreOnBar = Text(f"highscore: {thousands_separators(Data.highscores_speed[str(conf.speed)])}", conf.color_text, self.font_size)
         HighscoreOnBar.draw(self.width - conf.grid - HighscoreOnBar.width - 0.4 * conf.grid, (self.height - HighscoreOnBar.height) // 2)
 
 
@@ -506,7 +506,7 @@ class CurrentSpeedTextClass:
         self.y = 25 * conf.grid + (conf.grid - self.text.height) // 2
 
     def update(self):
-        self.text = Text(f"speed: {conf.speed}", conf.color_font, conf.font_size_currentspeed)
+        self.text = Text(f"speed: {conf.speed}", conf.color_text, conf.font_size_currentspeed)
 
     def draw(self):
         self.text.draw(self.x, self.y)
@@ -517,7 +517,7 @@ class HighscoresInMenuClass:
         self.x1 = conf.margin
         self.x2 = conf.margin + 15
         self.y1 = conf.margin - 4
-        self.color = conf.color_font
+        self.color = conf.color_text
         self.font_size1 = 23
         self.font_size2 = 21
         self.update()
@@ -546,7 +546,7 @@ class TotalStatsInMenuClass:
     def __init__(self):
         self.x = conf.margin
         self.y1 = HighscoresInMenu.y_bottom + 7
-        self.color = conf.color_font
+        self.color = conf.color_text
         self.font_size = 20
         self.update()
         self.y2 = self.y1 + self.text_games.height + 5
@@ -576,7 +576,7 @@ class VolumeWidgetInMenuClass:
 
     def update(self):
         pygame.mixer.music.set_volume(Data.volume)
-        self.text = Text(f"Volume: {Data.volume:.0%}", conf.color_font, self.font_size)
+        self.text = Text(f"Volume: {Data.volume:.0%}", conf.color_text, self.font_size)
         self.x_text = conf.window_width - conf.margin - 2 * (self.spacing + self.button_dim) - self.text.width
 
     @staticmethod
@@ -716,7 +716,7 @@ def game_main():
     Data.write()
 
     global LastScore
-    LastScore = Text(f"last score: {Snake.score}", conf.color_font, conf.font_size_lastscore)
+    LastScore = Text(f"last score: {Snake.score}", conf.color_text, conf.font_size_lastscore)
 
     gameover_main()
 
@@ -829,7 +829,7 @@ def about_main():
             "© 2023 Michał Machnikowski \n "
             "License: GNU General Public License version 3 (https://www.gnu.org/licenses/gpl-3.0.html)"
         ),
-        conf.color_font,
+        conf.color_text,
         conf.font_size_aboutscene,
         line_length=52
     )
@@ -867,10 +867,10 @@ def loading_screen(function, loading_text, error_text):
     thread.start()
     time = 0
     LoadingTexts = (
-        Text(loading_text, conf.color_font, conf.font_size_loading),
-        Text(f"{loading_text}.", conf.color_font, conf.font_size_loading),
-        Text(f"{loading_text}..", conf.color_font, conf.font_size_loading),
-        Text(f"{loading_text}...", conf.color_font, conf.font_size_loading)
+        Text(loading_text, conf.color_text, conf.font_size_loading),
+        Text(f"{loading_text}.", conf.color_text, conf.font_size_loading),
+        Text(f"{loading_text}..", conf.color_text, conf.font_size_loading),
+        Text(f"{loading_text}...", conf.color_text, conf.font_size_loading)
     )
 
     while thread.is_alive():
@@ -894,7 +894,7 @@ class ErrorScreen:
         self.message = message
         logger.critical(f"Error screen: {message}")
 
-        self.ErrorText = LongText(message, conf.color_font, self.font_size)
+        self.ErrorText = LongText(message, conf.color_text, self.font_size)
         self.text_x = (conf.window_width - self.ErrorText.width) / 2
         self.text_y = (conf.window_height - self.ErrorText.height) / 2 - 60
         self.ButtonExitError = Button(
@@ -953,7 +953,7 @@ class conf:
 
     color_window_background = (1, 170, 64)
     color_game_background = (0, 0, 0)
-    color_font = (255, 255, 255)
+    color_text = (255, 255, 255)
     color_newhighscore = (0, 0, 255)
 
     font_size_loading = 35
@@ -1055,7 +1055,7 @@ if __name__ == "__main__":
         radius=7
     )
 
-    SpeedText = Text("Speed:", conf.color_font, 22)
+    SpeedText = Text("Speed:", conf.color_text, 22)
     SpeedButtons = ButtonSpeedGroup()
     HighscoresInMenu = HighscoresInMenuClass()
     TotalStatsInMenu = TotalStatsInMenuClass()
