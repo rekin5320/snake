@@ -14,15 +14,10 @@ import webbrowser
 
 import pygame
 
-from base64_utils import base64_decode, base64_encode
+from utils import base64_decode, base64_encode, thousands_separators, format_time
 
 
 ######## Classes, functions and definitions ########
-
-def thousands_separators(n):
-    """Inserts spaces as thousands separator."""
-    return f"{n:,}".replace(",", " ")
-
 
 class MyThread(threading.Thread):
     def run(self):
@@ -61,16 +56,6 @@ class Tee:
 
     def flush(self):
         self.file.flush()
-
-
-def format_time(seconds, milliseconds=False):
-    if milliseconds:
-        return f"{seconds // 60:02.0f}:{seconds % 60:06.3f}"
-    else:
-        if not isinstance(seconds, int):
-            seconds = round(seconds)
-        minutes, seconds = divmod(seconds, 60)
-        return f"{minutes:02}:{seconds:02}"
 
 
 class Text:
