@@ -59,17 +59,17 @@ class Tee:
 
 
 class Text:
-    def __init__(self, text, color, font_size):
+    def __init__(self, text: str, color, font_size: int):
         self.font = pygame.font.Font(conf.path_font, font_size)
         self.text = self.font.render(text, True, color)
         self.width, self.height = self.text.get_size()
 
-    def draw(self, x, y):
+    def draw(self, x: int, y: int):
         window.blit(self.text, (x, y))
 
 
 class LongText:
-    def __init__(self, text, color, font_size, line_length=40, line_spacing=1):
+    def __init__(self, text: str, color, font_size: int, line_length: int = 40, line_spacing: int = 1):
         self.line_spacing = line_spacing
         lines = self.split_into_lines(text, line_length)
         self.renderedTextList = [Text(line, color, font_size) for line in lines]
@@ -78,7 +78,7 @@ class LongText:
         self.height = len(self.renderedTextList) * (self.line_height + self.line_spacing) - self.line_spacing
 
     @staticmethod
-    def split_into_lines(text, line_length):
+    def split_into_lines(text: str, line_length: int):
         words = text.split(" ")
         words_len = len(words)
         i = 0
@@ -111,7 +111,7 @@ class LongText:
 
         return textList
 
-    def draw(self, x, y):
+    def draw(self, x: int, y: int):
         i = 0
         for line in self.renderedTextList:
             line.draw(x, y + i)
@@ -119,22 +119,22 @@ class LongText:
 
 
 class RoundedRectangle:
-    def __init__(self, width, height, radius, color):
+    def __init__(self, width: int, height: int, radius: int, color):
         self.width = width
         self.height = height
         self.radius = radius
         self.color = color
 
-    def draw(self, x, y):
+    def draw(self, x: int, y: int):
         pygame.draw.rect(window, self.color, (x, y, self.width, self.height), border_radius=self.radius)
 
 
-def draw_tile(color, x, y):
+def draw_tile(color, x: int, y: int):
     pygame.draw.rect(window, color, (x, y, conf.tile_width, conf.tile_width), border_radius=conf.tile_radius)
 
 
 class Button:
-    def __init__(self, x, y, width, height, text, font_size, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command: Callable = lambda: None, radius=9):
+    def __init__(self, x: int, y: int, width: int, height: int, text: str, font_size: int, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command: Callable = lambda: None, radius: int = 9):
         self.x = x
         self.y = y
         self.width = width
@@ -163,7 +163,7 @@ class Button:
 
 
 class ButtonSpeed(Button):
-    def __init__(self, x, y, width, height, font_size, desired_value):
+    def __init__(self, x: int, y: int, width: int, height: int, font_size: int, desired_value: int):
         super().__init__(x, y, width, height, str(desired_value), font_size, radius=4)
         self.desired_value = desired_value
 
@@ -844,7 +844,7 @@ class AboutScreen():
         pygame.display.update()
 
 
-def loading_screen(function, loading_text, error_text):
+def loading_screen(function: Callable, loading_text: str, error_text: str):
     thread = MyThread(target=function, daemon=True)
     thread.start()
     time = 0
@@ -872,7 +872,7 @@ def loading_screen(function, loading_text, error_text):
 class ErrorScreen:
     color_background = (208, 26, 26)
     font_size = 30
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
         logger.critical(f"Error screen: {message}")
 
