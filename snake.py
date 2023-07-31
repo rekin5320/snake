@@ -475,19 +475,19 @@ class TopBarClass:
 
     def draw(self):
         Time = Text(f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_text, self.font_size)
-        Time.draw(1.4 * conf.grid, (self.height - Time.height) // 2)
+        Time.draw(int(1.4 * conf.grid), (self.height - Time.height) // 2)
 
         Score = Text(f"score: {thousands_separators(Snake.score)}", conf.color_text, self.font_size)
         Score.draw((self.width - Score.width) // 2, (self.height - Score.height) // 2)
 
         HighscoreOnBar = Text(f"highscore: {thousands_separators(Data.highscores_speed[str(conf.speed)])}", conf.color_text, self.font_size)
-        HighscoreOnBar.draw(self.width - conf.grid - HighscoreOnBar.width - 0.4 * conf.grid, (self.height - HighscoreOnBar.height) // 2)
+        HighscoreOnBar.draw(self.width - int(1.4 * conf.grid) - HighscoreOnBar.width, (self.height - HighscoreOnBar.height) // 2)
 
 
 class CurrentSpeedTextClass:
     def __init__(self):
         self.update()
-        self.x = 1.4 * conf.grid
+        self.x = int(1.4 * conf.grid)
         self.y = 25 * conf.grid + (conf.grid - self.text.height) // 2
 
     def update(self):
@@ -632,7 +632,7 @@ def menu_main():
 def menu_redraw(mouse):
     global LastScore
     window.fill(conf.color_window_background)
-    SnakeLogo.draw((conf.window_width - SnakeLogo.width) // 2, 4.5 * conf.grid)
+    SnakeLogo.draw((conf.window_width - SnakeLogo.width) // 2, 113)
     HighscoresInMenu.draw()
     TotalStatsInMenu.draw()
     if LastScore:
@@ -859,7 +859,7 @@ def loading_screen(function: Callable, loading_text: str, error_text: str):
         clock.tick(conf.fps)
         window.fill(conf.color_window_background)
         Loading = LoadingTexts[time // conf.fps % 4]
-        Loading.draw((conf.window_width - Loading.width) / 2, (conf.window_height - Loading.height) / 2)
+        Loading.draw((conf.window_width - Loading.width) // 2, (conf.window_height - Loading.height) // 2)
         pygame.display.update()
         time += 1
 
@@ -877,8 +877,8 @@ class ErrorScreen:
         logger.critical(f"Error screen: {message}")
 
         self.ErrorText = LongText(message, conf.color_text, self.font_size)
-        self.text_x = (conf.window_width - self.ErrorText.width) / 2
-        self.text_y = (conf.window_height - self.ErrorText.height) / 2 - 60
+        self.text_x = (conf.window_width - self.ErrorText.width) // 2
+        self.text_y = (conf.window_height - self.ErrorText.height) // 2 - 60
         self.ButtonExitError = Button(
             (conf.window_width - conf.button_width) // 2,
             500,
