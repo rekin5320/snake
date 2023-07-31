@@ -826,14 +826,14 @@ class AboutScreen():
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    return
+                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.BackButton.is_pointed(mouse):  # Back to menu
                         return
     
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
-                return
+                sys.exit()
     
             self.redraw(mouse)
 
