@@ -607,7 +607,7 @@ def menu_main():
                 elif ButtonExit.is_pointed(mouse):
                     return
                 elif AboutButton.is_pointed(mouse):
-                    about_main()
+                    AboutScreen()
                 WebsiteButton.click(mouse)
                 SpeedButtons.click(mouse)
                 VolumeWidgetInMenu.button_minus.click(mouse)
@@ -794,57 +794,54 @@ def gameover_main():
         joystick.stop_rumble()
 
 
-def about_main():
-    global AboutText
-    global AboutBackButton
+class AboutScreen():
+    def __init__(self):
+        self.Text = LongText(
+            (
+                "Credits: \n "
+                "- Icon: \n "
+                "\t Icon made by Freepik from www.flaticon.com \n "
+                "\n "
+                "- Music during gameplay: \n "
+                "\t Tristan Lohengrin - Happy 8bit Loop 01 \n "
+                "\n "
+                "- Sound after loss: \n "
+                "\t Sad Trombone Wah Wah Wah Fail Sound Effect \n "
+                "\n "
+                "© 2023 Michał Machnikowski \n "
+                "License: GNU General Public License version 3 (https://www.gnu.org/licenses/gpl-3.0.html)"
+            ),
+            conf.color_text,
+            font_size=24,
+            line_length=52
+        )
+        self.BackButton = Button((conf.window_width - conf.button_width) // 2, 540, 200, 70, "Back", 30)
 
-    # I do not prerender it, as it is unlikely to be used often
-    AboutText = LongText(
-        (
-            "Credits: \n "
-            "- Icon: \n "
-            "\t Icon made by Freepik from www.flaticon.com \n "
-            "\n "
-            "- Music during gameplay: \n "
-            "\t Tristan Lohengrin - Happy 8bit Loop 01 \n "
-            "\n "
-            "- Sound after loss: \n "
-            "\t Sad Trombone Wah Wah Wah Fail Sound Effect \n "
-            "\n "
-            "© 2023 Michał Machnikowski \n "
-            "License: GNU General Public License version 3 (https://www.gnu.org/licenses/gpl-3.0.html)"
-        ),
-        conf.color_text,
-        conf.font_size_aboutscene,
-        line_length=52
-    )
-    AboutBackButton = Button((conf.window_width - conf.button_width) // 2, 540, 200, 70, "Back", 30)
+        self.main_loop()
 
-    while True:
-        clock.tick(conf.fps)
-
-        mouse = pygame.mouse.get_pos()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if AboutBackButton.is_pointed(mouse):  # Back to menu
+    def main_loop(self):
+        while True:
+            clock.tick(conf.fps)
+    
+            mouse = pygame.mouse.get_pos()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     return
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.BackButton.is_pointed(mouse):  # Back to menu
+                        return
+    
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_ESCAPE]:
+                return
+    
+            self.redraw(mouse)
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE]:
-            return
-
-        about_redraw(mouse)
-
-
-def about_redraw(mouse):
-    global AboutText
-    global AboutBackButton
-    window.fill(conf.color_window_background)
-    AboutText.draw((conf.window_width - AboutText.width) // 2, 55)
-    AboutBackButton.draw(mouse)
-    pygame.display.update()
+    def redraw(self, mouse):
+        window.fill(conf.color_window_background)
+        self.Text.draw((conf.window_width - self.Text.width) // 2, 55)
+        self.BackButton.draw(mouse)
+        pygame.display.update()
 
 
 def loading_screen(function, loading_text, error_text):
@@ -945,7 +942,6 @@ class conf:
     font_size_newhighscore = 33
     font_size_lastscore = 27
     font_size_website = 21
-    font_size_aboutscene = 24
     font_size_currentspeed = 17
 
     button_width = grid * 10
