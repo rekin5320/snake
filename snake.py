@@ -187,15 +187,14 @@ class ButtonSpeedGroup:
         self.font_size = 22
         self.dec, self.inc = False, False
 
-        self.ButtonsList = []
-        for index, value in enumerate(self.speed_list):
-            self.ButtonsList.append(
-                ButtonSpeed(
-                    self.x + index * (self.spacing + self.width_single),
-                    self.y, self.width_single, self.height,
-                    self.font_size, value
-                )
+        self.ButtonsList = [
+            ButtonSpeed(
+                self.x + index * (self.spacing + self.width_single),
+                self.y, self.width_single, self.height,
+                self.font_size, value
             )
+            for index, value in enumerate(self.speed_list)
+        ]
 
     def click(self, mouse):
         for button in self.ButtonsList:
