@@ -843,15 +843,15 @@ class AboutScreen():
         pygame.display.update()
 
 
-def loading_screen(function: Callable, loading_text: str, error_text: str):
+def loading_screen(function: Callable, loading_text: str, error_text: str, font_size=35):
     thread = MyThread(target=function, daemon=True)
     thread.start()
     time = 0
     LoadingTexts = (
-        Text(loading_text, conf.color_text, conf.font_size_loading),
-        Text(f"{loading_text}.", conf.color_text, conf.font_size_loading),
-        Text(f"{loading_text}..", conf.color_text, conf.font_size_loading),
-        Text(f"{loading_text}...", conf.color_text, conf.font_size_loading)
+        Text(loading_text, conf.color_text, font_size),
+        Text(f"{loading_text}.", conf.color_text, font_size),
+        Text(f"{loading_text}..", conf.color_text, font_size),
+        Text(f"{loading_text}...", conf.color_text, font_size)
     )
 
     while thread.is_alive():
@@ -937,7 +937,6 @@ class conf:
     color_text = (255, 255, 255)
     color_newhighscore = (0, 0, 255)
 
-    font_size_loading = 35
     font_size_newhighscore = 33
     font_size_lastscore = 27
     font_size_website = 21
@@ -946,9 +945,6 @@ class conf:
     button_width = grid * 10
     button_height = grid * 4
     button_font_size = 35
-
-    ButtonPlay_y = 275
-    ButtonExit_y = 420
 
     if os.name == "nt":
         path_gameDir = MyPath.home() / "AppData" / "Roaming" / ".snake"  # ~\AppData\Roaming\.snake\
@@ -1014,8 +1010,8 @@ if __name__ == "__main__":
     SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
     VersionNumberInMenu = Text(f"v{conf.version}", (215, 215, 215), 19)
 
-    ButtonPlay = Button((conf.window_width - conf.button_width) // 2, conf.ButtonPlay_y, conf.button_width, conf.button_height, "Play", conf.button_font_size)
-    ButtonExit = Button((conf.window_width - conf.button_width) // 2, conf.ButtonExit_y, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
+    ButtonPlay = Button((conf.window_width - conf.button_width) // 2, 275, conf.button_width, conf.button_height, "Play", conf.button_font_size)
+    ButtonExit = Button((conf.window_width - conf.button_width) // 2, 420, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
     WebsiteButton = Button(
         conf.margin,
         conf.window_height - conf.margin - 2 * conf.grid,
