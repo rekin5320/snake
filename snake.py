@@ -843,39 +843,6 @@ class AboutScreen():
         pygame.display.update()
 
 
-class LoadingScreen:
-    def __init__(self, function: Callable, error_text: str, loading_text: str = "Loading", font_size: int = 35):
-        self.error_text = error_text
-        self.time = 0
-        self.thread = MyThread(target=function, daemon=True)
-        self.LoadingTexts = (
-            Text(loading_text, conf.color_text, font_size),
-            Text(f"{loading_text}.", conf.color_text, font_size),
-            Text(f"{loading_text}..", conf.color_text, font_size),
-            Text(f"{loading_text}...", conf.color_text, font_size)
-        )
-
-        self.main_loop()
-
-    def main_loop(self):
-        self.thread.start()
-        while self.thread.is_alive():
-            clock.tick(conf.fps)
-            self.redraw()
-            self.time += 1
-
-        if self.thread.error:
-            logger.error(self.thread.error)
-            logger.error(self.thread.traceback)
-            ErrorScreen(self.error_text)
-
-    def redraw(self):
-        window.fill(conf.color_window_background)
-        Loading = self.LoadingTexts[self.time // conf.fps % 4]
-        Loading.draw((conf.window_width - Loading.width) // 2, (conf.window_height - Loading.height) // 2)
-        pygame.display.update()
-
-
 class ErrorScreen:
     color_background = (208, 26, 26)
     font_size = 30
