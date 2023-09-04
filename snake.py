@@ -59,20 +59,21 @@ class Tee:
 
 
 class Text:
-    def __init__(self, text: str, color, font_size: int):
+    def __init__(self, surface: pygame.Surface, text: str, color, font_size: int):
+        self.surface = surface
         self.font = pygame.font.Font(conf.path_font, font_size)
         self.text = self.font.render(text, True, color)
         self.width, self.height = self.text.get_size()
 
     def draw(self, x: int, y: int):
-        window.blit(self.text, (x, y))
+        self.surface.blit(self.text, (x, y))
 
 
 class LongText:
-    def __init__(self, text: str, color, font_size: int, line_length: int = 40, line_spacing: int = 1):
+    def __init__(self, surface: pygame.Surface, text: str, color, font_size: int, line_length: int = 40, line_spacing: int = 1):
         self.line_spacing = line_spacing
         lines = self.split_into_lines(text, line_length)
-        self.renderedTextList = [Text(line, color, font_size) for line in lines]
+        self.renderedTextList = [Text(surface, line, color, font_size) for line in lines]
         self.width = max(T.width for T in self.renderedTextList)
         self.line_height = self.renderedTextList[0].height
         self.height = len(self.renderedTextList) * (self.line_height + self.line_spacing) - self.line_spacing
@@ -119,29 +120,30 @@ class LongText:
 
 
 class RoundedRectangle:
-    def __init__(self, width: int, height: int, radius: int, color):
+    def __init__(self, surface: pygame.Surface, width: int, height: int, radius: int, color):
+        self.surface = surface
         self.width = width
         self.height = height
         self.radius = radius
         self.color = color
 
     def draw(self, x: int, y: int):
-        pygame.draw.rect(window, self.color, (x, y, self.width, self.height), border_radius=self.radius)
+        pygame.draw.rect(self.surface, self.color, (x, y, self.width, self.height), border_radius=self.radius)
 
 
-def draw_tile(color, x: int, y: int):
+def draw_tile(color, x: int, y: int):  # TODO: surface? color jako ostatni?
     pygame.draw.rect(window, color, (x, y, conf.tile_width, conf.tile_width), border_radius=conf.tile_radius)
 
 
 class Button:
-    def __init__(self, x: int, y: int, width: int, height: int, text: str, font_size: int, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command: Callable = lambda: None, radius: int = 9):
+    def __init__(self, surface: pygame.Surface, x: int, y: int, width: int, height: int, text: str, font_size: int, color1=(254, 151, 12), color2=(195, 122, 20), color_text=(255, 255, 255), command: Callable = lambda: None, radius: int = 9):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.background1 = RoundedRectangle(width, height, radius, color1)
-        self.background2 = RoundedRectangle(width, height, radius, color2)
-        self.text = Text(text, color_text, font_size)
+        self.background1 = RoundedRectangle(surface, width, height, radius, color1)
+        self.background2 = RoundedRectangle(surface, width, height, radius, color2)
+        self.text = Text(surface, text, color_text, font_size)
         self.command = command
 
     def is_pointed(self, mouse):
@@ -163,8 +165,8 @@ class Button:
 
 
 class ButtonSpeed(Button):
-    def __init__(self, x: int, y: int, width: int, height: int, font_size: int, desired_value: int):
-        super().__init__(x, y, width, height, str(desired_value), font_size, radius=4)
+    def __init__(self, surface: pygame.Surface, x: int, y: int, width: int, height: int, font_size: int, desired_value: int):
+        super().__init__(surface, x, y, width, height, str(desired_value), font_size, radius=4)
         self.desired_value = desired_value
 
     def click(self, mouse):
@@ -176,7 +178,7 @@ class ButtonSpeed(Button):
 
 
 class ButtonSpeedGroup:
-    def __init__(self):
+    def __init__(self, surface: pygame.Surface):
         self.speed_list = conf.speed_list
         self.width_single = 40
         self.spacing = 11
@@ -189,6 +191,7 @@ class ButtonSpeedGroup:
 
         self.ButtonsList = [
             ButtonSpeed(
+                surface,
                 self.x + index * (self.spacing + self.width_single),
                 self.y, self.width_single, self.height,
                 self.font_size, value
@@ -465,7 +468,8 @@ class BananaClass:
 
 
 class TopBarClass:
-    def __init__(self):
+    def __init__(self, surface: pygame.Surface):
+        self.surface = surface
         self.x = 0
         self.y = 0
         self.width = conf.topbar_width
@@ -473,31 +477,33 @@ class TopBarClass:
         self.font_size = int(1.04 * conf.grid)
 
     def draw(self):
-        Time = Text(f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_text, self.font_size)
+        Time = Text(self.surface, f"time: {format_time(Snake.fpsCounter // conf.fps)}", conf.color_text, self.font_size)
         Time.draw(int(1.4 * conf.grid), (self.height - Time.height) // 2)
 
-        Score = Text(f"score: {thousands_separators(Snake.score)}", conf.color_text, self.font_size)
+        Score = Text(self.surface, f"score: {thousands_separators(Snake.score)}", conf.color_text, self.font_size)
         Score.draw((self.width - Score.width) // 2, (self.height - Score.height) // 2)
 
-        HighscoreOnBar = Text(f"highscore: {thousands_separators(Data.highscores_speed[str(conf.speed)])}", conf.color_text, self.font_size)
+        HighscoreOnBar = Text(self.surface, f"highscore: {thousands_separators(Data.highscores_speed[str(conf.speed)])}", conf.color_text, self.font_size)
         HighscoreOnBar.draw(self.width - int(1.4 * conf.grid) - HighscoreOnBar.width, (self.height - HighscoreOnBar.height) // 2)
 
 
 class CurrentSpeedTextClass:
-    def __init__(self):
+    def __init__(self, surface: pygame.Surface):
+        self.surface = surface
         self.update()
         self.x = int(1.4 * conf.grid)
         self.y = 25 * conf.grid + (conf.grid - self.text.height) // 2
 
     def update(self):
-        self.text = Text(f"speed: {conf.speed}", conf.color_text, conf.font_size_currentspeed)
+        self.text = Text(self.surface, f"speed: {conf.speed}", conf.color_text, conf.font_size_currentspeed)
 
     def draw(self):
         self.text.draw(self.x, self.y)
 
 
 class HighscoresInMenuClass:
-    def __init__(self):
+    def __init__(self, surface: pygame.Surface):
+        self.surface = surface
         self.x1 = conf.margin
         self.x2 = conf.margin + 15
         self.y1 = conf.margin - 4
@@ -508,8 +514,9 @@ class HighscoresInMenuClass:
         self.y_bottom = self.y2 + self.text2.height
 
     def update(self):
-        self.text1 = Text("Highscores:", self.color, self.font_size1)
+        self.text1 = Text(self.surface, "Highscores:", self.color, self.font_size1)
         self.text2 = LongText(
+            self.surface,
             f"• overall: {Data.highscore} \n "
             + " \n ".join([
                 f"• {speed}: {score}"
@@ -527,7 +534,8 @@ class HighscoresInMenuClass:
 
 
 class TotalStatsInMenuClass:
-    def __init__(self):
+    def __init__(self, surface: pygame.Surface):
+        self.surface = surface
         self.x = conf.margin
         self.y1 = HighscoresInMenu.y_bottom + 7
         self.color = conf.color_text
@@ -536,8 +544,8 @@ class TotalStatsInMenuClass:
         self.y2 = self.y1 + self.text_games.height + 5
 
     def update(self):
-        self.text_games = Text(f"total games: {Data.total_games}", self.color, self.font_size)
-        self.text_time = Text(f"total time: {format_time(Data.total_time)}", self.color, self.font_size)
+        self.text_games = Text(self.surface, f"total games: {Data.total_games}", self.color, self.font_size)
+        self.text_time = Text(self.surface, f"total time: {format_time(Data.total_time)}", self.color, self.font_size)
 
     def draw(self):
         self.text_games.draw(self.x, self.y1)
@@ -545,7 +553,8 @@ class TotalStatsInMenuClass:
 
 
 class VolumeWidgetInMenuClass:
-    def __init__(self):
+    def __init__(self, surface: pygame.Surface):
+        self.surface = surface
         self.button_dim = 22
         self.font_size = 22
         self.spacing = 10
@@ -555,12 +564,12 @@ class VolumeWidgetInMenuClass:
         self.y_buttons = self.y_text + (self.text.height - self.button_dim) // 2
         self.x_button_minus = conf.window_width - conf.margin - self.button_dim
         self.x_button_plus = self.x_button_minus - self.spacing - self.button_dim
-        self.button_minus = Button(self.x_button_minus, self.y_buttons, self.button_dim, self.button_dim, "−", self.font_size, command=VolumeWidgetInMenuClass.decrease)
-        self.button_plus = Button(self.x_button_plus, self.y_buttons, self.button_dim, self.button_dim, "+", self.font_size, command=VolumeWidgetInMenuClass.increase)
+        self.button_minus = Button(surface, self.x_button_minus, self.y_buttons, self.button_dim, self.button_dim, "−", self.font_size, command=VolumeWidgetInMenuClass.decrease)
+        self.button_plus = Button(surface, self.x_button_plus, self.y_buttons, self.button_dim, self.button_dim, "+", self.font_size, command=VolumeWidgetInMenuClass.increase)
 
     def update(self):
         pygame.mixer.music.set_volume(Data.volume)
-        self.text = Text(f"Volume: {Data.volume:.0%}", conf.color_text, self.font_size)
+        self.text = Text(self.surface, f"Volume: {Data.volume:.0%}", conf.color_text, self.font_size)
         self.x_text = conf.window_width - conf.margin - 2 * (self.spacing + self.button_dim) - self.text.width
 
     @staticmethod
@@ -682,7 +691,7 @@ def game_main():
         Data.highscores_speed[speed_str] = Snake.score
         if Snake.score > Data.highscore:
             Data.highscore = Snake.score
-        NewHighscoreText = Text(f"new highscore: {Snake.score} (speed {conf.speed})", conf.color_newhighscore, conf.font_size_newhighscore)
+        NewHighscoreText = Text(window, f"new highscore: {Snake.score} (speed {conf.speed})", conf.color_newhighscore, conf.font_size_newhighscore)
         NewHighscoreText.draw(
             (conf.window_width - NewHighscoreText.width) // 2,
             (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10
@@ -691,7 +700,7 @@ def game_main():
     elif Snake.score > Data.highscore:
         logger.info(f"Highscore beaten, old: {Data.highscore}, new: {Snake.score} (speed {conf.speed})")
         Data.highscore = Snake.score
-        NewHighscoreText = Text(f"new highscore: {Snake.score}", conf.color_newhighscore, conf.font_size_newhighscore)
+        NewHighscoreText = Text(window, f"new highscore: {Snake.score}", conf.color_newhighscore, conf.font_size_newhighscore)
         NewHighscoreText.draw(
             (conf.window_width - NewHighscoreText.width) // 2,
             (conf.window_height - GameOver.height) // 2 - GameOver.height + NewHighscoreText.height - 10
@@ -700,7 +709,7 @@ def game_main():
     Data.write()
 
     global LastScore
-    LastScore = Text(f"last score: {Snake.score}", conf.color_text, conf.font_size_lastscore)
+    LastScore = Text(window, f"last score: {Snake.score}", conf.color_text, conf.font_size_lastscore)
 
     gameover_main()
 
@@ -796,6 +805,7 @@ def gameover_main():
 class AboutScreen():
     def __init__(self):
         self.Text = LongText(
+            window,
             (
                 "Credits: \n "
                 "- Icon: \n "
@@ -814,7 +824,7 @@ class AboutScreen():
             font_size=24,
             line_length=52
         )
-        self.BackButton = Button((conf.window_width - conf.button_width) // 2, 540, 200, 70, "Back", 30)
+        self.BackButton = Button(window, (conf.window_width - conf.button_width) // 2, 540, 200, 70, "Back", 30)
 
         self.main_loop()
 
@@ -850,10 +860,11 @@ class ErrorScreen:
         self.message = message
         logger.critical(f"Error screen: {message}")
 
-        self.ErrorText = LongText(message, conf.color_text, self.font_size)
+        self.ErrorText = LongText(window, message, conf.color_text, self.font_size)
         self.text_x = (conf.window_width - self.ErrorText.width) // 2
         self.text_y = (conf.window_height - self.ErrorText.height) // 2 - 60
         self.ButtonExitError = Button(
+            window,
             (conf.window_width - conf.button_width) // 2,
             500,
             conf.button_width,
@@ -981,13 +992,14 @@ if __name__ == "__main__":
     Data.read()
 
     # Prerendered objects
-    GameOver = Text("GAME  OVER", (255, 0, 0), 77)
-    SnakeLogo = Text("Snake Game", (255, 255, 255), 62)
-    VersionNumberInMenu = Text(f"v{conf.version}", (215, 215, 215), 19)
+    GameOver = Text(window, "GAME  OVER", (255, 0, 0), 77)
+    SnakeLogo = Text(window, "Snake Game", (255, 255, 255), 62)
+    VersionNumberInMenu = Text(window, f"v{conf.version}", (215, 215, 215), 19)
 
-    ButtonPlay = Button((conf.window_width - conf.button_width) // 2, 275, conf.button_width, conf.button_height, "Play", conf.button_font_size)
-    ButtonExit = Button((conf.window_width - conf.button_width) // 2, 420, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
+    ButtonPlay = Button(window, (conf.window_width - conf.button_width) // 2, 275, conf.button_width, conf.button_height, "Play", conf.button_font_size)
+    ButtonExit = Button(window, (conf.window_width - conf.button_width) // 2, 420, conf.button_width, conf.button_height, "Exit", conf.button_font_size)
     WebsiteButton = Button(
+        window,
         conf.margin,
         conf.window_height - conf.margin - 2 * conf.grid,
         int(4.85 * conf.grid),
@@ -997,6 +1009,7 @@ if __name__ == "__main__":
         radius=7
     )
     AboutButton = Button(
+        window,
         conf.margin + int(5.5 * conf.grid),
         conf.window_height - conf.margin - 2 * conf.grid,
         int(4.65 * conf.grid),
@@ -1006,14 +1019,14 @@ if __name__ == "__main__":
         radius=7
     )
 
-    SpeedText = Text("Speed:", conf.color_text, 22)
-    SpeedButtons = ButtonSpeedGroup()
-    HighscoresInMenu = HighscoresInMenuClass()
-    TotalStatsInMenu = TotalStatsInMenuClass()
-    VolumeWidgetInMenu = VolumeWidgetInMenuClass()
+    SpeedText = Text(window, "Speed:", conf.color_text, 22)
+    SpeedButtons = ButtonSpeedGroup(window)
+    HighscoresInMenu = HighscoresInMenuClass(window)
+    TotalStatsInMenu = TotalStatsInMenuClass(window)
+    VolumeWidgetInMenu = VolumeWidgetInMenuClass(window)
 
-    TopBar = TopBarClass()
-    CurrentSpeedText = CurrentSpeedTextClass()
+    TopBar = TopBarClass(window)
+    CurrentSpeedText = CurrentSpeedTextClass(window)
 
     menu_main()
 
