@@ -26,4 +26,3 @@ def format_time(seconds, milliseconds=False):
             seconds = round(seconds)
         minutes, seconds = divmod(seconds, 60)
         return f"{minutes:02}:{seconds:02}"
-

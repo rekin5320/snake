@@ -862,4 +862,3 @@ if __name__ == "__main__":
     logger.debug(Data.dump_data())
 
     pygame.quit()
-

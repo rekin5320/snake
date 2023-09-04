@@ -55,4 +55,3 @@ speed_list = [5, 10, 15, 30, 60]
 move_delay = fps // speed
 
 joystick_sensitivity = 0.91
-

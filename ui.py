@@ -109,4 +109,3 @@ class Button:
 
 def draw_tile(surface: pygame.Surface, color, x: int, y: int):
     pygame.draw.rect(surface, color, (x, y, config.tile_width, config.tile_width), border_radius=config.tile_radius)
-

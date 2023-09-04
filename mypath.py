@@ -7,4 +7,3 @@ class MyPath(type(Path())):
 
     def is_good(self):
         return self.exists() and self.size() > 0
-
