@@ -4,7 +4,6 @@ from collections.abc import Callable
 import json
 import logging.handlers
 import os
-from pathlib import Path
 import platform
 from random import randrange
 import sys
@@ -14,6 +13,7 @@ import webbrowser
 
 import pygame
 
+from mypath import MyPath
 from utils import base64_decode, base64_encode, thousands_separators, format_time
 
 
@@ -28,14 +28,6 @@ class MyThread(threading.Thread):
             self.traceback = traceback.format_exc()
         else:
             self.error = False
-
-
-class MyPath(type(Path())):
-    def size(self):
-        return self.stat().st_size
-
-    def is_good(self):
-        return self.exists() and self.size() > 0
 
 
 class Tee:
