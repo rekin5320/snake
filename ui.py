@@ -106,3 +106,7 @@ class Button:
             self.background1.draw(self.x, self.y)
         self.text.draw(self.x + (self.width - self.text.width) // 2, self.y + (self.height - self.text.height) // 2)
 
+
+def draw_tile(surface: pygame.Surface, color, x: int, y: int):
+    pygame.draw.rect(surface, color, (x, y, config.tile_width, config.tile_width), border_radius=config.tile_radius)
+

@@ -12,7 +12,7 @@ import webbrowser
 import pygame
 
 import config as conf
-from ui import Text, LongText, Button
+from ui import Text, LongText, Button, draw_tile
 from utils import base64_decode, base64_encode, thousands_separators, format_time
 
 
@@ -47,10 +47,6 @@ class Tee:
 
     def flush(self):
         self.file.flush()
-
-
-def draw_tile(color, x: int, y: int):  # TODO: surface? color jako ostatni?
-    pygame.draw.rect(window, color, (x, y, conf.tile_width, conf.tile_width), border_radius=conf.tile_radius)
 
 
 def change_speed_to(speed):
@@ -323,8 +319,8 @@ class SnakeClass:
     def draw(self):
         for i, (x, y) in enumerate(self.xyList[:-1], start=1):
             color_num = (self.score - i) % self.colors_tail_len
-            draw_tile(self.colors_tail[color_num], x, y)
-        draw_tile(self.color_head, *self.xyList[-1])
+            draw_tile(window, self.colors_tail[color_num], x, y)
+        draw_tile(window, self.color_head, *self.xyList[-1])
 
 
 class AppleClass:
@@ -341,7 +337,7 @@ class AppleClass:
             self.move()
 
     def draw(self):
-        draw_tile(self.color, *self.location)
+        draw_tile(window, self.color, *self.location)
 
 
 class BananaClass:
@@ -361,7 +357,7 @@ class BananaClass:
             self.lifetime = self.lifetime_default
 
     def draw(self):
-        draw_tile(self.color, *self.location)
+        draw_tile(window, self.color, *self.location)
 
 
 class TopBarClass:
