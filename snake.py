@@ -821,7 +821,7 @@ class AboutScreen():
     def main_loop(self):
         while True:
             clock.tick(conf.fps)
-    
+
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -829,11 +829,11 @@ class AboutScreen():
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.BackButton.is_pointed(mouse):  # Back to menu
                         return
-    
+
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 sys.exit()
-    
+
             self.redraw(mouse)
 
     def redraw(self, mouse):
@@ -864,24 +864,24 @@ class ErrorScreen:
         )
 
         self.main_loop()
-    
+
     def main_loop(self):
         while True:
             clock.tick(conf.fps)
-    
+
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(1)
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.ButtonExitError.click(mouse)
-    
+
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 sys.exit(1)
 
             self.redraw(mouse)
-    
+
     def redraw(self, mouse):
         window.fill(self.color_background)
         self.ErrorText.draw(self.text_x, self.text_y)
